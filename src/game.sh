@@ -16,7 +16,8 @@
 
 ;Sound defines
 (define sOpening 1)
-(define sDeath 900)
+(define sDeath 2)
+(define sScore 3)
 ;Inventory items
 (enum
 	iCoin

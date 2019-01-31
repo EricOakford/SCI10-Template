@@ -3,7 +3,6 @@
 (include system.sh) (include sci2.sh) (include game.sh)
 (use Intrface)
 (use PalInit)
-(use RegionPath)
 (use PMouse)
 (use SlideIcon)
 (use BordWind)
@@ -16,6 +15,7 @@
 (use Sound)
 (use Game)
 (use Invent)
+(use PrintD)
 (use User)
 (use Actor)
 (use System)
@@ -26,7 +26,7 @@
 	HandsOff 2
 	HandsOn 3
 	IsHeapFree 4
-	proc0_5 5
+	IsObjectOnControl 5
 	Btst 6
 	Bset 7
 	Bclr 8
@@ -34,7 +34,7 @@
 	proc0_10 10
 	AddToScore 11
 	WindowlessPrint 12
-	proc0_13 13
+	AimToward 13
 	ShowStatus 14
 	proc0_15 15
 	VerbFail 16
@@ -276,6 +276,9 @@
 (procedure (HandsOn)
 	(User canControl: TRUE canInput: TRUE)
 	(theIconBar enable:ICON_WALK ICON_LOOK ICON_DO ICON_TALK ICON_ITEM ICON_INVENTORY ICON_SMELL ICON_TASTE)
+	(if (not (theIconBar curInvIcon?))
+		(theIconBar disable: (theIconBar useIconItem?))
+	)
 	(if (not (HaveMouse))
 		(theGame
 			setCursor: ((theIconBar curIcon?) cursor?) 1 global192 global193
@@ -289,7 +292,7 @@
 	(return (u> (MemoryInfo LargestPtr) memSize))
 )
 
-(procedure (proc0_5 param1 param2)
+(procedure (IsObjectOnControl param1 param2)
 	(return (if (& (param1 onControl: 1) param2) (return 1) else 0))
 )
 
@@ -434,7 +437,7 @@
 	)
 )
 
-(procedure (proc0_13 param1 param2 param3 param4 &tmp temp0 temp1 temp2 temp3)
+(procedure (AimToward param1 param2 param3 param4 &tmp temp0 temp1 temp2 temp3)
 	(= temp3 0)
 	(if (IsObject param2)
 		(= temp1 (param2 x?))
@@ -453,36 +456,9 @@
 	)
 )
 
-(procedure (ShowStatus param1 &tmp temp0 [temp1 25] [temp26 100] [temp126 4] temp130)
-	(if (!= param1 -1) (= global188 param1))
-	(StrCpy @temp1 {Space Quest_})
-	(switch global188
-		(1
-			(StrCat @temp1 {\1B - The Sarien Encounter})
-		)
-		(3
-			(StrCat @temp1 {\1C - The Pirates of Pestulon})
-		)
-		(4
-			(StrCat @temp1 {\1A - Roger Wilco and The Time Rippers})
-		)
-		(10
-			(StrCat @temp1 {\1E - Latex Babes of Estros})
-		)
-		(12
-			(StrCat @temp1 {\1D - Vohaul's Revenge \1F})
-			(= temp0 global148)
-		)
-	)
-	(TextSize @temp126 @temp1 0 -1)
-	(StrCpy @temp26 {\06})
-	(= temp130 (/ (- 326 (- [temp126 3] [temp126 1])) 2))
-	(while (> temp130 0)
-		(StrCat @temp26 {\06})
-		(-- temp130)
-	)
-	(StrCat @temp26 @temp1)
-	(DrawStatus @temp26 0 (proc0_18 global158 global155))
+(procedure (ShowStatus str)
+	(StrCpy @str {__Template Game})
+	(DrawStatus @str 0 (proc0_18 global158 global155))
 )
 
 (procedure (proc0_15 param1 param2)
@@ -540,37 +516,39 @@
 	(return (if (Btst 21) param1 else param2))
 )
 
-(procedure (EgoDead message &tmp printRet)
-	;This procedure handles when Ego dies. It closely matches that of QFG1EGA.
+(procedure (EgoDead &tmp printRet)
+	;This procedure handles when Ego dies. It closely matches that of SQ1VGA.
 	;To use it: "(EgoDead {death message})".
 	;You can add an icon in the same way as a normal Print message.
 	(HandsOff)
 	(Wait 100)
-	(SFX number: deathMusic play:)
 	(= normalCursor ARROW_CURSOR)
 	(theGame setCursor: normalCursor TRUE)
-		(repeat
-			(= printRet
-				(Print message
-					&rest
-					#width 250
-					#button	{Restore} 1
-					#button {Restart} 2
-					#button {__Quit__} 3
-				)
+
+	(sounds eachElementDo: #stop)	; Stop any other music
+	(music number: deathMusic play:)
+	(repeat
+		(= printRet
+			(Print
+				&rest
+				#width 250
+				#button	{Restore} 1
+				#button {Restart} 2
+				#button {__Quit__} 3
 			)
-				(switch printRet
-					(1
-						(theGame restore:)
-					)
-					(2
-						(theGame restart:)
-					)
-					(3
-						(= quit TRUE) (break)
-					)
-				)
 		)
+		(switch printRet
+			(1
+				(theGame restore:)
+			)
+			(2
+				(theGame restart:)
+			)
+			(3
+				(= quit TRUE) (break)
+			)
+		)
+	)
 )
 
 
@@ -583,10 +561,10 @@
 	
 	(method (doVerb theVerb theItem)
 		(switch theVerb
-			(V_TALK (Print 0 0))
-			(V_DO (Print 0 1))
-			(V_TASTE (Print 0 2))
-			(V_SMELL (Print 0 3))
+			(V_TALK (Print {You talk to yourself but are stumped for a reply.}))
+			(V_DO (Print {Hey! Keep your hands off yourself! This is a family game.}))
+			(V_TASTE (Print {I'll bet you wish you could!}))
+			(V_SMELL (Print {Ahhh!  The aroma of several adventure games emanates from your person.}))
 			(V_ITEM
 				(switch theItem
 					(iCoin (Print {There isn't much you can do to it what inflation hasn't already.}))
@@ -611,7 +589,6 @@
 	)
 )
 
-
 (instance longSong of Sound
 	(properties
 		number 1
@@ -627,7 +604,7 @@
 (instance pointsSound of Sound
 	(properties
 		flags $0001
-		number 888
+		number sScore
 		priority 15
 	)
 )
@@ -697,7 +674,7 @@
 			canControl: FALSE
 			canInput: FALSE
 		)
-		((= music longSong) owner: self init:)
+		((= music longSong) owner: self init: flags: 1)
 		((= SFX longSong2) owner: self init:)
 		(= waitCursor HAND_CURSOR)
 		(= possibleScore 0)
@@ -899,9 +876,7 @@
 			)
 		)
 	)
-	
 	(method (quitGame)
-		(babbleIcon view: 946 cycleSpeed: (* (+ howFast 1) 4))
 		(super
 			quitGame:
 				(Print {Do you really want to stop playing?}
@@ -1366,7 +1341,7 @@
 			(+ temp4 1)
 			1
 		)
-		(Format @temp14 0 27 score possibleScore)
+		(Format @temp14 {Score: %d of %d} score possibleScore)
 		(TextSize @temp29 @temp14 999 0)
 		(Display
 			@temp14
@@ -1445,7 +1420,7 @@
 		nsTop 6
 		message 9
 		signal $01c3
-		helpStr {Saves your current game (currently disabled).}
+		helpStr {Saves your current game.}
 	)
 )
 
@@ -1458,7 +1433,7 @@
 		nsTop 26
 		message 9
 		signal $01c3
-		helpStr {Restores a previously saved game (currently disabled).}
+		helpStr {Restores a previously saved game.}
 	)
 )
 
