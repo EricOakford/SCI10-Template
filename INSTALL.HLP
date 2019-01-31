@@ -317,6 +317,21 @@ WARNING:  THE MIDI SOUND DRIVER WILL WRITE NEW
           (This driver writes to unit #17) 
 \\mt32ibm.drv
 Roland MT-32, MT-100, LAPC-I, CM-32L, or CM-64
+\\GMBlast.drv
+General MIDI with SoundBlaster
+\\GMBlast.hlp
+General MIDI Device with SoundBlaster Sound Effects
+
+This driver follows the IMA spec for General MIDI.
+This will work on such devices as the Roland 
+Sound Canvas and SCC-1 when connected to a Roland
+MPU interface or compatible.  The Roland SCC-1
+card does not require a MIDI interface card.
+
+GMBLAST.DRV is the GENMIDI.DRV with sound effects 
+code appended from MTBLAST.DRV and some supporting 
+logic.
+
 \\proaudio.drv
 Pro Audio Spectrum
 \\proaudio.hlp
