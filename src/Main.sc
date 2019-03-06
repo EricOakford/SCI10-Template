@@ -32,7 +32,7 @@
 	Bclr 8
 	EgoHeadMove 9
 	proc0_10 10
-	AddToScore 11
+	SolvePuzzle 11
 	WindowlessPrint 12
 	AimToward 13
 	ShowStatus 14
@@ -356,7 +356,7 @@
 	(curRoom newRoom: 900)
 )
 
-(procedure (AddToScore flag points)
+(procedure (SolvePuzzle flag points)
 	(if (not (Btst flag))
 		(theGame changeScore: points)
 		(Bset flag)
@@ -800,7 +800,7 @@
 	)
 	
 	(method (replay)
-		(ShowStatus -1)
+;		(ShowStatus)
 		(Palette 4 0 255 100)
 		(super replay:)
 	)
