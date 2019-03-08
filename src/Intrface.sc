@@ -6,121 +6,51 @@
 
 (public
 	Print 0
-	PrintD_255 1
+	PrintD 1
 	GetInput 2
 	GetNumber 3
 	Printf 4
 	MousedOn 5
 )
 
-(procedure (Print param1 &tmp newDialog newDText_2 newDIcon newDEdit temp4 temp5 temp6 temp7 temp8 theModelessDialog temp10 temp11 [newDButton 6] temp18 temp19 temp20 [temp21 1001] temp1022 newDText temp1024 temp1025 theGamePrintLang theGameSubtitleLang temp1028 temp1029 temp1030 temp1031 temp1032)
-	(= temp1028 0)
-	(= temp1029 0)
+(procedure (Print param1 &tmp newDialog newDText newDIcon newDEdit temp4 temp5 temp6 temp7 temp8 theModelessDialog temp10 temp11 [newDButton 6] temp18 temp19 temp20 [temp21 1000])
 	(= temp6 (= temp7 -1))
-	(= theGamePrintLang (theGame printLang?))
-	(= theGameSubtitleLang (theGame subtitleLang?))
-	(= temp1032
-		(= theModelessDialog
-			(= temp8
-				(= temp18
-					(= newDIcon
-						(= newDEdit (= newDText (= temp1030 (= temp19 0))))
-					)
-				)
-			)
+	(= theModelessDialog
+		(= temp8
+			(= temp18 (= newDIcon (= newDEdit (= temp19 0))))
 		)
 	)
 	((= newDialog (Dialog new:))
 		window: systemWindow
-		name: {PrintD_255}
+		name: {PrintD}
 	)
+	(= newDText (DText new:))
 	(cond 
 		((u< [param1 0] 1000) (GetFarText [param1 0] [param1 1] @temp21) (= temp5 2))
 		([param1 0] (StrCpy @temp21 [param1 0]) (= temp5 1))
 		(else (= temp21 0) (= temp5 0))
 	)
-	(= temp1022 0)
-	(while (StrAt @temp21 temp1022)
-		(if
-			(and
-				(== (StrAt @temp21 temp1022) 14848)
-				(== (StrAt @temp21 (+ 1 temp1022)) 74)
-			)
-			(theGame printLang: 1 subtitleLang: 81)
-			(kernel_123 @temp21 @temp21 {#J})
-			(theGame
-				printLang: theGamePrintLang
-				subtitleLang: theGameSubtitleLang
-			)
-			(StrAt @temp21 temp1022 0)
-			(if (OneOf 81 theGamePrintLang theGameSubtitleLang)
-				((= newDText (DText new:))
-					text: (+ @temp21 2 temp1022)
-					font: 900
-					name: {jDText}
-				)
-			)
-		)
-		(++ temp1022)
-	)
-	((= newDText_2 (DText new:))
+	(newDText
 		text: @temp21
+		moveTo: 4 4
 		font: userFont
+		setSize:
 	)
-	(= temp1024
-		(if (and newDText (== theGamePrintLang 81))
-			newDText
-		else
-			newDText_2
-		)
-	)
-	(= temp1025
-		(cond 
-			((== theGameSubtitleLang 81) newDText)
-			(newDText
-				(if theGameSubtitleLang
-					newDText_2
-				else
-					(newDText_2 dispose:)
-					(= newDText_2 0)
-				)
-			)
-		)
-	)
-	(temp1024 moveTo: 4 4 setSize:)
-	(newDialog add: temp1024 setSize:)
-	(if temp1025
-		(temp1025
-			setSize:
-			moveTo: (temp1024 nsLeft?) (+ 4 (temp1024 nsBottom?))
-		)
-		(newDialog add: temp1025 setSize:)
-	)
+	(newDialog add: newDText)
 	(= temp5 temp5)
 	(while (< temp5 argc)
 		(switch [param1 temp5]
 			(30
 				(++ temp5)
-				(if (and newDText_2 (not temp1025))
-					(newDText_2 mode: [param1 temp5])
-				)
+				(newDText mode: [param1 temp5])
 			)
 			(33
 				(++ temp5)
-				(if newDText_2
-					(newDText_2 font: [param1 temp5] setSize: temp8)
-				)
+				(newDText font: [param1 temp5] setSize: temp8)
 			)
 			(70
-				(= temp1028 1)
 				(= temp8 [param1 (++ temp5)])
-				(temp1024 setSize: temp8)
-				(if temp1025
-					(temp1025
-						setSize: temp8
-						moveTo: (temp1024 nsLeft?) (+ 4 (temp1024 nsBottom?))
-					)
-				)
+				(newDText setSize: temp8)
 			)
 			(25
 				(++ temp5)
@@ -153,7 +83,6 @@
 				(++ temp19)
 			)
 			(82
-				(= temp1029 1)
 				(if (IsObject [param1 (+ temp5 1)])
 					((= newDIcon ([param1 (+ temp5 1)] new:)) setSize:)
 					(= temp5 (+ temp5 1))
@@ -168,7 +97,7 @@
 					(= temp5 (+ temp5 3))
 				)
 			)
-			(108
+			(103
 				(if
 					(and
 						(< (+ temp5 1) argc)
@@ -177,63 +106,27 @@
 					(newDialog caller: [param1 (+ temp5 1)])
 					(++ temp5)
 				)
-				(if (!= 0 81)
-					(if modelessDialog (modelessDialog dispose:))
-					(= theModelessDialog newDialog)
-				)
+				(if modelessDialog (modelessDialog dispose:))
+				(= theModelessDialog newDialog)
 			)
 			(35
 				(++ temp5)
 				(newDialog window: [param1 temp5])
 			)
-			(121 (= temp1032 1))
 		)
 		(++ temp5)
 	)
-	(if temp1032 (= theModelessDialog 0))
-	(if
-		(and
-			(not (if temp1028 else temp1029))
-			(> (- (newDialog nsBottom?) (newDialog nsTop?)) 100)
-		)
-		(temp1024 setSize: 300)
-		(if temp1025
-			(temp1025
-				setSize: 300
-				moveTo: (temp1024 nsLeft?) (+ 4 (temp1024 nsBottom?))
-			)
-		)
-	)
 	(if newDIcon
 		(newDIcon moveTo: 4 4)
-		(if
-		(or (== temp1024 newDText) (== temp1025 newDText))
-			(= temp1030 8)
-		)
-		(if (& (newDIcon state?) $0010)
-			(temp1024
-				moveTo: (+ 4 temp1030) (+ (newDIcon nsBottom?) (temp1024 nsTop?))
-				setSize:
-			)
-		else
-			(temp1024
-				moveTo: (+ 4 (newDIcon nsRight?) temp1030) (temp1024 nsTop?)
-				setSize:
-			)
-		)
-		(if temp1025
-			(temp1025
-				moveTo: (temp1024 nsLeft?) (+ 4 (temp1024 nsBottom?))
-			)
+		(newDText
+			moveTo: (+ 4 (newDIcon nsRight?)) (newDText nsTop?)
 		)
 		(newDialog add: newDIcon)
 	)
 	(newDialog setSize:)
 	(if newDEdit
 		(newDEdit
-			moveTo:
-				((if temp1025 else temp1024) nsLeft?)
-				(+ 4 ((if temp1025 else temp1024) nsBottom?))
+			moveTo: (newDText nsLeft?) (+ 4 (newDText nsBottom?))
 		)
 		(newDialog add: newDEdit setSize:)
 	)
@@ -252,11 +145,7 @@
 		(++ temp5)
 	)
 	(newDialog setSize: center:)
-	(if
-		(or
-			(and newDIcon (& (newDIcon state?) $0010))
-			(and newDIcon (not (StrLen @temp21)))
-		)
+	(if (and newDIcon (not (StrLen @temp21)))
 		(newDIcon
 			moveTo:
 				(/
@@ -282,8 +171,6 @@
 		(= modelessPort (GetPort))
 		(SetPort temp11)
 		(return (= modelessDialog theModelessDialog))
-	else
-		(sounds pause: 1)
 	)
 	(if
 		(and
@@ -305,11 +192,10 @@
 	)
 	(if (not (newDialog theItem?)) (= temp4 1))
 	(newDialog dispose:)
-	(sounds pause: 0)
 	(return temp4)
 )
 
-(procedure (PrintD_255 param1 param2 param3 param4)
+(procedure (PrintD param1 param2 param3 param4)
 	(Print param1 #icon param2 param3 param4 &rest)
 )
 
@@ -343,22 +229,39 @@
 	(Print @temp0)
 )
 
-(procedure (MousedOn param1 param2)
-	(return
-		(if
-			(and
-				(< (param1 nsLeft?) (param2 x?))
-				(< (param2 x?) (param1 nsRight?))
-				(< (param1 nsTop?) (param2 y?))
+(procedure (MousedOn param1 param2 param3)
+	(cond 
+		(
+			(or
+				(!= (param2 type?) 1)
+				(and
+					(param1 respondsTo: #signal)
+					(& (param1 signal?) $0080)
+				)
 			)
-			(< (param2 y?) (param1 nsBottom?))
-		else
 			0
+		)
+		(
+			(and
+				(>= argc 3)
+				param3
+				(== (& (param2 modifiers?) param3) 0)
+			)
+			0
+		)
+		((param1 respondsTo: #nsLeft)
+			(InRect
+				(param1 nsLeft?)
+				(param1 nsTop?)
+				(param1 nsRight?)
+				(param1 nsBottom?)
+				param2
+			)
 		)
 	)
 )
 
-(procedure (localproc_0022 &tmp newEvent temp1)
+(procedure (localproc_0016 &tmp newEvent temp1)
 	(= temp1 (!= ((= newEvent (Event new:)) type?) 2))
 	(newEvent dispose:)
 	(return temp1)
@@ -378,11 +281,11 @@
 		(DrawMenuBar 0)
 	)
 	
-	(method (handleEvent pEvent &tmp temp0 temp1)
+	(method (handleEvent event &tmp temp0 temp1)
 		(= temp0 0)
 		(if state
 			(= temp1 (Joystick 12 30))
-			(= temp0 (MenuSelect pEvent &rest))
+			(= temp0 (MenuSelect event &rest))
 			(Joystick 12 temp1)
 		)
 		(return temp0)
@@ -427,26 +330,26 @@
 		(self draw:)
 	)
 	
-	(method (handleEvent pEvent &tmp temp0 pEventType temp2)
-		(if (pEvent claimed?) (return 0))
+	(method (handleEvent event &tmp temp0 pEventType temp2)
+		(if (event claimed?) (return 0))
 		(= temp0 0)
 		(if
 			(and
 				(& state $0001)
 				(or
 					(and
-						(== (= pEventType (pEvent type?)) 128)
+						(== (= pEventType (event type?)) 128)
 						(Said said)
 					)
 					(and
 						(== pEventType evKEYBOARD)
-						(== (pEvent message?) key)
+						(== (event message?) key)
 					)
-					(and (== pEventType evMOUSEBUTTON) (self check: pEvent))
+					(and (== pEventType evMOUSEBUTTON) (self check: event))
 				)
 			)
-			(pEvent claimed: 1)
-			(= temp0 (self track: pEvent))
+			(event claimed: 1)
+			(= temp0 (self track: event))
 		)
 		(return temp0)
 	)
@@ -471,13 +374,14 @@
 			(if (== 1 (param1 type?))
 				(= temp1 0)
 				(repeat
-					((= param1 (Event new: -32768)) localize:)
+					(= param1 (Event new: -32768))
+					(GlobalToLocal param1)
 					(if (!= (= temp0 (self check: param1)) temp1)
 						(HiliteControl self)
 						(= temp1 temp0)
 					)
 					(param1 dispose:)
-					(breakif (not (localproc_0022)))
+					(breakif (not (localproc_0016)))
 				)
 				(if temp0 (HiliteControl self))
 				(return temp0)
@@ -538,14 +442,7 @@
 	)
 	
 	(method (setSize param1 &tmp [temp0 4])
-		(TextSize
-			@[temp0
-			0]
-			text
-			font
-			(if argc param1 else 0)
-			{\0D\n----------\0D\n}
-		)
+		(TextSize @[temp0 0] text font (if argc param1 else 0))
 		(= nsBottom (+ nsTop [temp0 2]))
 		(= nsRight (+ nsLeft [temp0 3]))
 	)
@@ -589,7 +486,7 @@
 	)
 	
 	(method (setSize &tmp [temp0 4])
-		(TextSize @[temp0 0] text font 0 0)
+		(TextSize @[temp0 0] text font)
 		(= [temp0 2] (+ [temp0 2] 2))
 		(= [temp0 3] (+ [temp0 3] 2))
 		(= nsBottom (+ nsTop [temp0 2]))
@@ -621,8 +518,7 @@
 	)
 	
 	(method (setSize &tmp [temp0 4])
-		(= font inputFont)
-		(TextSize @[temp0 0] {M} font 0 0)
+		(TextSize @[temp0 0] {M} font)
 		(= nsBottom (+ nsTop [temp0 2]))
 		(= nsRight (+ nsLeft (/ (* [temp0 3] max 3) 4)))
 		(= cursor (StrLen text))
@@ -645,53 +541,61 @@
 		y 6
 		text 0
 		cursor 0
-		topString 0
+		lsTop 0
 		mark 0
 	)
 	
-	(method (handleEvent pEvent &tmp temp0 [temp1 3] temp4 [temp5 4])
-		(if (pEvent claimed?) (return 0))
+	(method (handleEvent event &tmp temp0 [temp1 3] temp4 [temp5 4])
+		(if (event claimed?) (return 0))
+		(if (== evJOYSTICK (event type?))
+			(event type: 4)
+			(switch (event message?)
+				(JOY_DOWN
+					(event message: 20480)
+				)
+				(JOY_UP (event message: 18432))
+				(else  (event type: 64))
+			)
+		)
 		(= temp0 0)
-		(switch (pEvent type?)
+		(switch (event type?)
 			(evKEYBOARD
-				(pEvent
-					claimed:
-						(switch (pEvent message?)
-							(KEY_NUMPAD7 (self retreat: 50))
-							(KEY_NUMPAD1 (self advance: 50))
-							(KEY_PAGEUP
-								(self advance: (- y 1))
-							)
-							(KEY_PAGEDOWN
-								(self retreat: (- y 1))
-							)
-							(KEY_NUMPAD2 (self advance: 1))
-							(KEY_UP (self retreat: 1))
-							(else  0)
-						)
+				(event claimed: 1)
+				(switch (event message?)
+					(KEY_NUMPAD7 (self retreat: 50))
+					(KEY_NUMPAD1 (self advance: 50))
+					(KEY_PAGEUP
+						(self advance: (- y 1))
+					)
+					(KEY_PAGEDOWN
+						(self retreat: (- y 1))
+					)
+					(KEY_NUMPAD2 (self advance: 1))
+					(KEY_UP (self retreat: 1))
+					(else  (event claimed: 0))
 				)
 			)
 			(evMOUSEBUTTON
-				(if (self check: pEvent)
-					(pEvent claimed: 1)
+				(if (self check: event)
+					(event claimed: 1)
 					(cond 
-						((< (pEvent y?) (+ nsTop 10))
+						((< (event y?) (+ nsTop 10))
 							(repeat
 								(self retreat: 1)
-								(breakif (not (localproc_0022)))
+								(breakif (not (localproc_0016)))
 							)
 						)
-						((> (pEvent y?) (- nsBottom 10))
+						((> (event y?) (- nsBottom 10))
 							(repeat
 								(self advance: 1)
-								(breakif (not (localproc_0022)))
+								(breakif (not (localproc_0016)))
 							)
 						)
 						(else
-							(TextSize @[temp5 0] {M} font 0 0)
+							(TextSize @[temp5 0] {M} font)
 							(if
 								(>
-									(= temp4 (/ (- (pEvent y?) (+ nsTop 10)) [temp5 2]))
+									(= temp4 (/ (- (event y?) (+ nsTop 10)) [temp5 2]))
 									mark
 								)
 								(self advance: (- temp4 mark))
@@ -704,7 +608,7 @@
 			)
 		)
 		(return
-			(if (and (pEvent claimed?) (& state $0002))
+			(if (and (event claimed?) (& state $0002))
 				self
 			else
 				0
@@ -713,10 +617,10 @@
 	)
 	
 	(method (setSize &tmp [temp0 4])
-		(TextSize @[temp0 0] {M} font 0 0)
+		(TextSize @[temp0 0] {M} font)
 		(= nsBottom (+ nsTop 20 (* [temp0 2] y)))
 		(= nsRight (+ nsLeft (/ (* [temp0 3] x 3) 4)))
-		(= topString (= cursor text))
+		(= lsTop (= cursor text))
 		(= mark 0)
 	)
 	
@@ -738,9 +642,7 @@
 	)
 	
 	(method (advance param1 &tmp temp0)
-		(if (not (StrAt cursor 0))
-			(return (not (StrAt cursor 0)))
-		)
+		(if (not (StrAt cursor 0)) (return))
 		(= temp0 0)
 		(while (and param1 (StrAt cursor x))
 			(= temp0 1)
@@ -748,11 +650,11 @@
 			(if (< (+ mark 1) y)
 				(++ mark)
 			else
-				(= topString (+ topString x))
+				(= lsTop (+ lsTop x))
 			)
 			(-- param1)
 		)
-		(return (if temp0 (self draw:) 1 else 0))
+		(if temp0 (self draw:))
 	)
 	
 	(method (retreat param1 &tmp temp0)
@@ -760,10 +662,10 @@
 		(while (and param1 (!= cursor text))
 			(= temp0 1)
 			(= cursor (- cursor x))
-			(if mark (-- mark) else (= topString (- topString x)))
+			(if mark (-- mark) else (= lsTop (- lsTop x)))
 			(-- param1)
 		)
-		(return (if temp0 (self draw:) 1 else 0))
+		(if temp0 (self draw:))
 	)
 )
 
@@ -785,7 +687,7 @@
 		lastSeconds 0
 	)
 	
-	(method (doit param1 &tmp temp0 temp1 temp2 theEatMice temp4)
+	(method (doit param1 &tmp temp0 newEvent temp2 temp3 temp4)
 		(= temp0 0)
 		(= busy 1)
 		(self eachElementDo: #init)
@@ -799,24 +701,24 @@
 		)
 		(if theItem (theItem select: 1))
 		(if (not theItem)
-			(= theEatMice eatMice)
+			(= temp3 60)
 			(= temp4 (GetTime))
 		else
-			(= theEatMice 0)
+			(= temp3 0)
 		)
 		(= temp2 0)
 		(while (not temp2)
 			(self eachElementDo: #cycle)
-			(= temp1 ((Event new:) localize:))
-			(if theEatMice
-				(-- theEatMice)
-				(if (== (temp1 type?) 1) (temp1 type: 0))
+			(GlobalToLocal (= newEvent (Event new:)))
+			(if temp3
+				(-- temp3)
+				(if (== (newEvent type?) 1) (newEvent type: 0))
 				(while (== temp4 (GetTime))
 				)
 				(= temp4 (GetTime))
 			)
-			(= temp2 (self handleEvent: temp1))
-			(temp1 dispose:)
+			(= temp2 (self handleEvent: newEvent))
+			(newEvent dispose:)
 			(self check:)
 			(if (or (== temp2 -1) (not busy))
 				(= temp2 0)
@@ -881,16 +783,6 @@
 				(if (& (theItem state?) $0001) (break))
 			)
 			(theItem select: 1)
-			(theGame
-				setCursor:
-					theCursor
-					1
-					(+
-						(theItem nsLeft?)
-						(/ (- (theItem nsRight?) (theItem nsLeft?)) 2)
-					)
-					(- (theItem nsBottom?) 3)
-			)
 		)
 	)
 	
@@ -906,16 +798,6 @@
 				(if (& (theItem state?) $0001) (break))
 			)
 			(theItem select: 1)
-			(theGame
-				setCursor:
-					theCursor
-					1
-					(+
-						(theItem nsLeft?)
-						(/ (- (theItem nsRight?) (theItem nsLeft?)) 2)
-					)
-					(- (theItem nsBottom?) 3)
-			)
 		)
 	)
 	
@@ -958,7 +840,7 @@
 	
 	(method (setSize &tmp dialogFirst temp1 [theNsTop 4])
 		(if text
-			(TextSize @[theNsTop 0] text 0 -1 0)
+			(TextSize @[theNsTop 0] text 0 -1)
 			(= nsTop [theNsTop 0])
 			(= nsLeft [theNsTop 1])
 			(= nsBottom [theNsTop 2])
@@ -986,39 +868,23 @@
 		(self moveTo: 0 0)
 	)
 	
-	(method (handleEvent pEvent &tmp theTheItem)
-		(if (& (pEvent type?) evJOYSTICK)
-			(pEvent type: 4)
-			(switch (pEvent message?)
-				(JOY_DOWN
-					(pEvent message: 20480)
-				)
-				(JOY_UP (pEvent message: 18432))
-				(JOY_LEFT
-					(pEvent message: 19200)
-				)
-				(JOY_RIGHT
-					(pEvent message: 19712)
-				)
-				(else  (pEvent type: 64))
-			)
-		)
+	(method (handleEvent event &tmp theTheItem)
 		(if
 			(or
-				(pEvent claimed?)
-				(== (pEvent type?) evNULL)
+				(event claimed?)
+				(== (event type?) evNULL)
 				(and
-					(!= evMOUSEBUTTON (pEvent type?))
-					(!= evKEYBOARD (pEvent type?))
-					(!= evJOYSTICK (pEvent type?))
-					(!= evJOYDOWN (pEvent type?))
+					(!= evMOUSEBUTTON (event type?))
+					(!= evKEYBOARD (event type?))
+					(!= evJOYSTICK (event type?))
+					(!= evJOYDOWN (event type?))
 				)
 			)
-			(EditControl theItem pEvent)
+			(EditControl theItem event)
 			(return 0)
 		)
 		(if
-		(= theTheItem (self firstTrue: #handleEvent pEvent))
+		(= theTheItem (self firstTrue: #handleEvent event))
 			(EditControl theItem 0)
 			(if (not (theTheItem checkState: 2))
 				(if theItem (theItem select: 0))
@@ -1032,10 +898,10 @@
 				(
 					(and
 						(or
-							(== (pEvent type?) evJOYDOWN)
+							(== (event type?) evJOYDOWN)
 							(and
-								(== evKEYBOARD (pEvent type?))
-								(== KEY_RETURN (pEvent message?))
+								(== evKEYBOARD (event type?))
+								(== KEY_RETURN (event message?))
 							)
 						)
 						theItem
@@ -1043,7 +909,7 @@
 					)
 					(= theTheItem theItem)
 					(EditControl theItem 0)
-					(pEvent claimed: 1)
+					(event claimed: 1)
 				)
 				(
 					(or
@@ -1051,65 +917,38 @@
 							(not (self firstTrue: #checkState 1))
 							(or
 								(and
-									(== evKEYBOARD (pEvent type?))
-									(== KEY_RETURN (pEvent message?))
+									(== evKEYBOARD (event type?))
+									(== KEY_RETURN (event message?))
 								)
-								(== evMOUSEBUTTON (pEvent type?))
-								(== evJOYDOWN (pEvent type?))
+								(== evMOUSEBUTTON (event type?))
+								(== evJOYDOWN (event type?))
 							)
 						)
 						(and
-							(== evKEYBOARD (pEvent type?))
-							(== KEY_ESCAPE (pEvent message?))
+							(== evKEYBOARD (event type?))
+							(== KEY_ESCAPE (event message?))
 						)
 					)
-					(pEvent claimed: 1)
+					(event claimed: 1)
 					(= theTheItem -1)
 				)
 				(
 					(and
-						(IsObject theItem)
-						(theItem isType: 3)
-						(== (pEvent type?) evKEYBOARD)
-						(== (pEvent message?) KEY_RIGHT)
+						(== evKEYBOARD (event type?))
+						(== KEY_TAB (event message?))
 					)
-					(if
-					(>= (theItem cursor?) (StrLen (theItem text?)))
-						(self advance:)
-					else
-						(EditControl theItem pEvent)
-					)
-				)
-				(
-					(and
-						(IsObject theItem)
-						(theItem isType: 3)
-						(== (pEvent type?) evKEYBOARD)
-						(== (pEvent message?) KEY_NUMPAD4)
-					)
-					(if (<= (theItem cursor?) 0)
-						(self retreat:)
-					else
-						(EditControl theItem pEvent)
-					)
-				)
-				(
-					(and
-						(== evKEYBOARD (pEvent type?))
-						(OneOf (pEvent message?) 9 19712 20480)
-					)
-					(pEvent claimed: 1)
+					(event claimed: 1)
 					(self advance:)
 				)
 				(
 					(and
-						(== evKEYBOARD (pEvent type?))
-						(OneOf (pEvent message?) 3840 19200 18432)
+						(== evKEYBOARD (event type?))
+						(== KEY_SHIFTTAB (event message?))
 					)
-					(pEvent claimed: 1)
+					(event claimed: 1)
 					(self retreat:)
 				)
-				(else (EditControl theItem pEvent))
+				(else (EditControl theItem event))
 			)
 		)
 		(return theTheItem)
@@ -1138,11 +977,11 @@
 		(self eachElementDo: #draw)
 	)
 	
-	(method (handleEvent pEvent &tmp temp0)
-		(if (pEvent claimed?) (return 0))
+	(method (handleEvent event &tmp temp0)
+		(if (event claimed?) (return 0))
 		(if
 			(and
-				(= temp0 (self firstTrue: #handleEvent pEvent))
+				(= temp0 (self firstTrue: #handleEvent event))
 				(not (temp0 checkState: 2))
 			)
 			(temp0 doit:)

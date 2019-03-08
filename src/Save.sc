@@ -4,7 +4,6 @@
 (use Main)
 (use Intrface)
 (use Language)
-(use PrintD)
 (use File)
 
 (public
@@ -378,9 +377,8 @@ code_0906:
                (self dispose:)
                ; confirm deletion
                (if (not
-                  (PrintD_940
+                  (Print
                      {Are you sure you want to\ndelete this saved game?}
-                     106
                      #button {No_} FALSE
                      #button {Yes} TRUE
                    ))

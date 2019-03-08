@@ -5,7 +5,6 @@
 (use Game)
 (use Sound)
 (use SQRoom)
-(use PrintD)
 (use Intrface)
 (use System)
 

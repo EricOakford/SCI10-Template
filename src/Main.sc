@@ -15,7 +15,6 @@
 (use Sound)
 (use Game)
 (use Invent)
-(use PrintD)
 (use User)
 (use Actor)
 (use System)
@@ -457,8 +456,10 @@
 )
 
 (procedure (ShowStatus str)
+	;NOTE: This is non-functional at this time. That may be why it wasn't used much
+	;in SCI1 and beyond.
 	(StrCpy @str {__Template Game})
-	(DrawStatus @str 0 (proc0_18 global158 global155))
+	(DrawStatus @str 0)
 )
 
 (procedure (proc0_15 param1 param2)
@@ -561,14 +562,14 @@
 	
 	(method (doVerb theVerb theItem)
 		(switch theVerb
-			(V_TALK (Print {You talk to yourself but are stumped for a reply.}))
-			(V_DO (Print {Hey! Keep your hands off yourself! This is a family game.}))
-			(V_TASTE (Print {I'll bet you wish you could!}))
-			(V_SMELL (Print {Ahhh!  The aroma of several adventure games emanates from your person.}))
+			(V_TALK (Print "You talk to yourself but are stumped for a reply."))
+			(V_DO (Print "Hey! Keep your hands off yourself! This is a family game."))
+			(V_TASTE (Print "I'll bet you wish you could!"))
+			(V_SMELL (Print "Ahhh!  The aroma of several adventure games emanates from your person."))
 			(V_ITEM
 				(switch theItem
-					(iCoin (Print {There isn't much you can do to it what inflation hasn't already.}))
-					(iBomb (EgoDead {Maybe messing with the unstable ordinance wasn't such a hot idea...}))
+					(iCoin (Print "There isn't much you can do to it what inflation hasn't already."))
+					(iBomb (EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea..."))
 					(else  (VerbFail))
 				)
 			)
@@ -580,8 +581,8 @@
 (instance egoHead of Head
 	(properties
 		description {your head.}
-		lookStr {It's your head.}
-		view 4
+		lookStr {There's nothing going on in your stupid little head.}
+		view vEgoStand
 	)
 	
 	(method (doVerb theVerb theItem)
@@ -800,7 +801,7 @@
 	)
 	
 	(method (replay)
-;		(ShowStatus)
+;		(ShowStatus -1)
 		(Palette 4 0 255 100)
 		(super replay:)
 	)
@@ -816,14 +817,7 @@
 		(ScriptID SIGHT)
 		(super startRoom: roomNum)
 		(if (cast contains: ego)
-			(if
-				(and
-					(ego normal?)
-					(not (OneOf roomNum 405 406 410 411))
-					(not ((ego cycler?) isKindOf: StopWalk))
-				)
-				(ego setCycle: StopWalk 4)
-			)
+			(ego setCycle: StopWalk 4)
 			(if (not (ego looper?)) (ego setLoop: stopGroop))
 			(EgoHeadMove (egoHead view?))
 		)
@@ -879,7 +873,7 @@
 	(method (quitGame)
 		(super
 			quitGame:
-				(Print {Do you really want to stop playing?}
+				(Print "Do you really want to stop playing?"
 					#button {Quit} 1
 					#button {Don't Quit} 0
 				)
@@ -1341,7 +1335,7 @@
 			(+ temp4 1)
 			1
 		)
-		(Format @temp14 {Score: %d of %d} score possibleScore)
+		(Format @temp14 "Score: %d of %d" score possibleScore)
 		(TextSize @temp29 @temp14 999 0)
 		(Display
 			@temp14
