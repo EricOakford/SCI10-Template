@@ -21,6 +21,7 @@
 	
 	(method (init)
 		(HandsOn)
+		(StatusLine enable:)
 		(ego posn: 146 153 loop: 1)
 		(ego init:)
 		(super init:)

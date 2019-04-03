@@ -34,7 +34,6 @@
 	SolvePuzzle 11
 	WindowlessPrint 12
 	AimToward 13
-	ShowStatus 14
 	proc0_15 15
 	VerbFail 16
 	proc0_17 17
@@ -455,13 +454,6 @@
 	)
 )
 
-(procedure (ShowStatus str)
-	;NOTE: This is non-functional at this time. That may be why it wasn't used much
-	;in SCI1 and beyond.
-	(StrCpy @str {__Template Game})
-	(DrawStatus @str 0)
-)
-
 (procedure (proc0_15 param1 param2)
 	(return (if (== (param1 onControl:) param2) (return 1) else 0))
 )
@@ -610,6 +602,14 @@
 	)
 )
 
+(instance statusCode of Code
+	(properties)
+	
+	(method (doit strg)
+		(Format strg "___Template Game__________________Score: %d of %d" score possibleScore)
+	)
+)
+
 (instance stopGroop of GradualLooper
 	(properties)
 	
@@ -680,6 +680,7 @@
 		(= waitCursor HAND_CURSOR)
 		(= possibleScore 0)
 		(= userFont 1)
+		(StatusLine code: statusCode disable:) ;hide the status code at startup
 		(= version {x.yyy})
 		(= musicChannels (DoSound sndDISPOSE))
 		(if

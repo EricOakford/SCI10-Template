@@ -4,6 +4,9 @@
 ; *************************************************************************
 ; * Put all the defines specific to your game in here
 
+;View defines
+(define vEgo 0)
+(define vEgoStand 4)
 
 ;Script defines
 (define rTitle 1)

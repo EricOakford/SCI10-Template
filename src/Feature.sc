@@ -93,25 +93,25 @@
 		(super dispose:)
 	)
 	
-	(method (handleEvent pEvent &tmp temp0)
+	(method (handleEvent event &tmp temp0)
 		(cond 
-			((pEvent claimed?) (return 1))
+			((event claimed?) (return 1))
 			(
 				(and
-					(== (pEvent type?) 16384)
-					(self onMe: pEvent)
+					(== (event type?) 16384)
+					(self onMe: event)
 					(self isNotHidden:)
 				)
 				(CueObj
 					state: 0
 					cycles: 0
 					client: self
-					theVerb: (pEvent message?)
+					theVerb: (event message?)
 					theInvItem:
 						(if
 							(and
 								theIconBar
-								(== (pEvent message?) JOY_DOWNRIGHT)
+								(== (event message?) JOY_DOWNRIGHT)
 								inventory
 							)
 							(inventory indexOf: (theIconBar curInvIcon?))
@@ -119,14 +119,14 @@
 							0
 						)
 				)
-				(pEvent claimed: 1)
+				(event claimed: TRUE)
 				(if
 					(and
 						(user canControl:)
 						(!= _approachVerbs 26505)
 						(&
 							_approachVerbs
-							(<< $0001 (- (pEvent message?) JOY_UP))
+							(<< $0001 (- (event message?) JOY_UP))
 						)
 					)
 					(ego
@@ -138,7 +138,7 @@
 				)
 			)
 		)
-		(return (pEvent claimed?))
+		(return (event claimed?))
 	)
 	
 	(method (doVerb theVerb)
@@ -231,22 +231,22 @@
 (instance dftDoVerb of Code
 	(properties)
 	
-	(method (doit param1 param2 param3 &tmp temp0 temp1)
-		(= temp0 (param2 description?))
-		(switch param1
+	(method (doit theVerb theNoun theItem &tmp noun item)
+		(= noun (theNoun description?))
+		(switch theVerb
 			(2
-				(if (param2 lookStr?)
-					(Print (param2 lookStr?))
+				(if (theNoun lookStr?)
+					(Print (theNoun lookStr?))
 				else
-					(Printf 950 0 temp0 temp0)
+					(Printf "The %s looks like any other %s." noun noun)
 				)
 			)
 			(4
-				(if (= temp1 (inventory at: param3))
-					(Printf 950 1 (temp1 description?) temp0)
+				(if (= item (inventory at: theItem))
+					(Printf "You clicked inv item %s on %s." (item description?) noun)
 				)
 			)
-			(5 (Printf 950 2 temp0))
+			(5 (Printf "The %s has nothing to say." noun))
 		)
 	)
 )

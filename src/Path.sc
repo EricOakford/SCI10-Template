@@ -52,7 +52,7 @@
 	)
 	
 	(method (at)
-		(Printf 983 0 name)
+		(Printf "%s needs an 'at:' method." name)
 		(return 0)
 	)
 	
