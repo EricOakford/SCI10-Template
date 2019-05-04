@@ -21,7 +21,7 @@
 
 (public
 	SCI10 0
-	SetUpEgo 1
+	NormalEgo 1
 	HandsOff 2
 	HandsOn 3
 	IsHeapFree 4
@@ -193,7 +193,7 @@
 	global157
 	global158
 	numBuckazoids =  59
-	global160
+	debugging
 	global161
 	global162
 	global163
@@ -229,7 +229,7 @@
 	global193
 	global194
 )
-(procedure (SetUpEgo param1 param2 param3 &tmp temp0)
+(procedure (NormalEgo param1 param2 param3 &tmp temp0)
 	(= temp0 0)
 	(if (> argc 0)
 		(ego loop: param1)
@@ -246,7 +246,7 @@
 		setLoop: stopGroop
 		setPri: -1
 		setMotion: 0
-		setCycle: StopWalk temp0
+		setCycle: StopWalk 4 
 		setStep: 3 2
 		illegalBits: 0
 		ignoreActors: 0
@@ -554,11 +554,11 @@
 	
 	(method (doVerb theVerb theItem)
 		(switch theVerb
-			(V_TALK (Print "You talk to yourself but are stumped for a reply."))
-			(V_DO (Print "Hey! Keep your hands off yourself! This is a family game."))
-			(V_TASTE (Print "I'll bet you wish you could!"))
-			(V_SMELL (Print "Ahhh!  The aroma of several adventure games emanates from your person."))
-			(V_ITEM
+			(verbTalk (Print "You talk to yourself but are stumped for a reply."))
+			(verbDo (Print "Hey! Keep your hands off yourself! This is a family game."))
+			(verbTaste (Print "I'll bet you wish you could!"))
+			(verbSmell (Print "Ahhh!  The aroma of several adventure games emanates from your person."))
+			(verbUse
 				(switch theItem
 					(iCoin (Print "There isn't much you can do to it what inflation hasn't already."))
 					(iBomb (EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea..."))
@@ -649,8 +649,10 @@
 	(properties)
 	
 	(method (init &tmp temp0)
+		(= debugging TRUE)
 		(= systemWindow sq4Win)
 		(PalInit)
+		(= version {x.yyy.zzz})
 		(= gStopGroop stopGroop)
 		(= deathMusic sDeath)
 		(= useSortedFeatures TRUE)
@@ -682,7 +684,7 @@
 		(= userFont 1)
 		(StatusLine code: statusCode disable:) ;hide the status code at startup
 		(= version {x.yyy})
-		(= musicChannels (DoSound sndDISPOSE))
+		(= musicChannels (DoSound NumVoices))
 		(if
 			(and
 				(>= (= colorCount (Graph GDetect)) 2)
@@ -912,7 +914,7 @@
 		loop 2
 		cel 0
 		cursor 19
-		message V_LOOK
+		message verbLook
 		helpStr {Select this Icon then select an inventory item you'd like a description of.}
 	)
 	
@@ -931,7 +933,7 @@
 		loop 0
 		cel 0
 		cursor 20
-		message V_DO
+		message verbDo
 		helpStr {This allows you to do something to an item.}
 	)
 	
@@ -950,7 +952,7 @@
 		loop 1
 		cel 0
 		cursor 29
-		message V_HELP
+		message verbHelp
 	)
 	
 	(method (init)
@@ -1014,7 +1016,7 @@
 		loop 0
 		cel 0
 		cursor 6
-		message V_WALK
+		message verbWalk
 		signal $0041
 		helpStr {This icon is for walking.}
 		maskView 900
@@ -1029,7 +1031,7 @@
 		loop 1
 		cel 0
 		cursor 19
-		message V_LOOK
+		message verbLook
 		signal $0041
 		helpStr {This icon is for looking.}
 		maskView 900
@@ -1044,7 +1046,7 @@
 		loop 2
 		cel 0
 		cursor 20
-		message V_DO
+		message verbDo
 		signal $0041
 		helpStr {This icon is for doing.}
 		maskView 900
@@ -1058,7 +1060,7 @@
 		loop 3
 		cel 0
 		cursor 7
-		message V_TALK
+		message verbTalk
 		signal $0041
 		helpStr {This icon is for talking.}
 		maskView 900
@@ -1073,7 +1075,7 @@
 		loop 4
 		cel 0
 		cursor 999
-		message V_ITEM
+		message verbUse
 		signal $0041
 		helpStr {This window displays the current inventory item.}
 		maskView 900
@@ -1108,7 +1110,7 @@
 		loop 10
 		cel 0
 		cursor 30
-		message V_SMELL
+		message verbSmell
 		signal $0041
 		helpStr {This icon is for smelling.}
 		maskView 900
@@ -1122,7 +1124,7 @@
 		loop 11
 		cel 0
 		cursor 31
-		message V_TASTE
+		message verbTaste
 		signal $0041
 		helpStr {This icon is for tasting.}
 		maskView 900
@@ -1159,7 +1161,7 @@
 		loop 9
 		cel 0
 		cursor 29
-		message V_HELP
+		message verbHelp
 		signal $0003
 		helpStr {This icon tells you about other icons.}
 		maskView 900
@@ -1173,7 +1175,7 @@
 	(method (doit param1 param2 &tmp temp0)
 		(= temp0 (param2 description?))
 		(switch param1
-			(V_LOOK
+			(verbLook
 				(if (param2 facingMe: ego)
 					(if (param2 lookStr?)
 						(Print (param2 lookStr?))
@@ -1307,7 +1309,7 @@
 		(= temp13 0)
 		(while (< temp13 temp1)
 			(Graph
-				grDRAW_LINE
+				GDrawLine
 				(+ temp2 temp13)
 				(+ temp3 temp13)
 				(- temp5 (+ temp13 1))
@@ -1317,7 +1319,7 @@
 				-1
 			)
 			(Graph
-				grDRAW_LINE
+				GDrawLine
 				(+ temp2 temp13)
 				(- temp4 (+ temp13 1))
 				(- temp5 (+ temp13 1))
@@ -1329,7 +1331,7 @@
 			(++ temp13)
 		)
 		(Graph
-			grUPDATE_BOX
+			GShowBits
 			temp2
 			temp3
 			(+ temp5 1)

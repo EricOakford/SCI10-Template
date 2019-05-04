@@ -13,6 +13,6 @@
 	(properties)
 	
 	(method (doit)
-		(Printf {SCI10 Template Game\nBy Eric Oakford} version)
+		(Printf "SCI10 Template Game\nBy Eric Oakford\nVersion %s" version)
 	)
 )

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 989)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use System)
 
@@ -31,12 +31,12 @@
 	(method (init)
 		(= prevSignal (= signal 0))
 		(sounds add: self)
-		(DoSound sndPAUSE self)
+		(DoSound InitSound self)
 	)
 	
 	(method (dispose)
 		(sounds delete: self)
-		(if nodePtr (DoSound sndRESUME self) (= nodePtr 0))
+		(if nodePtr (DoSound KillSound self) (= nodePtr 0))
 		(super dispose:)
 	)
 	
@@ -50,17 +50,17 @@
 		(self init:)
 		(if (not loop) (= loop 1))
 		(if theParamTotal (= vol theClient) else (= vol 127))
-		(DoSound sndVOLUME self 0)
+		(DoSound PlaySound self 0)
 	)
 	
 	(method (stop)
-		(if handle (DoSound 17 self) (DoSound sndUPDATE self))
+		(if handle (DoSound UpdateCues self) (DoSound StopSound self))
 	)
 	
 	(method (pause param1)
 		(if (not argc) (= param1 1))
 		(DoSound
-			sndFADE
+			PauseSound
 			(if (self isMemberOf: Sound) self else 0)
 			param1
 		)
@@ -68,11 +68,11 @@
 	
 	(method (hold param1)
 		(if (not argc) (= param1 1))
-		(DoSound sndSTOP_ALL self param1)
+		(DoSound HoldSound self param1)
 	)
 	
 	(method (release)
-		(DoSound sndSTOP_ALL self 0)
+		(DoSound HoldSound self 0)
 	)
 	
 	(method (fade theClient param2 param3 param4 &tmp theParamTotal)
@@ -82,7 +82,7 @@
 		)
 		(if theParamTotal
 			(DoSound
-				sndCHECK_DRIVER
+				FadeSound
 				self
 				theClient
 				param2
@@ -90,39 +90,39 @@
 				param4
 			)
 		else
-			(DoSound sndCHECK_DRIVER self 0 25 10 1)
+			(DoSound FadeSound self 0 25 10 1)
 		)
 	)
 	
 	(method (mute param1)
 		(if (not argc) (= param1 1))
-		(DoSound 13 self param1)
+		(DoSound MuteSound self param1)
 	)
 	
 	(method (setVol param1)
-		(DoSound 14 self param1)
+		(DoSound SetVol self param1)
 	)
 	
 	(method (setPri param1)
-		(DoSound 15 self param1)
+		(DoSound SetPri self param1)
 	)
 	
 	(method (setLoop param1)
-		(DoSound 16 self param1)
+		(DoSound SetLoop self param1)
 	)
 	
 	(method (send param1 param2 param3 param4)
 		(if (and (<= 1 param1) (<= param1 15))
 			(if (< param2 128)
-				(DoSound 18 self param1 176 param2 param3)
+				(DoSound MidiSend self param1 176 param2 param3)
 			else
-				(DoSound 18 self param1 param2 param3 param4)
+				(DoSound MidiSend self param1 param2 param3 param4)
 			)
 		)
 	)
 	
 	(method (check)
-		(if handle (DoSound 17 self))
+		(if handle (DoSound UpdateCues self))
 		(if signal
 			(= prevSignal signal)
 			(= signal 0)
@@ -146,10 +146,10 @@
 		(self init:)
 		(if (not loop) (= loop 1))
 		(if theParamTotal (= vol theClient) else (= vol 127))
-		(DoSound sndVOLUME self 1)
+		(DoSound PlaySound self 1)
 	)
 	
 	(method (changeState)
-		(DoSound 20 self)
+		(DoSound ChangeSndState self)
 	)
 )

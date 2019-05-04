@@ -1,6 +1,8 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 937)
 (include sci.sh)
+;system.sh not included in this script,
+;as it prevents visual button presses
 (use Main)
 (use Intrface)
 (use System)

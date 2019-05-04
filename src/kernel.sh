@@ -86,11 +86,45 @@
 ;   (define StopSound		5)  ;sci.sh = sndSTOP
 ;   (define PauseSound		6)  ;sci.sh = sndPAUSE
 ;   (define RestoreSound	7)  ;sci.sh = sndRESUME
-   (define ChangeVolume		8)  ;sci.sh = sndVOLUME
+;   (define ChangeVolume		8)  ;sci.sh = sndVOLUME
 ;   (define ChangeSndState	9)  ;sci.sh = sndUPDATE
 ;   (define FadeSound		10) ;sci.sh = sndFADE
 ;   (define NumVoices		11) ;sci.sh = sndCHECK_DRIVER
 ;   (define (unknown)		12) ;sci.sh = sndSTOP_ALL
+
+;  DoSound in SCI0         kernel   45
+; (includes KQ1SCI)
+;   (define InitSound		0)  ;sci.sh = sndINIT
+;   (define PlaySound		1)  ;sci.sh = sndPLAY
+;   (define NextSound		2)  ;sci.sh = sndNOP
+;   (define KillSound		3)  ;sci.sh = sndDISPOSE
+;   (define SoundOn			4)  ;sci.sh = sndSET_SOUND
+;   (define StopSound		5)  ;sci.sh = sndSTOP
+;   (define PauseSound		6)  ;sci.sh = sndPAUSE
+;   (define RestoreSound	7)  ;sci.sh = sndRESUME
+;   (define ChangeVolume	8)  ;sci.sh = sndVOLUME
+;   (define ChangeSndState	9)  ;sci.sh = sndUPDATE
+;   (define FadeSound		10) ;sci.sh = sndFADE
+;   (define NumVoices		11) ;sci.sh = sndCHECK_DRIVER
+;   (define MidiSend		12) ;sci.sh = sndSTOP_ALL
+
+;  DoSound in SCI1 (early)  kernel   45
+;(includes Seasoned Professional and QFG2)
+;   (define MasterVol           0)  ;SCI0 = sndINIT
+;   (define SoundOn             1)  ;SCI0 = sndPLAY
+;   (define RestoreSound        2)  ;SCI0 = sndNOP
+;   (define NumVoices           3)  ;SCI0 = sndDISPOSE
+;   (define ChangeSndState      4)  ;SCI0 = sndSET_SOUND
+;   (define InitSound           5)  ;SCI0 = sndSTOP
+;   (define KillSound           6)  ;SCI0 = sndPAUSE
+;   (define PlaySound           7)  ;SCI0 = sndRESUME
+;   (define StopSound           8)  ;SCI0 = sndVOLUME
+;   (define PauseSound          9)  ;SCI0 = sndUPDATE
+;   (define FadeSound           10) ;SCI0 = sndFADE
+;   (define UpdateCues          11) ;SCI0 = sndCHECK_DRIVER
+;   (define MidiSend            12) ;SCI0 = sndSTOP_ALL
+;   (define SetVol              13) 
+;   (define HoldSound           14) 
 
 
 ;  DoSound in SCI1.1       kernel   45
@@ -263,9 +297,9 @@
          GDetect        ; none                        # of colors available        ;sci.sh = grGET_COLOURS
 
          GSetPalette    ; Palette number
-         GDrawLine      ; x1/y1/x2/y2 mapSet colors...
+         GDrawLine      ; x1/y1/x2/y2 mapSet colors...                             ;sci.sh = grDRAW_LINE
          GFillArea      ; x/y/ mapSet colors...
-         GDrawBrush     ; x/y/ size randomSeed mapSet colors...                    ;sci.sh = grDRAW_LINE
+         GDrawBrush     ; x/y/ size randomSeed mapSet colors...                    
          GSaveBits      ; top/left/bottom/right mapSet            saveID of area   ;sci.sh = grSAVE_BOX
          GRestoreBits   ; saveID from SaveBits                                     ;sci.sh = grRESTORE_BOX
          GEraseRect     ; top/left/bottom/right (draws visual in background color) ;sci.sh = grFILL_BOX_BACKGROUND

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 943)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use Intrface)
 (use PrintD)
@@ -219,7 +219,7 @@
 			(= temp1 -1)
 		)
 		(Graph
-			grDRAW_LINE
+			GDrawLine
 			y
 			x
 			(param1 y?)
@@ -234,13 +234,13 @@
 		(localproc_17cc x y (param1 x?) (param1 y?))
 		(if underBits (UnLoad 133 underBits))
 		(= underBits
-			(Graph grSAVE_BOX rTop rLft rBot rRgt curMap)
+			(Graph GSaveBits rTop rLft rBot rRgt curMap)
 		)
 	)
 	
 	(method (restore)
 		(if underBits
-			(Graph grRESTORE_BOX underBits)
+			(Graph GRestoreBits underBits)
 			(= underBits 0)
 		)
 	)
@@ -467,7 +467,7 @@
 			lsRight
 			lsBottom
 		)
-		(Graph grUPDATE_BOX rTop rLft rBot rRgt curMap)
+		(Graph GShowBits rTop rLft rBot rRgt curMap)
 	)
 	
 	(method (restore)
@@ -1100,7 +1100,7 @@ code_0623:
 		(self eachElementDo: #restore)
 		(self eachElementDo: #save)
 		(self eachElementDo: #draw)
-		(Graph grUPDATE_BOX 0 0 190 320 curMap)
+		(Graph GShowBits 0 0 190 320 curMap)
 	)
 	
 	(method (select param1 param2 &tmp temp0 theCurPolygon temp2 theTheCurPolygon temp4)
@@ -1174,7 +1174,7 @@ code_0623:
 		(self changeState: 3)
 		(self eachElementDo: #save)
 		(self eachElementDo: #draw)
-		(Graph grUPDATE_BOX 0 0 190 320 curMap)
+		(Graph GShowBits 0 0 190 320 curMap)
 	)
 	
 	(method (deletePt &tmp temp0)
@@ -1188,7 +1188,7 @@ code_0623:
 		)
 		(self eachElementDo: #save)
 		(self eachElementDo: #draw)
-		(Graph grUPDATE_BOX 0 0 190 320 curMap)
+		(Graph GShowBits 0 0 190 320 curMap)
 	)
 	
 	(method (undo &tmp temp0 theUndoPoly theUndoPrvPoly theUndoPolyBuf theUndoX theUndoY theUndoState)
@@ -1220,7 +1220,7 @@ code_0623:
 		(self changeState: theUndoState)
 		(self eachElementDo: #save)
 		(self eachElementDo: #draw)
-		(Graph grUPDATE_BOX 0 0 190 320 curMap)
+		(Graph GShowBits 0 0 190 320 curMap)
 		(SetCursor normalCursor 1 x y)
 	)
 	
@@ -1274,7 +1274,7 @@ code_0623:
 			(= curMap theCurMap)
 			(self eachElementDo: #save)
 			(self eachElementDo: #draw)
-			(Graph grUPDATE_BOX 0 0 190 320 curMap)
+			(Graph GShowBits 0 0 190 320 curMap)
 		)
 	)
 	

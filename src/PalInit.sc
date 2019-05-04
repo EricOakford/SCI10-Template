@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 802)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 
 (public
@@ -8,7 +8,7 @@
 )
 
 (procedure (PalInit)
-	(if (> (Graph grGET_COLOURS) 16)
+	(if (> (Graph GDetect) 16)
 		(= global129 (Palette 5 31 31 31))
 		(= global155 (Palette 5 63 63 63))
 		(= global156 (Palette 5 95 95 95))

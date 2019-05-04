@@ -5,6 +5,8 @@
 (use Motion)
 (use Game)
 (use Actor)
+(use Window)
+(use Intrface)
 (use System)
 
 (public
@@ -73,7 +75,7 @@
 (instance speedScript of Script
 	(properties)
 	
-	(method (changeState newState &tmp temp0)
+	(method (changeState newState &tmp temp0 [inputRoom 20] nextRoom)
 		(switch (= state newState)
 			(0
 				(Palette 4 0 255 100)
@@ -81,7 +83,24 @@
 				(= cycles 1)
 			)
 			(1 (= speed 2) (= cycles 1))
-			(2 (curRoom newRoom: rTitle))
+			(2
+				(if debugging
+					(repeat
+						(= inputRoom 0)
+						(= nextRoom
+							(Print "Where to, boss?"
+								#edit @inputRoom 5
+							)
+						)
+						(if inputRoom (= nextRoom (ReadNumber @inputRoom)))
+						(if (> nextRoom 0) (break))
+					)
+					(theIconBar enable:)
+					(HandsOn)
+				else
+					(= nextRoom rTitle)
+				)
+				(curRoom newRoom: nextRoom))
 		)
 	)
 )

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 995)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use Intrface)
 (use IconBar)
@@ -52,12 +52,12 @@
 		(= temp1 (- nsLeft 2))
 		(= temp2 (+ nsBottom 1))
 		(= temp3 (+ nsRight 1))
-		(Graph grDRAW_LINE temp0 temp1 temp0 temp3 temp4 -1 -1)
-		(Graph grDRAW_LINE temp0 temp3 temp2 temp3 temp4 -1 -1)
-		(Graph grDRAW_LINE temp2 temp3 temp2 temp1 temp4 -1 -1)
-		(Graph grDRAW_LINE temp2 temp1 temp0 temp1 temp4 -1 -1)
+		(Graph GDrawLine temp0 temp1 temp0 temp3 temp4 -1 -1)
+		(Graph GDrawLine temp0 temp3 temp2 temp3 temp4 -1 -1)
+		(Graph GDrawLine temp2 temp3 temp2 temp1 temp4 -1 -1)
+		(Graph GDrawLine temp2 temp1 temp0 temp1 temp4 -1 -1)
 		(Graph
-			grUPDATE_BOX
+			GShowBits
 			(- nsTop 2)
 			(- nsLeft 2)
 			(+ nsBottom 2)

@@ -41,14 +41,9 @@
 	ICON_HELP
 )
 
-;Verbs
-(define V_WALK 1)
-(define V_LOOK 2)
-(define V_DO 3)
-(define V_ITEM 4)
-(define V_TALK 5)
-(define V_HELP 6)
-(define V_TASTE 10)
-(define V_SMELL 11)
+;Game-specific verbs
+;(for generic verbs, refer to SYSTEM.SH)
+(define verbTaste 10)
+(define verbSmell 11)
 
 ;Event flags

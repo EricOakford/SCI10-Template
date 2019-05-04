@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 994)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use Intrface)
 (use Polygon)
@@ -288,7 +288,7 @@
 				(HaveMouse)
 		)
 		(StatusLine doit:)
-		(DoSound sndNOP)
+		(DoSound RestoreSound)
 		(Sound pause: 0)
 		(while (not quit)
 			(self doit:)
@@ -446,9 +446,9 @@
 	
 	(method (masterVolume param1)
 		(if argc
-			(DoSound sndINIT param1)
+			(DoSound MasterVol param1)
 		else
-			(DoSound sndINIT)
+			(DoSound MasterVol)
 		)
 	)
 	

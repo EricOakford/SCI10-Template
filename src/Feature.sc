@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 950)
-(include sci.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use Intrface)
 (use PolyPath)
@@ -234,19 +234,19 @@
 	(method (doit theVerb theNoun theItem &tmp noun item)
 		(= noun (theNoun description?))
 		(switch theVerb
-			(2
+			(verbLook
 				(if (theNoun lookStr?)
 					(Print (theNoun lookStr?))
 				else
 					(Printf "The %s looks like any other %s." noun noun)
 				)
 			)
-			(4
+			(verbUse
 				(if (= item (inventory at: theItem))
 					(Printf "You clicked inv item %s on %s." (item description?) noun)
 				)
 			)
-			(5 (Printf "The %s has nothing to say." noun))
+			(verbTalk (Printf "The %s has nothing to say." noun))
 		)
 	)
 )
