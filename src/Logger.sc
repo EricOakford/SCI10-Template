@@ -958,7 +958,7 @@ code_080c:
 			pushi    2
 			lofsa    {CD-AUDIO}
 			push    
-			lsg      global83
+			lsg      cDAudio
 			call     localproc_000e,  6
 			pushi    3
 			pushi    1

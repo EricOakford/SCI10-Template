@@ -125,7 +125,7 @@
 	user
 	syncBias
 	theSync
-	global83
+	cDAudio
 	fastCast
 	inputFont
 	tickOffset
