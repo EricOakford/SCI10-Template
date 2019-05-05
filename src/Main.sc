@@ -60,7 +60,7 @@
 	score
 	possibleScore
 	showStyle =  7
-	overRun
+	aniInterval
 	theCursor
 	normalCursor =  999
 	waitCursor =  20
@@ -72,10 +72,10 @@
 	version
 	locales
 	curSaveDir
-	animationDelay =  10
+	aniThreshold =  10
 	perspective
 	features
-	saidFeatures
+	sortedFeatures
 	useSortedFeatures
 	egoBlindSpot
 	overlays =  -1
@@ -193,7 +193,7 @@
 	global157
 	global158
 	numBuckazoids =  59
-	debugging
+	global160
 	global161
 	global162
 	global163
@@ -228,6 +228,7 @@
 	global192
 	global193
 	global194
+	debugging
 )
 (procedure (NormalEgo param1 param2 param3 &tmp temp0)
 	(= temp0 0)
@@ -828,6 +829,32 @@
 	)
 	
 	(method (handleEvent event)
+				(if debugging
+			(if
+				(and
+					(== (event type?) mouseDown)
+					(& (event modifiers?) shiftDown)
+				)
+				(if (not (User canInput:))
+					(event claimed: TRUE)
+				else
+					(cast eachElementDo: #handleEvent event)
+					(if (event claimed?) (return))
+				)
+			)
+			(super handleEvent: event)
+			(if (event claimed?) (return))
+			(switch (event type?)
+				(keyDown
+					((ScriptID 800) handleEvent: event)
+				)
+				(mouseDown
+					((ScriptID 800) handleEvent: event)
+				)
+			)
+		else
+			(super handleEvent: event)
+		)
 		(super handleEvent: event)
 		(if (event claimed?) (return TRUE))
 		(return
@@ -839,7 +866,7 @@
 								(Inventory showSelf: ego)
 							)
 						)
-						(KEY_SHIFTTAB
+						(SHIFTTAB
 							(if (not (& (icon5 signal?) $0004))
 								(Inventory showSelf: ego)
 							)
