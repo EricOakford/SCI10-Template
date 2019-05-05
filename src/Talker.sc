@@ -132,7 +132,7 @@
 				(mouth setCycle: 0)
 			)
 			(cond 
-				(global83 (DoAudio 3))
+				(cDAudio (DoAudio 3))
 				(modelessDialog (modelessDialog dispose:))
 			)
 			(if eyes (eyes setCycle: 0))
@@ -280,7 +280,7 @@
 			(= disposeWhenDone theDisposeWhenDone)
 			(if (>= argc 5) (= caller theCaller))
 		)
-		(if global83
+		(if cDAudio
 			(self startAudio: param1 param2 param3)
 		else
 			(self startText: param1 param2 param3)

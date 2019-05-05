@@ -218,7 +218,7 @@
 		(if argc (client x: param1 y: param2))
 		(= temp2
 			(if (not (client cantBeHere:))
-				(if offScreenOK else (not (IsOffSCreen client)))
+				(if offScreenOK else (not (IsOffScreen client)))
 			else
 				0
 			)

@@ -4,12 +4,12 @@
 (use Main)
 
 (public
-	IsOffSCreen 0
+	IsOffScreen 0
 	CantBeSeen 1
 	AngleDiff 2
 )
 
-(procedure (IsOffSCreen param1)
+(procedure (IsOffScreen param1)
 	(return
 		(not
 			(if
