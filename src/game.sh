@@ -9,9 +9,9 @@
 (define vEgoStand 4)
 
 ;Script defines
-(define rTitle 1)
 (define rTestRoom 98)
 (define rSpeedTest 99)
+(define rTitle 100)
 
 ;Pic defines
 (define pTestRoom 98)
