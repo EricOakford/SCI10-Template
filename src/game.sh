@@ -4,6 +4,8 @@
 ; *************************************************************************
 ; * Put all the defines specific to your game in here
 
+(include system.sh) (include sci2.sh)
+
 ;View defines
 (define vEgo 0)
 (define vEgoStand 4)

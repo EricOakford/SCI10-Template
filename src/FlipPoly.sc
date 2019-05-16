@@ -1,92 +1,122 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 926)
-(include sci.sh)
+(script# FLIPPOLY)
+
+;; FlipPoly procedure for use (primarily) with picture mirroring.
+;; 7/3/91   J.M.H. 
+;; FlipFeature procedure for use (primarily) with picture mirroring.
+;; 7/24/91  J.M.H.
+(include game.sh)
 (use Main)
 (use System)
 
+   (define SIZEOFPOINT  4)
+   (define SIZEOFWORD   2)
+
 (public
-	FlipPoly 0
-	FlipFeature 1
+   FlipPoly 0
+   FlipFeature 1
+)
+;; pass a Polygon, a list of polygons or no args to use (curRoom obstacles?)
+(procedure (FlipPoly arg &tmp theList)
+   (cond
+      ((not argc)
+         (= theList (curRoom obstacles?))
+      )
+      ((arg isKindOf: Collection)
+         (= theList arg)
+      )
+      (else
+         (arg perform:flipPoly)
+         (return)
+      )
+   )
+   (theList eachElementDo: #perform flipPoly)
+   (DisposeScript FLIPPOLY)
 )
 
-(procedure (FlipPoly theCurRoomObstacles &tmp curRoomObstacles)
-	(cond 
-		((not argc) (= curRoomObstacles (curRoom obstacles?)))
-		((theCurRoomObstacles isKindOf: Collection) (= curRoomObstacles theCurRoomObstacles))
-		(else (theCurRoomObstacles perform: flipPoly) (return))
-	)
-	(curRoomObstacles eachElementDo: #perform flipPoly)
-	(DisposeScript 926)
-)
-
-(procedure (FlipFeature param1 &tmp temp0)
-	(if (not argc)
-		(features eachElementDo: #perform flipFeature)
-	else
-		(= temp0 0)
-		(while (< temp0 argc)
-			(if ([param1 temp0] isKindOf: Collection)
-				([param1 temp0] eachElementDo: #perform flipFeature)
-			else
-				([param1 temp0] perform: flipFeature)
-			)
-			(++ temp0)
-		)
-	)
-	(DisposeScript 926)
-)
 
 (instance flipPoly of Code
-	(properties)
-	
-	(method (doit param1 &tmp temp0 temp1 temp2)
-		(= temp1 (Memory 1 (* 4 (= temp2 (param1 size?)))))
-		(= temp0 0)
-		(while (< temp0 temp2)
-			(Memory
-				6
-				(+ temp1 (* 4 temp0))
-				(-
-					320
-					(Memory
-						5
-						(-
-							(+ (param1 points?) (* 4 temp2))
-							(+ 4 (* 4 temp0))
-						)
-					)
-				)
-			)
-			(Memory
-				6
-				(+ temp1 (* 4 temp0) 2)
-				(Memory
-					5
-					(-
-						(+ (param1 points?) (* 4 temp2))
-						(+ 2 (* 4 temp0))
-					)
-				)
-			)
-			(++ temp0)
-		)
-		(if (param1 dynamic?) (Memory 3 (param1 points?)))
-		(param1 points: temp1 dynamic: 1)
-	)
+   (method (doit thePoly &tmp i newPoints theSize)
+      ;; get a new array
+      (= newPoints 
+         (Memory MNeedPtr (* SIZEOFPOINT (= theSize (thePoly size?))))
+      )
+      ;; walk through the points
+      (for ((= i 0)) (< i theSize) ((++ i))
+         ;; set the new x
+         (Memory MWriteWord   
+            ;; location of new x
+            (+ newPoints (* SIZEOFPOINT i))
+            ;; translate horizontally
+            (- 
+               320 
+               ;; old x?
+               (Memory MReadWord 
+                  (- 
+                     (+ 
+                        (thePoly points?) 
+                        (* SIZEOFPOINT theSize)
+                     )  
+                     (+ SIZEOFPOINT (* SIZEOFPOINT i))
+                  )
+               )
+            )
+         )
+         ;; the y
+         (Memory MWriteWord
+            ;; location of new y
+            (+ newPoints (* SIZEOFPOINT i) SIZEOFWORD)
+            ;; get old y as is
+            (Memory MReadWord 
+               (- 
+                  (+ 
+                     (thePoly points?) 
+                     (* SIZEOFPOINT theSize)
+                  )  
+                  (+ SIZEOFWORD (* SIZEOFPOINT i))
+               )
+            )
+         )
+      )
+      ;; clear Polygons old points array
+      (if (thePoly dynamic?)
+         (Memory MDisposePtr (thePoly points?))
+      )
+      ;; set it to the newly created array
+      (thePoly 
+         points:  newPoints, 
+         dynamic: TRUE
+      )
+   )
+)
+
+;; flip a feature, many features, a list of features 
+;; or the feature list (no args)
+(procedure (FlipFeature args &tmp i)
+   (if (not argc)
+      (features eachElementDo: #perform flipFeature)
+   else
+      (for ((= i 0)) (< i argc) ((++ i))
+         (if ([args i] isKindOf: Collection)
+            ([args i] eachElementDo: #perform flipFeature)
+         else
+            ([args i] perform: flipFeature)
+         )
+      )
+   )
+   (DisposeScript FLIPPOLY)
 )
 
 (instance flipFeature of Code
-	(properties)
-	
-	(method (doit param1 &tmp temp0)
-		(if (IsObject (param1 onMeCheck?))
-			(FlipPoly (param1 onMeCheck?))
-		else
-			(= temp0 (param1 nsLeft?))
-			(param1
-				nsLeft: (- 320 (param1 nsRight?))
-				nsRight: (- 320 temp0)
-			)
-		)
-	)
+   (method (doit theFeature &tmp oldLeft)
+      (if (IsObject (theFeature onMeCheck?))
+         (FlipPoly (theFeature onMeCheck?))
+      else
+         (= oldLeft (theFeature nsLeft?))
+         (theFeature
+            nsLeft:     (- 320 (theFeature nsRight?)),
+            nsRight:    (- 320 oldLeft)
+         )
+      )
+   )
 )
