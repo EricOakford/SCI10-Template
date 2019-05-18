@@ -563,7 +563,7 @@
 	(method (getAccessType &tmp temp0)
 		(if
 			(= temp0
-				(PrintD_940
+				(PrintD
 					80
 					{Polygon access type}
 					81
@@ -899,9 +899,9 @@ code_0623:
 	)
 	
 	(method (init)
-		(DrawPic (curRoom curPic?) 100 dpCLEAR defaultPalette)
+		(DrawPic (curRoom curPic?) 100 dpCLEAR currentPalette)
 		(if (!= overlays -1)
-			(DrawPic overlays 100 dpNO_CLEAR defaultPalette)
+			(DrawPic overlays 100 dpNO_CLEAR currentPalette)
 		)
 		(addToPics doit:)
 		(cast eachElementDo: #stopUpd)
@@ -1289,7 +1289,7 @@ code_0623:
 		(if
 			(not
 				(= temp100
-					(PrintD_940
+					(PrintD
 						80
 						{Save Polygons}
 						{File:_}
@@ -1323,7 +1323,7 @@ code_0623:
 				(FileIO 10 @fileName)
 				(not
 					(= temp100
-						(PrintD_940
+						(PrintD
 							(Format @temp0 943 8 @fileName)
 							106
 							81

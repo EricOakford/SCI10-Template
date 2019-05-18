@@ -9,11 +9,12 @@
 (define TRUE		1)
 (define FALSE		0)
 
+/* Since this is not SCI0, this is unneeded
 #ifdef SCI_0
 (define ENABLED		1)
 (define DISABLED	0)
 #endif
-
+*/
 // (define NULL		0) //NOTE: defined in system.sh
 
 // Rects
@@ -332,12 +333,12 @@
 (define memPEEK 5)
 (define memPOKE 6)
 
-// Polygon types
-(define PTotalAccess 0)
+// Polygon types (already defined in system.sh)
+/*(define PTotalAccess 0)
 (define PNearestAccess 1)
 (define PBarredAccess 2)
 (define PContainedAccess 3)
-
+*/
 // setOnMeCheck flags
 (define omcDISABLE $6789)
 (define omcCOLORS 1)
@@ -486,7 +487,7 @@
  *************************************************************************/
  //(define notUpd                     $0001) //NOTE: defined in system.sh (this value is incorrect compared to sci.sh)
  //(define fixPriOn                   $0010) //NOTE: defined in system.sh
- //(define isExtra                    $0200)
+ (define isExtra                    $0200)
  (define noTurn                     $0800)
  //(define skipCheck                  $1000) //NOTE: defined in system.sh
  (define ignoreHorizon              $2000)

@@ -49,7 +49,7 @@
 			(theIconBar enable:)
 			(theGame setCursor: normalCursor TRUE 160 100)
 			(switch
-				(PrintD_940
+				(PrintD
 					{Would you like to skip\nthe introduction or\nwatch the whole thing?} 67 100 60
 					106
 					#button {Skip it} skipIt

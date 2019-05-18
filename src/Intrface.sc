@@ -6,7 +6,7 @@
 
 (public
 	Print 0
-	PrintD 1
+	PrintIcon 1
 	GetInput 2
 	GetNumber 3
 	Printf 4
@@ -195,7 +195,7 @@
 	(return temp4)
 )
 
-(procedure (PrintD param1 param2 param3 param4)
+(procedure (PrintIcon param1 param2 param3 param4)
 	(Print param1 #icon param2 param3 param4 &rest)
 )
 
@@ -261,7 +261,7 @@
 	)
 )
 
-(procedure (localproc_0016 &tmp newEvent temp1)
+(procedure (StillDown &tmp newEvent temp1)
 	(= temp1 (!= ((= newEvent (Event new:)) type?) 2))
 	(newEvent dispose:)
 	(return temp1)
@@ -381,7 +381,7 @@
 						(= temp1 temp0)
 					)
 					(param1 dispose:)
-					(breakif (not (localproc_0016)))
+					(breakif (not (StillDown)))
 				)
 				(if temp0 (HiliteControl self))
 				(return temp0)
@@ -582,13 +582,13 @@
 						((< (event y?) (+ nsTop 10))
 							(repeat
 								(self retreat: 1)
-								(breakif (not (localproc_0016)))
+								(breakif (not (StillDown)))
 							)
 						)
 						((> (event y?) (- nsBottom 10))
 							(repeat
 								(self advance: 1)
-								(breakif (not (localproc_0016)))
+								(breakif (not (StillDown)))
 							)
 						)
 						(else

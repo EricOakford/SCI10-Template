@@ -60,16 +60,16 @@
 	debugOn
 	score
 	possibleScore
-	showStyle =  7
+	showStyle =  IRISOUT
 	aniInterval
 	theCursor
-	normalCursor =  999
+	normalCursor =  ARROW_CURSOR
 	waitCursor =  20
-	userFont =  1
+	userFont =  USERFONT
 	smallFont =  4
 	lastEvent
 	modelessDialog
-	bigFont =  1
+	bigFont =  USERFONT
 	version
 	locales
 	curSaveDir
@@ -82,35 +82,35 @@
 	overlays =  -1
 	doMotionCue
 	systemWindow
-	global39 =  3
-	defaultPalette
+	demoDialogTime =  3
+	currentPalette
 	modelessPort
 	sysLogPath
-	global43
-	global44
-	global45
-	global46
-	global47
-	global48
-	global49
-	global50
-	global51
-	global52
-	global53
-	global54
-	global55
-	global56
-	global57
-	global58
-	global59
-	global60
-	global61
+		global43
+		global44
+		global45
+		global46
+		global47
+		global48
+		global49
+		global50
+		global51
+		global52
+		global53
+		global54
+		global55
+		global56
+		global57
+		global58
+		global59
+		global60
+		global61
 	endSysLogPath
 	gameControls
 	ftrInitializer
 	doVerbCode
 	approachCode
-	useObstacles =  1
+	useObstacles =  TRUE
 	theMenuBar
 	theIconBar
 	mouseX
@@ -132,7 +132,8 @@
 	tickOffset
 	howFast
 	gameTime
-	narrator
+	;globals 89-99 are unused
+	global89
 	global90
 	global91
 	global92
@@ -142,7 +143,7 @@
 	global96
 	global97
 	global98
-	global99
+	lastSysGlobal
 	music
 	deathMusic = sDeath
 	global102
@@ -648,7 +649,11 @@
 )
 
 (instance SCI10 of Game
-	(properties)
+	(properties
+		;Set your game's language here.
+		;Supported langauges can be found in SYSTEM.SH.
+		printLang ENGLISH
+	)
 	
 	(method (init &tmp temp0)
 		(= debugging TRUE)

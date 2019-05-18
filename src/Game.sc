@@ -272,9 +272,9 @@
 		(if modelessDialog (modelessDialog dispose:))
 		(cast eachElementDo: #perform RestoreUpdate)
 		(theGame setCursor: waitCursor 1)
-		(DrawPic (curRoom curPic?) 100 dpCLEAR defaultPalette)
+		(DrawPic (curRoom curPic?) 100 dpCLEAR currentPalette)
 		(if (!= overlays -1)
-			(DrawPic overlays 100 dpNO_CLEAR defaultPalette)
+			(DrawPic overlays 100 dpNO_CLEAR currentPalette)
 		)
 		(if (curRoom controls?) ((curRoom controls?) draw:))
 		(addToPics doit:)
@@ -673,7 +673,7 @@
 				(else showStyle)
 			)
 			dpCLEAR
-			defaultPalette
+			currentPalette
 		)
 	)
 	
@@ -687,7 +687,7 @@
 				(else showStyle)
 			)
 			dpNO_CLEAR
-			defaultPalette
+			currentPalette
 		)
 	)
 	
