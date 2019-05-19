@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 812)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use PolyPath)
@@ -27,7 +27,7 @@
 	)
 )
 
-(instance controls of Controls
+(instance theControls of Controls
 	(properties)
 )
 
@@ -56,7 +56,7 @@
 	
 	(method (init &tmp temp0 temp1)
 		(= number curRoomNum)
-		(= controls controls)
+		(= controls theControls)
 		(= perspective picAngle)
 		(if picture (self drawPic: picture))
 		(cond 
