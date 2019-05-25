@@ -8,7 +8,6 @@
 
 ;View defines
 (define vEgo 0)
-(define vEgoStand 4)
 
 ;Script defines
 (define rTestRoom 98)
@@ -23,6 +22,7 @@
 (define sOpening 1)
 (define sDeath 2)
 (define sScore 3)
+
 ;Inventory items
 (enum
 	iCoin

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 998)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use Feature)
@@ -294,7 +294,7 @@
 		brBottom 0
 		brRight 0
 		palette 0
-		cycleSpeed 0
+		cycleSpeed 6
 		script 0
 		cycler 0
 		timer 0
@@ -408,7 +408,7 @@
 		brBottom 0
 		brRight 0
 		palette 0
-		cycleSpeed 0
+		cycleSpeed 6
 		script 0
 		cycler 0
 		timer 0
@@ -417,7 +417,7 @@
 		xLast 0
 		yLast 0
 		xStep 3
-		moveSpeed 0
+		moveSpeed 6
 		blocks 0
 		baseSetter 0
 		mover 0

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 932)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 
@@ -111,7 +111,7 @@
 (procedure (localproc_003c param1 &tmp theGamePrintLang theGameSubtitleLang)
 	(= theGameSubtitleLang (theGame subtitleLang?))
 	(theGame subtitleLang: 0)
-	(if param1 (Display &rest) else (Print &rest 121))
+	(if param1 (Display &rest) else (Print &rest 120))
 	(if theGameSubtitleLang
 		(= theGamePrintLang (theGame printLang?))
 		(theGame printLang: theGameSubtitleLang)

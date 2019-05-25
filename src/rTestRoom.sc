@@ -4,7 +4,7 @@
 (use Main)
 (use Game)
 (use Sound)
-(use SQRoom)
+(use GameRoom)
 (use Intrface)
 (use System)
 
@@ -12,7 +12,7 @@
 	testRoom 0
 )
 
-(instance testRoom of SQRoom
+(instance testRoom of GameRoom
 	(properties
 		lookStr {This is an empty room.}
 		picture pTestRoom
@@ -22,7 +22,7 @@
 	(method (init)
 		(HandsOn)
 		(StatusLine enable:)
-		(ego posn: 146 153 loop: 1)
+		(ego posn: 146 153 loop: 0)
 		(ego init:)
 		(super init:)
 	)

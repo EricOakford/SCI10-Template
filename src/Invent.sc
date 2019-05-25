@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 995)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use IconBar)
@@ -52,12 +52,12 @@
 		(= temp1 (- nsLeft 2))
 		(= temp2 (+ nsBottom 1))
 		(= temp3 (+ nsRight 1))
-		(Graph GDrawLine temp0 temp1 temp0 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp0 temp3 temp2 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp3 temp2 temp1 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp1 temp0 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp1 temp0 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp3 temp2 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp3 temp2 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp1 temp0 temp1 temp4 -1 -1)
 		(Graph
-			GShowBits
+			grUPDATE_BOX
 			(- nsTop 2)
 			(- nsLeft 2)
 			(+ nsBottom 2)
@@ -85,14 +85,13 @@
 	
 	(method (doVerb theVerb)
 		(switch theVerb
-			(2 (Printf 995 0 description))
+			(verbLook (Printf 995 0 description))
 		)
 	)
 )
 
 (class Inventory of IconBar
 	(properties
-		name "Inv"
 		elements 0
 		size 0
 		height 0
@@ -405,15 +404,11 @@
 						)
 						(if (== highlightedIcon okButton) (break))
 						(if (== highlightedIcon helpIconItem)
-							(if (& state $0800)
-								(self noClickHelp:)
-							else
-								(if (!= (highlightedIcon cursor?) -1)
-									(theGame setCursor: (helpIconItem cursor?))
-								)
-								(if helpIconItem
-									(helpIconItem signal: (| (helpIconItem signal?) $0010))
-								)
+							(if (!= (highlightedIcon cursor?) -1)
+								(theGame setCursor: (helpIconItem cursor?))
+							)
+							(if helpIconItem
+								(helpIconItem signal: (| (helpIconItem signal?) $0010))
 							)
 						else
 							(= curIcon highlightedIcon)

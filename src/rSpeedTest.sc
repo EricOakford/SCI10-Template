@@ -1,12 +1,11 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# rSpeedTest)
-(include system.sh) (include sci2.sh) (include game.sh)
+(script# 99)
+(include game.sh)
 (use Main)
+(use Intrface)
 (use Motion)
 (use Game)
 (use Actor)
-(use Window)
-(use Intrface)
 (use System)
 
 (public
@@ -25,14 +24,11 @@
 
 (instance speedTest of Room
 	(properties
-		picture scriptNumber
+		picture pSpeedTest
 		style $0064
 	)
 	
 	(method (init)
-		(= local2 (FileIO 0 {version} 1))
-		(FileIO 5 version 6 local2)
-		(FileIO 1 local2)
 		(super init:)
 		(sounds eachElementDo: #stop)
 		(while (u> (GetTime) -1024)
@@ -58,11 +54,18 @@
 		(if
 		(and (u< local0 (GetTime)) (not (self script?)))
 			(if (< local1 local3)
-				(= howFast 0)
-				(theGame detailLevel: 1)
+			;EO: this is based on the decompiled NRS timer fix for PQ3
+				(= howFast 3)
+				(theGame detailLevel: howFast)
 			else
-				(= howFast 2)
+				(= howFast 3)
 			)
+			;EO: below is the original unaltered code
+			;	(= howFast 0)
+			;	(theGame detailLevel: 1)
+			;else
+			;	(= howFast 2)
+			;)
 			(self setScript: speedScript)
 		)
 	)
@@ -75,7 +78,7 @@
 (instance speedScript of Script
 	(properties)
 	
-	(method (changeState newState &tmp temp0 [inputRoom 20] nextRoom)
+	(method (changeState newState &tmp [inputRoom 10] nextRoom)
 		(switch (= state newState)
 			(0
 				(Palette 4 0 255 100)
@@ -104,3 +107,4 @@
 		)
 	)
 )
+

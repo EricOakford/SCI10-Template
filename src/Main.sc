@@ -8,10 +8,11 @@
 (use SlideIcon)
 (use BordWind)
 (use IconBar)
-(use SQEgo)
+(use GameEgo)
 (use RandCyc)
 (use StopWalk)
 (use DCIcon)
+(use Motion)
 (use Grooper)
 (use Sound)
 (use Game)
@@ -232,16 +233,13 @@
 	global194
 	debugging
 )
-(procedure (NormalEgo param1 param2 param3 &tmp temp0)
-	(= temp0 0)
+(procedure (NormalEgo param1 param2)
 	(if (> argc 0)
-		(ego loop: param1)
-		(if (> argc 1)
-			(ego view: param2)
-			(if (> argc 2) (= temp0 param3))
+		(if (!= param1 -1) (ego view: param1))
+		(if (and (> argc 1) (!= param2 -1))
+			(ego loop: param2)
 		)
 	)
-	(if (not temp0) (= temp0 4))
 	(ego
 		normal: 1
 		moveHead: 1
@@ -249,7 +247,7 @@
 		setLoop: stopGroop
 		setPri: -1
 		setMotion: 0
-		setCycle: StopWalk 4 
+		setCycle: Walk
 		setStep: 3 2
 		illegalBits: 0
 		ignoreActors: 0
@@ -257,6 +255,7 @@
 		cycleSpeed: (theGame egoMoveSpeed?)
 	)
 )
+
 
 (procedure (HandsOff &tmp theIconBarCurIcon)
 	(User canControl: FALSE canInput: FALSE)
@@ -328,14 +327,8 @@
 	(return oldState)
 )
 
-(procedure (EgoHeadMove param1 &tmp temp0)
-	(= temp0 0)
-	(if argc (= temp0 param1) else (= temp0 4))
-	((= gEgoHead egoHead)
-		init: ego
-		view: temp0
-		cycleSpeed: 24
-	)
+(procedure (EgoHeadMove)
+	(egoHead init: ego view: (ego view?) cycleSpeed: 24)
 )
 
 
@@ -548,11 +541,13 @@
 )
 
 
-(instance egoBody of SQEgo
+(instance egoBody of Body
 	(properties
+		name "ego"
 		description {you}
 		sightAngle 180
 		lookStr {It's you!}
+		view vEgo
 	)
 	
 	(method (doVerb theVerb theItem)
@@ -577,7 +572,6 @@
 	(properties
 		description {your head.}
 		lookStr {There's nothing going on in your stupid little head.}
-		view vEgoStand
 	)
 	
 	(method (doVerb theVerb theItem)
@@ -617,12 +611,8 @@
 	(properties)
 	
 	(method (doit)
-		(if
-			(and
-				(IsObject (ego cycler?))
-				((ego cycler?) isKindOf: StopWalk)
-			)
-			(ego view: ((ego cycler?) vWalking?))
+		(if (== (ego loop?) (- (NumLoops ego) 1))
+			(ego loop: (ego cel?))
 		)
 		(super doit: &rest)
 	)
@@ -636,15 +626,15 @@
 	)
 )
 
-(instance sq4KeyDownHandler of EventHandler
+(instance gameKeyDownHandler of EventHandler
 	(properties)
 )
 
-(instance sq4MouseDownHandler of EventHandler
+(instance gameMouseDownHandler of EventHandler
 	(properties)
 )
 
-(instance sq4DirectionHandler of EventHandler
+(instance gameDirectionHandler of EventHandler
 	(properties)
 )
 
@@ -657,7 +647,7 @@
 	
 	(method (init &tmp temp0)
 		(= debugging TRUE)
-		(= systemWindow sq4Win)
+		(= systemWindow gameWindow)
 		(PalInit)
 		(= version {x.yyy.zzz})
 		(= gStopGroop stopGroop)
@@ -665,26 +655,21 @@
 		(= useSortedFeatures TRUE)
 		(super init:)
 		(StrCpy @sysLogPath {})
-		(= doVerbCode sq4DoVerbCode)
-		(= ftrInitializer sq4FtrInit)
-		((= keyDownHandler sq4KeyDownHandler) add:)
-		((= mouseDownHandler sq4MouseDownHandler) add:)
-		((= directionHandler sq4DirectionHandler) add:)
+		(= doVerbCode gameDoVerbCode)
+		(= ftrInitializer gameFtrInit)
+		((= keyDownHandler gameKeyDownHandler) add:)
+		((= mouseDownHandler gameMouseDownHandler) add:)
+		((= directionHandler gameDirectionHandler) add:)
 		(= pMouse PseudoMouse)
-		(self egoMoveSpeed: 0 setCursor: theCursor TRUE 304 172)
-		((= ego egoBody)
-			_head: (= gEgoHead egoHead)
+		(self egoMoveSpeed: 2 setCursor: theCursor TRUE 304 172)
+		(= ego egoBody)
+		(ego
+			head: egoHead
 			moveSpeed: (self egoMoveSpeed?)
 			cycleSpeed: (self egoMoveSpeed?)
 		)
-		((ego _head?) client: ego)
-		(User
-			alterEgo: ego
-			verbMessager: 0
-			canControl: FALSE
-			canInput: FALSE
-		)
-		((= music longSong) owner: self init: flags: 1)
+		(User alterEgo: ego canControl: FALSE canInput: FALSE)
+		((= music longSong) owner: self priority: 15 init:)
 		((= SFX longSong2) owner: self init:)
 		(= waitCursor HAND_CURSOR)
 		(= possibleScore 0)
@@ -701,7 +686,7 @@
 		else
 			(Bset 21)
 		)
-		(sq4Win
+		(gameWindow
 			color: 0
 			back: (proc0_18 global158 global155)
 			topBordColor: global130
@@ -763,34 +748,16 @@
 			window: gcWin
 			add:
 				iconOk
-				(detailSlider
-					theObj: self
-					selector: 291
-					topValue: 3
-					bottomValue: 0
-					yourself:
-				)
-				(volumeSlider
-					theObj: self
-					selector: 381
-					topValue: (if (> musicChannels 1) 15 else 1)
-					bottomValue: 0
-					yourself:
-				)
-				(speedSlider
-					theObj: self
-					selector: 378
-					topValue: 1
-					bottomValue: 15
-					yourself:
-				)
-				(iconSave theObj: self selector: 78 yourself:)
-				(iconRestore theObj: self selector: 79 yourself:)
-				(iconRestart theObj: self selector: 104 yourself:)
-				(iconQuit theObj: self selector: 103 yourself:)
+				(detailSlider theObj: self selector: #detailLevel yourself:)
+				(volumeSlider theObj: self selector: #masterVolume yourself:)
+				(speedSlider theObj: self selector: #setSpeed yourself:)
+				(iconSave theObj: self selector: #save yourself:)
+				(iconRestore theObj: self selector: #restore yourself:)
+				(iconRestart theObj: self selector: #restart yourself:)
+				(iconQuit theObj: self selector: #quitGame yourself:)
 				(iconAbout
 					theObj: (ScriptID 811 0)
-					selector: 60
+					selector: #doit
 					yourself:
 				)
 				iconHelp
@@ -823,19 +790,27 @@
 	(method (startRoom roomNum)
 		(if pMouse (pMouse stop:))
 		((ScriptID 801) doit: roomNum)
-		(if debugOn (SetDebug))
-		(ScriptID SIGHT)
+		(if
+			(and
+				(u> (MemoryInfo FreeHeap) (+ 10 (MemoryInfo )))
+				(Print "Memory fragmented." 
+					#button {Who cares} 0
+					#button {Debug} 1
+				)
+			)
+			(SetDebug)
+		)
 		(super startRoom: roomNum)
 		(if (cast contains: ego)
-			(ego setCycle: StopWalk 4)
 			(if (not (ego looper?)) (ego setLoop: stopGroop))
-			(EgoHeadMove (egoHead view?))
+			(EgoHeadMove)
 		)
 		(redX init: hide: setPri: 15 posn: 1000 -1000)
 	)
+
 	
 	(method (handleEvent event)
-				(if debugging
+		(if debugging
 			(if
 				(and
 					(== (event type?) mouseDown)
@@ -867,7 +842,7 @@
 			(switch (event type?)
 				(keyDown
 					(switch (event message?)
-						(KEY_TAB
+						(TAB
 							(if (not (& (icon5 signal?) $0004))
 								(Inventory showSelf: ego)
 							)
@@ -906,12 +881,24 @@
 			)
 		)
 	)
+	(method (setSpeed newSpeed)
+		(if (not (User canControl:))
+			(return (not (User canControl:)))
+		)
+		(if argc
+			(if (< (= egoMoveSpeed newSpeed) 0) (= egoMoveSpeed 0))
+			(if (> egoMoveSpeed 15) (= egoMoveSpeed 15))
+			(ego cycleSpeed: newSpeed moveSpeed: newSpeed)
+		)
+		(return egoMoveSpeed)
+	)
+		
 	(method (quitGame)
 		(super
 			quitGame:
 				(Print "Do you really want to stop playing?"
-					#button {Quit} 1
-					#button {Don't Quit} 0
+					#button {Quit} TRUE
+					#button {Don't Quit} FALSE
 				)
 		)
 	)
@@ -1202,7 +1189,7 @@
 	)
 )
 
-(instance sq4DoVerbCode of Code
+(instance gameDoVerbCode of Code
 	(properties)
 	
 	(method (doit param1 param2 &tmp temp0)
@@ -1222,7 +1209,7 @@
 	)
 )
 
-(instance sq4FtrInit of Code
+(instance gameFtrInit of Code
 	(properties)
 	
 	(method (doit param1)
@@ -1233,7 +1220,7 @@
 	)
 )
 
-(instance sq4Win of BorderWindow
+(instance gameWindow of BorderWindow
 	(properties)
 )
 
@@ -1406,9 +1393,10 @@
 		cel 1
 		nsLeft 67
 		nsTop 37
-		signal $0080
-		helpStr {Raises and lowers the level of graphics detail.}
+		signal $0280
+		helpStr {The graphics detail level.}
 		sliderView 947
+		yStep 2
 		topValue 3
 	)
 )
@@ -1421,8 +1409,9 @@
 		nsLeft 107
 		nsTop 37
 		signal $0080
-		helpStr {Adjusts sound volume.}
+		helpStr {Overall sound volume.}
 		sliderView 947
+		yStep 2
 		topValue 15
 	)
 )
@@ -1434,10 +1423,22 @@
 		cel 1
 		nsLeft 147
 		nsTop 37
-		signal $0080
-		helpStr {Adjusts the speed of the game's animation (within the limits of your computer's capability).}
+		signal $0280
+		helpStr {The speed at which the player character moves.}
 		sliderView 947
+		yStep 2
 		bottomValue 15
+	)
+	
+	(method (doit param1)
+		(if argc
+			(theGame egoMoveSpeed: param1)
+			(ego
+				moveSpeed: (theGame egoMoveSpeed?)
+				cycleSpeed: (theGame egoMoveSpeed?)
+			)
+		)
+		(theGame egoMoveSpeed?)
 	)
 )
 
@@ -1448,9 +1449,9 @@
 		cel 0
 		nsLeft 8
 		nsTop 6
-		message 9
+		message 7
 		signal $01c3
-		helpStr {Saves your current game.}
+		helpStr {Allows you to save your game.}
 	)
 )
 
@@ -1461,9 +1462,9 @@
 		cel 0
 		nsLeft 8
 		nsTop 26
-		message 9
+		message 7
 		signal $01c3
-		helpStr {Restores a previously saved game.}
+		helpStr {Allows you to restore a previously saved game.}
 	)
 )
 
@@ -1474,9 +1475,9 @@
 		cel 0
 		nsLeft 8
 		nsTop 46
-		message 9
+		message 7
 		signal $01c3
-		helpStr {Restarts the Game.}
+		helpStr {Allows you to restart the game.}
 	)
 )
 
@@ -1487,9 +1488,9 @@
 		cel 0
 		nsLeft 8
 		nsTop 66
-		message 9
+		message 7
 		signal $01c3
-		helpStr {Exits the game.}
+		helpStr {Allows you to quit the game.}
 	)
 )
 
@@ -1498,9 +1499,9 @@
 		view 947
 		loop 6
 		cel 0
-		nsLeft 8
-		nsTop 86
-		message 9
+		nsLeft 34
+		nsTop 106
+		message 7
 		signal $01c3
 		helpStr {Information about the game.}
 	)
@@ -1511,9 +1512,9 @@
 		view 947
 		loop 7
 		cel 0
-		nsLeft 34
-		nsTop 86
-		cursor 70
+		nsLeft 8
+		nsTop 106
+		cursor 29
 		message 6
 		signal $0183
 	)
@@ -1525,10 +1526,9 @@
 		loop 8
 		cel 0
 		nsLeft 8
-		nsTop 106
-		cursor 70
-		message 9
+		nsTop 86
+		message 7
 		signal $01c3
-		helpStr {Exits this menu.}
+		helpStr {Returns you to the game.}
 	)
 )

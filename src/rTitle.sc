@@ -29,7 +29,7 @@
 		(music number: sOpening play:)
 		(keyDownHandler addToFront: self)
 		(mouseDownHandler addToFront: self)
-		(theGame setCursor: waitCursor 0)
+		(theGame setCursor: waitCursor TRUE)
 		(Display
 			"Intro/Opening screen"
 			dsCOORD 90 80

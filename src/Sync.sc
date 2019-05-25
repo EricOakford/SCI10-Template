@@ -1,153 +1,203 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 929)
-(include sci.sh)
+;;;;
+;;;;  SYNC.SC
+;;;;
+;;;;  (c) Sierra On-Line, Inc, 1992
+;;;;
+;;;;  Author:  Unknown
+;;;;  Updated: Brian K. Hughes
+;;;;
+;;;;  Create a hook between talker & mouthSync to that a mouth can be
+;;;;  assigned a specific channel (1 through 4) which will cause a different
+;;;;  masking word to be used in Sync
+;;;;
+;;;;  Classes:
+;;;;     Sync
+;;;;     ScriptSync
+;;;;     MouthSync
+
+
+(script# SYNC)
+(include game.sh)
 (use Main)
 (use Timer)
 (use Motion)
 (use System)
 
 
-(class Sync of Object
-	(properties
-		syncTime -1
-		syncCue $ffff
-		prevCue $ffff
-		syncNum -1
-	)
-	
-	(method (syncStart param1)
-		(DoSync 0 self param1)
-		(if (!= syncCue -1) (= prevCue syncCue) (= syncTime 0))
-	)
-	
-	(method (syncCheck)
-		(if
-			(and
-				(!= syncCue -1)
-				(or (u<= syncTime syncBias) (<= syncTime (DoAudio 6)))
-			)
-			(= prevCue syncCue)
-			(DoSync 1 self)
-		)
-	)
-	
-	(method (syncStop)
-		(= prevCue -1)
-		(DoSync 2)
-	)
+(class Sync kindof Object
+   (properties
+      syncTime -1
+      syncCue  -1
+      prevCue  -1
+      syncNum  -1
+   )
+;;;   (methods
+;;;      syncStart
+;;;      syncCheck
+;;;      syncStop
+;;;   )
+   
+   (method (syncStart modnum noun verb case seq)
+      (DoSync StartSync self modnum noun verb case seq)
+      (if (!= syncCue -1)
+         (= prevCue syncCue)
+         (= syncTime 0)
+      )
+   )
+
+   (method (syncCheck)
+      (if (!= syncCue -1)
+         (if (or  (u<= syncTime syncBias)
+                  (<= syncTime (DoAudio Loc))
+            )
+            (if (== (& $fff0 syncCue) 0)
+               (= prevCue (| (& prevCue $fff0) syncCue))
+            else
+               (= prevCue syncCue)
+            )
+            (DoSync NextSync self)  ;; get next syncTime and syncCue
+         )
+      )
+   )
+
+   (method (syncStop)
+      (= prevCue -1)
+      (DoSync StopSync)
+   )
 )
 
-(class ScriptSync of Object
-	(properties
-		prevSignal -1
-		playing 0
-	)
-	
-	(method (init param1)
-		(if theSync (self cue:))
-		((= theSync (Sync new:)) init: syncStart: param1)
-		(if (!= (theSync prevCue?) -1)
-			(= playing 1)
-			(regions add: self)
-		)
-		(Timer set60ths: self (DoAudio 1 param1))
-	)
-	
-	(method (doit &tmp theSyncPrevCue)
-		(if (!= (theSync prevCue?) -1)
-			(repeat
-				(if (== (theSync prevCue?) -1) (break))
-				(= theSyncPrevCue (theSync prevCue?))
-				(theSync syncCheck:)
-				(if (== theSyncPrevCue (theSync prevCue?)) (break))
-			)
-			(= prevSignal (theSync prevCue?))
-		)
-	)
-	
-	(method (cue)
-		(Animate (cast elements?) 0)
-		(= playing 0)
-		(= prevSignal 32767)
-		(regions delete: self)
-		(if theSync (theSync syncStop: dispose:) (= theSync 0))
-	)
-	
-	(method (handleEvent)
-	)
+
+
+(class ScriptSync kindof Object
+   (properties
+      prevSignal  -1
+      playing     0
+   )
+;;;   (methods
+;;;      cue
+;;;      handleEvent
+;;;   )
+   
+   (method (init modNum noun verb case seq)
+      (if theSync
+         (self cue:)
+      )
+      ((= theSync (Sync new:))
+         init:       ,
+         syncStart:  modNum noun verb case seq
+      )
+      (if (!= (theSync prevCue?) -1)
+         (= playing TRUE)
+         (regions add: self)
+      )
+      (Timer setTicks: self (DoAudio WPlay modNum noun verb case seq))
+   )
+
+   (method (doit &tmp oldSignal)
+      (if (!= (theSync prevCue?) -1)
+         (repeat
+            (if (== (theSync prevCue?) -1)
+               (break)
+            )
+            (= oldSignal (theSync syncTime?))
+            (theSync syncCheck:)
+            (if (== oldSignal (theSync syncTime?))
+               (break)
+            )
+         )
+         (= prevSignal (theSync prevCue?))
+      )
+   )
+
+   (method (cue)
+      (Animate (cast elements?) FALSE)
+      (= playing FALSE)
+      (= prevSignal 32767)
+      (regions delete: self)
+      (if theSync
+         (theSync syncStop:, dispose:)
+         (= theSync 0)
+      )
+   )
 )
 
-(class MouthSync of Cycle
-	(properties
-		client 0
-		caller 0
-		cycleDir 1
-		cycleCnt 0
-		completed 0
-	)
-	
-	(method (init param1 param2 &tmp temp0)
-		(super init: param1)
-		(if (IsObject theSync)
-			(theSync syncStop: dispose:) ;fixed decompile error
-		)
-		((= theSync (Sync new:)) syncStart: param2)
-	)
-	
-	(method (doit &tmp clientLastCel theSyncPrevCue theSyncSyncTime_2 theSyncSyncTime temp4)
-		(super doit:)
-		(if (!= (theSync prevCue?) -1)
-			(= theSyncSyncTime (theSync syncTime?))
-			(= temp4 0)
-			(repeat
-				(= theSyncSyncTime_2 (theSync syncTime?))
-				(theSync syncCheck:)
-				(if (== theSyncSyncTime_2 (theSync syncTime?)) (break))
-			)
-			(if
-				(and
-					(!= theSyncSyncTime (theSync syncTime?))
-					(!= (client cel?) (theSync prevCue?))
-				)
-				(= theSyncPrevCue (theSync prevCue?))
-				(= clientLastCel (client lastCel:))
-				(if
-					(or
-						(< theSyncPrevCue 0)
-						(> theSyncPrevCue clientLastCel)
-					)
-					(if (<= clientLastCel 1)
-						(= theSyncPrevCue clientLastCel)
-					else
-						(repeat
-							(if
-								(!=
-									(client cel?)
-									(= theSyncPrevCue (Random 1 clientLastCel))
-								)
-								(break)
-							)
-						)
-					)
-				)
-				(client cel: theSyncPrevCue)
-			)
-		else
-			(= completed 1)
-			(self cycleDone:)
-		)
-	)
-	
-	(method (dispose)
-		(super dispose:)
-		(if theSync (theSync dispose:) (= theSync 0))
-	)
-	
-	(method (cue)
-		(if theSync
-			(theSync syncStop: dispose:)
-			(= theSync 0)
-			(if caller (caller cue:) (= caller 0))
-		)
-	)
+
+
+(class MouthSync kindof Cycle
+;;;   (methods
+;;;      cue
+;;;   )
+   (method (init theObj modnum noun verb case seq) 
+      (super init: theObj)
+      (if (IsObject theSync)
+         (theSync 
+            syncStop: ,
+            dispose:
+         )
+      )
+      ((= theSync (Sync new:))
+         syncStart: modnum noun verb case seq
+      )
+   )
+
+   (method (doit &tmp newCel oldSignal theTime cntr)
+      (super doit:)
+
+      (if (!= (theSync prevCue?) -1)
+         (= theTime (theSync syncTime?))
+         (= cntr 0)
+         (repeat
+            (= oldSignal (theSync syncTime?))
+            (theSync syncCheck:)
+            (if (== oldSignal (theSync syncTime?))
+               (break)
+            )
+         )
+         (if (and (!= theTime (theSync syncTime?))
+                  (!= (client cel?) (= newCel (& $F (theSync prevCue?))))
+            )
+;            (= numCels (client lastCel?))
+;            (if (or  (< newCel 0)
+;                     (> newCel numCels)
+;               )
+;               (if (<= numCels 1)
+;                  (= newCel numCels)
+;               else
+;                  (repeat
+;                     (if (!= (client cel?) (= newCel (Random 1 numCels)))
+;                        (break)
+;                     )
+;                  )
+;               )
+;            )
+            (client cel: newCel)
+         )
+      else
+         (= completed TRUE)
+         (self cycleDone:)
+      )
+   )
+
+   (method (dispose)
+      (super dispose:)
+      (if theSync
+         (theSync dispose:)
+         (= theSync 0)
+      )
+   )
+
+   (method (cue)
+      (if theSync
+         (theSync 
+            syncStop:,
+            dispose:
+         )
+         (= theSync 0)
+         (if caller
+            (caller cue:)
+            (= caller 0)
+         )
+      )
+   )
 )

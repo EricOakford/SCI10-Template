@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# DCICON)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Intrface)
 (use Motion)
 
@@ -17,6 +17,11 @@
       cycleSpeed 6  ; 60ths second between cels. 
       signal 0      ; just to satisfy cycler
    )
+
+;;;   (methods
+;;;      lastCel        ; required by cycler class
+;;;   )
+
    ;;; Do not pass a caller to this cycler
    (method (init)
       ((= cycler (Forward new:)) init: self)

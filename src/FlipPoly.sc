@@ -9,8 +9,15 @@
 (use Main)
 (use System)
 
-   (define SIZEOFPOINT  4)
-   (define SIZEOFWORD   2)
+
+(define SIZEOFPOINT  4)
+(define SIZEOFWORD   2)
+
+
+;;;(procedure
+;;;   FlipPoly
+;;;   FlipFeature
+;;;)
 
 (public
    FlipPoly 0
@@ -36,6 +43,8 @@
 
 
 (instance flipPoly of Code
+;;;   (define SIZEOFPOINT  4)
+;;;   (define SIZEOFWORD   2)
    (method (doit thePoly &tmp i newPoints theSize)
       ;; get a new array
       (= newPoints 

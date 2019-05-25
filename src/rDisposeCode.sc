@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 801)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Main)
 (use LoadMany)
 (use System)
@@ -13,10 +13,11 @@
 	(properties)
 	
 	(method (doit param1)
+		;Cramming in as many system scripts as possible to ensure no "Memory Fragmented" errors.
 		(LoadMany
-			FALSE OSC NAMEFIND REVERSE SORT COUNT DPATH FORCOUNT
+			FALSE OSC NAMEFIND REVERSE SORT COUNT DPATH FORCOUNT PCHASE
 			SIGHT MOVEFWD RANDCYC STOPWALK MOVECYC POLYPATH POLYGON PRINTD
-			812 808 708 810 807
+			TIMER PAVOID EXTRA JUMP CHASE FOLLOW WANDER TALKER 812
 		)
 		(DisposeScript 800)
 		(DisposeScript 801)

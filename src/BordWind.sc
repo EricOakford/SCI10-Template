@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 936)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Window)
 
 
@@ -8,7 +8,7 @@
 	(= temp0 (GetPort))
 	(SetPort 0)
 	(Graph
-		GFillRect
+		grFILL_BOX
 		param1
 		param2
 		(+ param3 1)
@@ -22,7 +22,7 @@
 	(= param4 (+ param4 param10))
 	(= param3 (+ param3 param10))
 	(Graph
-		GFillRect
+		grFILL_BOX
 		param1
 		param2
 		(+ param1 param10)
@@ -32,7 +32,7 @@
 		param12
 	)
 	(Graph
-		GFillRect
+		grFILL_BOX
 		(- param3 param10)
 		param2
 		param3
@@ -44,7 +44,7 @@
 	(= temp1 0)
 	(while (< temp1 param10)
 		(Graph
-			GDrawLine
+			grDRAW_LINE
 			(+ param1 temp1)
 			(+ param2 temp1)
 			(- param3 (+ temp1 1))
@@ -54,7 +54,7 @@
 			-1
 		)
 		(Graph
-			GDrawLine
+			grDRAW_LINE
 			(+ param1 temp1)
 			(- param4 (+ temp1 1))
 			(- param3 (+ temp1 1))
@@ -67,7 +67,7 @@
 	)
 	(if param11
 		(Graph
-			GFillRect
+			grFILL_BOX
 			(+ param1 param11)
 			param4
 			(+ param3 param11)
@@ -77,7 +77,7 @@
 			param12
 		)
 		(Graph
-			GFillRect
+			grFILL_BOX
 			param3
 			(+ param2 param11)
 			(+ param3 param11)
@@ -146,12 +146,12 @@
 	
 	(method (dispose)
 		(SetPort 0)
-		(Graph GRestoreBits underBits)
-		(Graph GRestoreBits pUnderBits)
+		(Graph grRESTORE_BOX underBits)
+		(Graph grRESTORE_BOX pUnderBits)
 		(if eraseOnly
-			(Graph GShowBits lsTop lsLeft lsBottom lsRight 1)
+			(Graph grUPDATE_BOX lsTop lsLeft lsBottom lsRight 1)
 		else
-			(Graph GReAnimate lsTop lsLeft lsBottom lsRight)
+			(Graph grREDRAW_BOX lsTop lsLeft lsBottom lsRight)
 		)
 		(if window
 			(DisposeWindow window eraseOnly)
@@ -170,11 +170,11 @@
 		(= lsRight (+ right bevelWid shadowWid))
 		(= lsBottom (+ bottom bevelWid shadowWid))
 		(= underBits
-			(Graph GSaveBits lsTop lsLeft lsBottom lsRight 1)
+			(Graph grSAVE_BOX lsTop lsLeft lsBottom lsRight 1)
 		)
 		(if (!= priority -1)
 			(= pUnderBits
-				(Graph GSaveBits lsTop lsLeft lsBottom lsRight 2)
+				(Graph grSAVE_BOX lsTop lsLeft lsBottom lsRight 2)
 			)
 		)
 		(localproc_0318
@@ -192,7 +192,7 @@
 			priority
 			temp1
 		)
-		(Graph GShowBits lsTop lsLeft lsBottom lsRight 1)
+		(Graph grUPDATE_BOX lsTop lsLeft lsBottom lsRight 1)
 		(= type 129)
 		(super open:)
 	)
@@ -274,7 +274,7 @@
 		(= temp1 (GetPort))
 		(SetPort 0)
 		(Graph
-			GShowBits
+			grUPDATE_BOX
 			(- theTop bevWid)
 			(- theLeft bevWid)
 			(+ theBottom bevWid)

@@ -13,10 +13,11 @@
 
 
 (script# GAUGE)
-(include game.sh)
+(include system.sh) (include sci2.sh)
 (use Main)
 (use Intrface)
 (use Window)
+
 
 (define  BLOCKON     6)
 (define  BLOCKOFF    7)

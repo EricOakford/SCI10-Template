@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 255)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use System)
 
@@ -358,7 +358,7 @@
 	)
 )
 
-(procedure (StillDown &tmp newEvent temp1)
+(procedure (localproc_0022 &tmp newEvent temp1)
 	(= temp1 (!= ((= newEvent (Event new:)) type?) 2))
 	(newEvent dispose:)
 	(return temp1)
@@ -378,11 +378,11 @@
 		(DrawMenuBar 0)
 	)
 	
-	(method (handleEvent event &tmp temp0 temp1)
+	(method (handleEvent pEvent &tmp temp0 temp1)
 		(= temp0 0)
 		(if state
 			(= temp1 (Joystick 12 30))
-			(= temp0 (MenuSelect event &rest))
+			(= temp0 (MenuSelect pEvent &rest))
 			(Joystick 12 temp1)
 		)
 		(return temp0)
@@ -427,26 +427,26 @@
 		(self draw:)
 	)
 	
-	(method (handleEvent event &tmp temp0 pEventType temp2)
-		(if (event claimed?) (return 0))
+	(method (handleEvent pEvent &tmp temp0 pEventType temp2)
+		(if (pEvent claimed?) (return 0))
 		(= temp0 0)
 		(if
 			(and
 				(& state $0001)
 				(or
 					(and
-						(== (= pEventType (event type?)) 128)
+						(== (= pEventType (pEvent type?)) 128)
 						(Said said)
 					)
 					(and
 						(== pEventType evKEYBOARD)
-						(== (event message?) key)
+						(== (pEvent message?) key)
 					)
-					(and (== pEventType evMOUSEBUTTON) (self check: event))
+					(and (== pEventType evMOUSEBUTTON) (self check: pEvent))
 				)
 			)
-			(event claimed: 1)
-			(= temp0 (self track: event))
+			(pEvent claimed: 1)
+			(= temp0 (self track: pEvent))
 		)
 		(return temp0)
 	)
@@ -477,7 +477,7 @@
 						(= temp1 temp0)
 					)
 					(param1 dispose:)
-					(breakif (not (StillDown)))
+					(breakif (not (localproc_0022)))
 				)
 				(if temp0 (HiliteControl self))
 				(return temp0)
@@ -649,14 +649,14 @@
 		mark 0
 	)
 	
-	(method (handleEvent event &tmp temp0 [temp1 3] temp4 [temp5 4])
-		(if (event claimed?) (return 0))
+	(method (handleEvent pEvent &tmp temp0 [temp1 3] temp4 [temp5 4])
+		(if (pEvent claimed?) (return 0))
 		(= temp0 0)
-		(switch (event type?)
+		(switch (pEvent type?)
 			(evKEYBOARD
-				(event
+				(pEvent
 					claimed:
-						(switch (event message?)
+						(switch (pEvent message?)
 							(KEY_NUMPAD7 (self retreat: 50))
 							(KEY_NUMPAD1 (self advance: 50))
 							(KEY_PAGEUP
@@ -672,26 +672,26 @@
 				)
 			)
 			(evMOUSEBUTTON
-				(if (self check: event)
-					(event claimed: 1)
+				(if (self check: pEvent)
+					(pEvent claimed: 1)
 					(cond 
-						((< (event y?) (+ nsTop 10))
+						((< (pEvent y?) (+ nsTop 10))
 							(repeat
 								(self retreat: 1)
-								(breakif (not (StillDown)))
+								(breakif (not (localproc_0022)))
 							)
 						)
-						((> (event y?) (- nsBottom 10))
+						((> (pEvent y?) (- nsBottom 10))
 							(repeat
 								(self advance: 1)
-								(breakif (not (StillDown)))
+								(breakif (not (localproc_0022)))
 							)
 						)
 						(else
 							(TextSize @[temp5 0] {M} font 0 0)
 							(if
 								(>
-									(= temp4 (/ (- (event y?) (+ nsTop 10)) [temp5 2]))
+									(= temp4 (/ (- (pEvent y?) (+ nsTop 10)) [temp5 2]))
 									mark
 								)
 								(self advance: (- temp4 mark))
@@ -704,7 +704,7 @@
 			)
 		)
 		(return
-			(if (and (event claimed?) (& state $0002))
+			(if (and (pEvent claimed?) (& state $0002))
 				self
 			else
 				0
@@ -986,39 +986,39 @@
 		(self moveTo: 0 0)
 	)
 	
-	(method (handleEvent event &tmp theTheItem)
-		(if (& (event type?) evJOYSTICK)
-			(event type: 4)
-			(switch (event message?)
+	(method (handleEvent pEvent &tmp theTheItem)
+		(if (& (pEvent type?) evJOYSTICK)
+			(pEvent type: 4)
+			(switch (pEvent message?)
 				(JOY_DOWN
-					(event message: 20480)
+					(pEvent message: 20480)
 				)
-				(JOY_UP (event message: 18432))
+				(JOY_UP (pEvent message: 18432))
 				(JOY_LEFT
-					(event message: 19200)
+					(pEvent message: 19200)
 				)
 				(JOY_RIGHT
-					(event message: 19712)
+					(pEvent message: 19712)
 				)
-				(else  (event type: 64))
+				(else  (pEvent type: 64))
 			)
 		)
 		(if
 			(or
-				(event claimed?)
-				(== (event type?) evNULL)
+				(pEvent claimed?)
+				(== (pEvent type?) evNULL)
 				(and
-					(!= evMOUSEBUTTON (event type?))
-					(!= evKEYBOARD (event type?))
-					(!= evJOYSTICK (event type?))
-					(!= evJOYDOWN (event type?))
+					(!= evMOUSEBUTTON (pEvent type?))
+					(!= evKEYBOARD (pEvent type?))
+					(!= evJOYSTICK (pEvent type?))
+					(!= evJOYDOWN (pEvent type?))
 				)
 			)
-			(EditControl theItem event)
+			(EditControl theItem pEvent)
 			(return 0)
 		)
 		(if
-		(= theTheItem (self firstTrue: #handleEvent event))
+		(= theTheItem (self firstTrue: #handleEvent pEvent))
 			(EditControl theItem 0)
 			(if (not (theTheItem checkState: 2))
 				(if theItem (theItem select: 0))
@@ -1032,10 +1032,10 @@
 				(
 					(and
 						(or
-							(== (event type?) evJOYDOWN)
+							(== (pEvent type?) evJOYDOWN)
 							(and
-								(== evKEYBOARD (event type?))
-								(== KEY_RETURN (event message?))
+								(== evKEYBOARD (pEvent type?))
+								(== KEY_RETURN (pEvent message?))
 							)
 						)
 						theItem
@@ -1043,7 +1043,7 @@
 					)
 					(= theTheItem theItem)
 					(EditControl theItem 0)
-					(event claimed: 1)
+					(pEvent claimed: 1)
 				)
 				(
 					(or
@@ -1051,65 +1051,65 @@
 							(not (self firstTrue: #checkState 1))
 							(or
 								(and
-									(== evKEYBOARD (event type?))
-									(== KEY_RETURN (event message?))
+									(== evKEYBOARD (pEvent type?))
+									(== KEY_RETURN (pEvent message?))
 								)
-								(== evMOUSEBUTTON (event type?))
-								(== evJOYDOWN (event type?))
+								(== evMOUSEBUTTON (pEvent type?))
+								(== evJOYDOWN (pEvent type?))
 							)
 						)
 						(and
-							(== evKEYBOARD (event type?))
-							(== KEY_ESCAPE (event message?))
+							(== evKEYBOARD (pEvent type?))
+							(== KEY_ESCAPE (pEvent message?))
 						)
 					)
-					(event claimed: 1)
+					(pEvent claimed: 1)
 					(= theTheItem -1)
 				)
 				(
 					(and
 						(IsObject theItem)
 						(theItem isType: 3)
-						(== (event type?) evKEYBOARD)
-						(== (event message?) KEY_RIGHT)
+						(== (pEvent type?) evKEYBOARD)
+						(== (pEvent message?) KEY_RIGHT)
 					)
 					(if
 					(>= (theItem cursor?) (StrLen (theItem text?)))
 						(self advance:)
 					else
-						(EditControl theItem event)
+						(EditControl theItem pEvent)
 					)
 				)
 				(
 					(and
 						(IsObject theItem)
 						(theItem isType: 3)
-						(== (event type?) evKEYBOARD)
-						(== (event message?) KEY_NUMPAD4)
+						(== (pEvent type?) evKEYBOARD)
+						(== (pEvent message?) KEY_NUMPAD4)
 					)
 					(if (<= (theItem cursor?) 0)
 						(self retreat:)
 					else
-						(EditControl theItem event)
+						(EditControl theItem pEvent)
 					)
 				)
 				(
 					(and
-						(== evKEYBOARD (event type?))
-						(OneOf (event message?) 9 19712 20480)
+						(== evKEYBOARD (pEvent type?))
+						(OneOf (pEvent message?) 9 19712 20480)
 					)
-					(event claimed: 1)
+					(pEvent claimed: 1)
 					(self advance:)
 				)
 				(
 					(and
-						(== evKEYBOARD (event type?))
-						(OneOf (event message?) 3840 19200 18432)
+						(== evKEYBOARD (pEvent type?))
+						(OneOf (pEvent message?) 3840 19200 18432)
 					)
-					(event claimed: 1)
+					(pEvent claimed: 1)
 					(self retreat:)
 				)
-				(else (EditControl theItem event))
+				(else (EditControl theItem pEvent))
 			)
 		)
 		(return theTheItem)
@@ -1138,11 +1138,11 @@
 		(self eachElementDo: #draw)
 	)
 	
-	(method (handleEvent event &tmp temp0)
-		(if (event claimed?) (return 0))
+	(method (handleEvent pEvent &tmp temp0)
+		(if (pEvent claimed?) (return 0))
 		(if
 			(and
-				(= temp0 (self firstTrue: #handleEvent event))
+				(= temp0 (self firstTrue: #handleEvent pEvent))
 				(not (temp0 checkState: 2))
 			)
 			(temp0 doit:)

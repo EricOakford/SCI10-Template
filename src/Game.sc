@@ -15,7 +15,6 @@
 ;;;;		Locale
 ;;;;		StatusLine
 
-
 (script# GAME)
 (include game.sh)
 (use Main)
@@ -28,54 +27,19 @@
 (use User)
 (use System)
 
+;;;(procedure
+;;;	PromptForDiskChange
+;;;)
+;;;
+;;;(extern
+;;;	GetDirectory	SAVE	0
+;;;)
+;;;
 
-(procedure (PromptForDiskChange saveDisk &tmp ret [saveDevice 40] [curDevice 40] str)
-	(= str (Memory MNeedPtr (if 0 200 else 80)))
-	;; Used by restore: to prompt the user to change disks if running
-	;; on single-drive removable media.
+;;;; GAME OBJECTS
+;;;; These are static objects which are used in the generalized game.  Game
+;;;; specific objects will be defined in module 0.
 
-	(= ret TRUE)
-	(DeviceInfo GetDevice curSaveDir @saveDevice)
-	(DeviceInfo CurDevice @curDevice)
-	(if
-		(and
-			(DeviceInfo DevRemovable @curDevice)
-			(or (DeviceInfo SameDevice @saveDevice @curDevice)
-				(not (DeviceInfo SaveDirMounted (theGame name?)))
-			)
-		)
-		(Format str
-			994 3
-			(if saveDisk {SAVE GAME} else {GAME})
-			@saveDevice
-		)
-		
-		;Do whatever is necessary to prepare for switching disks.
-		(Load RES_FONT userFont)
-		(DeviceInfo CloseDevice)
-		(= ret
-			(if saveDisk
-				(Print str
-					#font SYSFONT
-					#button {OK} TRUE
-					#button {Cancel} FALSE
-					#button {Change Directory} 2
-				)
-			else
-				(Print str
-					#font SYSFONT
-					#button {OK} TRUE
-				)
-			)
-		)
-		(if (== ret 2)
-			(= ret (GetDirectory curSaveDir))
-		)
-		
-	)
-	(Memory MDisposePtr str)
-	(return ret)
-)
 
 (instance theCast of EventHandler
 	(properties
@@ -119,29 +83,26 @@
 
 (instance theSounds of EventHandler
 	(properties
-		;;; The Sounds list contains all the sounds in the game.
 		name "sounds"
 	)
 	
-	(method (pause param1)
+	(method (pause tOrF)
 		(self
-			eachElementDo: #perform mayPause (if argc param1 else 1)
+			eachElementDo: #perform mayPause (if argc tOrF else TRUE)
 		)
 	)
 )
 
 (instance mayPause of Code
-	(properties)
-		;; pause each sound in the list that 
-		;; does not have the mNOPAUSE flag set
-	
+   ;; pause each sound in the list that 
+   ;; does not have the mNOPAUSE flag set
+
    (method (doit theSound tOrF)
-      (if (not (& (theSound flags:) mNOPAUSE))
+      (if (not (& (theSound flags?) mNOPAUSE))
          (theSound pause: tOrF)
       )
    )
 )
-
 
 (instance theRegions of EventHandler
 	(properties
@@ -161,10 +122,6 @@
 	)
 	
 	(method (doit)
-      ;
-      ; Call kernel to draw the current list of addToPics
-      ; They will not be seen until the next Animate call
-		
 		(self eachElementDo: #perform addToObstaclesCode)
 		(AddToPic elements)
 	)
@@ -181,7 +138,7 @@
 		name "timers"
 	)
 )
-
+	
 (instance addToObstaclesCode of Code
    (properties
       name  "aTOC"
@@ -219,49 +176,50 @@
 
 
 (class Game of Object
+	;; The Game class implements the game which is being written.  The
+	;; game author creates a source file with script number 0 which
+	;; contains the instance of the class Game which is the game.  This
+	;; instance is where, for example, input not handled by any Actor,
+	;; Room, Region, etc. will be handled.  
+	
 	(properties
-   ;; The Game class implements the game which is being written.  The
-   ;; game author creates a source file with script number 0 which
-   ;; contains the instance of the class Game which is the game.  This
-   ;; instance is where, for example, input not handled by any Actor,
-   ;; Room, Region, etc. will be handled.  		
-		script NULL
+		script NULL			;a current script for the game as a whole	
 		parseLang ENGLISH
 		printLang ENGLISH
 		subtitleLang 0
 		_detailLevel 3
 		egoMoveSpeed 0
 	)
-;;;	(methods
-;;;		play			;start playing the game
-;;;		replay			;start playing from a restore
-;;;		newRoom			;change rooms
-;;;		startRoom		;initialize the room which is being changed to
-;;;		restart			;restart the game
-;;;		restore			;restore a game
-;;;		save			;save a game
-;;;		changeScore		;change the game score
-;;;		handleEvent		;handle user events
-;;;		showMem			;show the free memory
-;;;		setSpeed			;set the animation speed
-;;;		setCursor		;set the cursor shape
-;;;		checkAni			;check the animation speed, dropping out Extras if too bad
-;;;		notify			;communication mechanism between Game, Regions, and Rooms
-;;;		setScript		;set the script for the Game
-;;;		cue				;cues the game script
+	
+;;;   (methods
+;;;      play           ;start playing the game
+;;;      replay         ;start playing from a restore
+;;;      newRoom        ;change rooms
+;;;      startRoom      ;initialize the room which is being changed to
+;;;      restart        ;restart the game
+;;;      restore        ;restore a game
+;;;      save           ;save a game
+;;;      changeScore    ;change the game score
+;;;      handleEvent    ;handle user events
+;;;      showMem        ;show the free memory
+;;;      setCursor      ;set the cursor shape
+;;;      notify         ;communication mechanism between Game, Regions, and Rooms
+;;;      setScript      ;set the script for the Game
+;;;      cue            ;cues the game script
 ;;;      quitGame       ;stops theGame
 ;;;      masterVolume   ;set volume
 ;;;      detailLevel    ;set _detailLevel and send checkDetail to cast
 ;;;      pragmaFail     ;invoked when nobody responds to the user's input
-;;;	)	
+;;;   )
 
+	
 	(method (init)
       ;
       ; This initializes the generic game system.  The game's 0 module will be
       ;  responsible for modifying this to select and start the initial room
       ;  of the game.
 
-      ; Make sure some important modules are loaded in.		
+      ; Make sure some important modules are loaded in.
 		Motion
 		Sound
 		(ScriptID LANGUAGE)
@@ -290,45 +248,61 @@
 			(= user User)
 		)
 		(user init:)
-	);game init
-
-
+	)
+	
 	(method (doit &tmp event)
 		;
 		; This is the code which is repeatedly executed in order to run the game
-
-		; Check all sounds and timers for completion, which will cue if required
+		
+		(= gameTime (+ tickOffset (GetTime)))
 		(if (fastCast isEmpty:)
+			;Check all sounds and timers for completion, which will do any
+			;appropriate cue:ing.
 			(sounds eachElementDo: #check)
 			(timers eachElementDo: #doit)
 			(if modelessDialog
-				;;this used to be done by dialog's timer, so put it here
-				;;check will cue dialog if its seconds have expired
-				;;(like scripts) --Pablo
-				(modelessDialog check:)
+			;;this used to be done by dialog's timer, so put it here
+			;;check will cue dialog if its seconds have expired
+			;;(like scripts) --Pablo
+			(modelessDialog check:)
 			)
-			
 			;Give each character in the cast the chance to do its thing.
 			;Show the changes on the screen, then delete any cast members
 			;which are scheduled for deletion.
 			(Animate (cast elements?) TRUE)
-			(if doMotionCue
-				(= doMotionCue FALSE)
-				(cast eachElementDo: #motionCue)
-			)
+			
+			;EO: this is based on the decompiled NRS timer fix for PQ3
+			(if (Wait 2) (~ (Wait 2)))
+			(cast eachElementDo: #motionCue)
+			
+			;EO: below is the original unaltered code
+			;(if doMotionCue
+			;	(= doMotionCue FALSE)
+			;	(cast eachElementDo: #motionCue)
+			;)
 			;Execute any script attached to theGame.
 			(if script
 				(script doit:)
 			)
+		
 			;Now give each region a chance.
-			(regions eachElementDo: #doit)
-			(if (== newRoomNum curRoomNum) (user doit:))
+			(regions eachElementDo: #doit:)
+
+			; Check for user input, unless a room change is in progress
+			(if (== newRoomNum curRoomNum)
+				(user doit:)
+			)
+			; Miscellaneous objects that need doits
 			(theDoits doit:)
+			
+			; If somebody wants us to change rooms, they set newRoomNum to do so
 			(if (!= newRoomNum curRoomNum)
 				(self newRoom: newRoomNum)
 			)
+			
+			; Remove any expired timers.
 			(timers eachElementDo: #delete)
-			(GameIsRestarting 0)
+			(GameIsRestarting FALSE)
 		else
 			(while (not (fastCast isEmpty:))
 				(fastCast eachElementDo: #doit)
@@ -338,54 +312,56 @@
 				(event dispose:)
 			)
 		)
-	);game doit
-
-	(method (play)
+	);Game doit
+	
+	(method (play)	
 		;
 		; Invoked from the kernel, this starts the game going, then goes into the
 		; main game loop of doit: then wait for the next animation cycle
 
 		(= theGame self)
 		(= curSaveDir (GetSaveDir))
-		
 		(if (not (GameIsRestarting))
 			(GetCWD curSaveDir)
 		)
-		; Put up the 'wait a bit' cursor while initializing the 
+		
+		; Put up the 'wait a bit' cursor while initializing the game
 		(self
 			setCursor: waitCursor TRUE
 			init:
-			setCursor: normalCursor (HaveMouse)
 		)
-		;The main game loop -- doit:, then wait and doit: again.
+		
+		; This can't be in the same message as above because normalCursor gets
+		;  evaluated first, making it impossible to initialize it in the game's
+		;  init method
+		(self setCursor: normalCursor TRUE)
+		
+		; The main game loop
 		(while (not quit)
 			(self doit:)
-			(= aniInterval (Wait speed))
 		)
 	)
 	
 	(method (replay)
-		;; Invoked from the kernel, this restarts the game from a restore.
-
-		;Dispose the event which triggered the save-game which we're 
-		;restoring.		
+		;
+		; Invoked from the kernel, this restarts the game from a restore
+		
+		; Dispose the event which triggered the save-game which we're restoring
 		(if lastEvent
 			(lastEvent dispose:)
 		)
 		(sortedFeatures release:)
 		
-		;Dispose any modeless Dialog present when the user selected to
-		;restore the game.
+		; Dispose any modeless dialog present
 		(if modelessDialog
 			(modelessDialog dispose:)
 		)
-		
-		;Invalidate any saved background bitmaps which were in the game
-		;being restored.
+		; Invalidate any saved background bitmaps which were in the game
+		;  being restored
 		(cast eachElementDo: #perform RestoreUpdate)
 		
-		;Draw the picture and put in all the PicViews which were in the game
-		;being restored.
+		; Draw the picture and put in all the addToPics which were in the game
+		;  being restored
 		(theGame setCursor: waitCursor TRUE)
 		(DrawPic (curRoom curPic?) PLAIN TRUE currentPalette)
 		(if (!= overlays -1)
@@ -394,10 +370,14 @@
 		(if (curRoom controls?)
 			((curRoom controls?) draw:)
 		)
+		
 		; redraw the views that we have saved as addToPics
 		(addToPics doit:)
+		
+		; Figure out what cursor to display
 		(theGame
 			setCursor:
+				; The iconbar's current icon's cursor
 				(if (and theIconBar (theIconBar curIcon?))
 					((theIconBar curIcon?) cursor?)
 				else
@@ -406,58 +386,40 @@
 				(HaveMouse)
 		)
 		
-		;Redisplay the status line.
+		; Redisplay the status line
 		(StatusLine doit:)
 		
-		;Turn sound back on.
+		; Turn sound back on
 		(DoSound RestoreSound)
 		(Sound pause: FALSE)
 		
-		;The main game loop -- doit:, then wait and doit: again.
+		; Adjust the game's real-time counter
+		(= tickOffset (- gameTime (GetTime)))
+		
+		; The main game loop
 		(while (not quit)
 			(self doit:)
-			(= aniInterval (Wait speed))
 		)
 	)
-		
-
 	
-	(method (newRoom n &tmp evt)
+	(method (newRoom n &tmp [temp0 5] evt)
 		;
 		; Change rooms to room 'n'
-
+		
 		; Dispose of any addToPics
-		(addToPics
-			eachElementDo: #dispose
-			release:
-		)
+		(addToPics eachElementDo: #dispose release:)
 		
 		; Dispose of features
-		(features
-			eachElementDo: #perform featureDisposeCode
-			release:
-		)
-		; Dispose the cast, expired timers, non-kept regions, and locales
-		(cast
-			eachElementDo: #dispose
-			eachElementDo: #delete
-		)
-		(timers
-			eachElementDo: #delete
-		)	
-		(regions
-			eachElementDo: #perform DisposeNonKeptRegions
-			release:
-		)
-		(locales
-			eachElementDo: #dispose
-			release:
-		)
+		(features eachElementDo: #perform featureDisposeCode release:)
+		
+		;Dispose the cast, expired timers, non-kept regions, and locales.
+		(cast eachElementDo: #dispose eachElementDo: #delete)
+		(timers eachElementDo: #delete)
+		(regions eachElementDo: #perform DisposeNonKeptRegion release:)
+		(locales eachElementDo: #dispose release:)
 		
 		; Get rid of any miscellaneous doit-demoning nodes
-		(theDoits
-			release:
-		)
+		(theDoits release:)
 		
 		; Dispose lastCast (internal kernel knowledge of the cast during
 		;  the previous animation cycle)
@@ -471,11 +433,8 @@
 		; If resource usage tracking is enabled, flush all non-purgable resources
 		(FlushResources n)
 		
-		; Start up the room we're going to.
-		(self
-			startRoom: curRoomNum
-			checkAni:
-		)
+		; Start up the room to which we're going
+		(self startRoom: curRoomNum checkAni:)
 		
 		;Set the synonym list.
 		(SetSynonyms regions)
@@ -485,7 +444,7 @@
 			(evt dispose:)
 		)
 		(evt dispose:)
-	)
+	);Game newRoom
 	
 	(method (startRoom roomNum)
 		;
@@ -504,65 +463,65 @@
 		(curRoom init:)
 	)
 	
-
-	
 	(method (restart)
-		;;Restart the game.
-		
 		(if modelessDialog
 			(modelessDialog dispose:)
 		)
 		(RestartGame)
 	)
 	
-	(method (restore &tmp [comment 20] num oldCur theParseLang)
+	(method (restore &tmp [comment 20] num oldCur oldLang)
 		;
 		; Restore a previously saved game.  The user interface work for this is
 		;  done in class Restore, the actual save in the RestoreGame kernel
 		;  function
-		(= theParseLang parseLang)
+		
+		(= oldLang parseLang)
 		(= parseLang ENGLISH)
 		(Load RES_FONT smallFont)
 		(Load RES_CURSOR waitCursor)
 		(ScriptID SAVE)
+		
 		(= oldCur (self setCursor: normalCursor))
 		(Sound pause: TRUE)
 		(if (PromptForDiskChange TRUE)
 			(if modelessDialog
 				(modelessDialog dispose:)
 			)
-		(= num (Restore doit: &rest))
-		(if (!= num -1)
-			(self setCursor: waitCursor TRUE)
-			(if (CheckSaveGame name num version)
-				(RestoreGame name num version)
+			(= num (Restore doit: &rest))
+			(if (!= num -1)
+				(self setCursor: waitCursor TRUE)
+				(if (CheckSaveGame name num version)
+					(RestoreGame name num version)
 				else
-					(Print
-						994 1
+					(Print "That game was saved under a different interpreter.
+						It cannot be restored."
 						#font SYSFONT
-						#button "OK" TRUE
+						#button {OK} TRUE
 					)
 					(self setCursor: oldCur (HaveMouse))
-					(= parseLang theParseLang)
+					(= parseLang oldLang)
 				)
 			else
-				(= parseLang theParseLang)
+				(= parseLang oldLang)
 			)
 			(PromptForDiskChange FALSE)
 		)
 		(Sound pause: FALSE)
 	)
 	
-	(method (save &tmp [comment 20] num oldCur theParseLang)
+	(method (save &tmp [comment 20] num oldCur oldLang)
 		;
 		; Save the game at its current state.  The user interface work for this
 		;  is done in class Save, the actual save in the SaveGame kernel function
 
-		(= theParseLang parseLang)
+		(= oldLang parseLang)		
 		(= parseLang ENGLISH)
+		
 		(Load RES_FONT smallFont)
 		(Load RES_CURSOR waitCursor)
 		(ScriptID SAVE)
+		
 		(= oldCur (self setCursor: normalCursor))
 		(Sound pause: TRUE)
 		(if (PromptForDiskChange TRUE)
@@ -570,11 +529,12 @@
 				(modelessDialog dispose:)
 			)
 			(= num (Save doit: @comment))
-				(if (!= num -1)
-					(= parseLang theParseLang)
-					(= oldCur (self setCursor: waitCursor TRUE))
+			(if (!= num -1)
+				(= parseLang oldLang)
+				(= oldCur (self setCursor: waitCursor TRUE))
 				(if (not (SaveGame name num @comment version))
-					(Print 994 0
+					(Print "Your save game disk is full.
+						You must either use another disk or save over an existing saved game."
 						#font SYSFONT
 						#button {OK} TRUE
 					)
@@ -584,14 +544,13 @@
 			(PromptForDiskChange FALSE)
 		)
 		(Sound pause: FALSE)
-		(= parseLang theParseLang)
+		(= parseLang oldLang)
 	)
 	
 	(method (changeScore delta)
 		;
 		; Update the game score and status line if appropriate
-
-		(+= score delta)
+		(= score (+ score delta))
 		(StatusLine doit:)
 	)
 	
@@ -601,20 +560,20 @@
 				TRUE
 			)
 			((and script
-					(script handleEvent: event))
+					(script handleEvent: event)
+					)
 				TRUE
 			)
-			((== (event type?) userEvent)
+			((& (event type?) userEvent)
 				(self pragmaFail:)
 			)
 		)
-		(event claimed?)
+		(return (event claimed?))
 	)
 	
 	(method (showMem)
 		;
 		; Display information about free heap and hunk memory
-		
 		(Printf
 			{Free Heap: %u Bytes\n
 			Largest ptr: %u Bytes\n
@@ -629,7 +588,7 @@
 	
 	(method (setSpeed newSpeed &tmp oldSpeed)
 		;; Set the animation speed for the game, returning the old speed.
-		
+
 		(= oldSpeed speed)
 		(= speed newSpeed)
 		(return oldSpeed)
@@ -648,7 +607,7 @@
 		;; Check animation speed.  If it is not adequate, start converting
 		;; members of the cast which are marked as extras (through isExtra:)
 		;; in to PicViews until animation speed is okay.
-		
+
 		;Make sure that every thing is drawn on the screen before doing
 		;speed tests.
 		(Animate (cast elements?) FALSE)
@@ -659,22 +618,23 @@
 		;animation is not deemed adequate and we start converting to PicViews.
 		(Animate (cast elements?) FALSE)
 		(while (> (Wait 0) aniThreshold)
-			(= theExtra (cast firstTrue: #isExtra))
+			(= theExtra (cast firstTrue: #isExtra:))
 			(breakif (== theExtra NULL))
 			(theExtra addToPic:)
 			(Animate (cast elements?) FALSE)
-			(cast eachElementDo: #delete)
+			(cast eachElementDo: #delete:)
 		)
 	)
 	
 	(method (notify)
-		;; Handle arbitrary communication between Game, Regions, and Rooms.
-		;; Protocol and number of parameters are up to the game programmer.
-		(return 0)
+		;
+		; Handle arbitrary communication between Game, Regions, and Rooms.
+		; Protocol and number of parameters are up to the game programmer.
 	)
 	
 	(method (setScript newScript)
-		;; Attach a new script to this object, removing any existing one.
+		;
+		; Attach a new script to this object, removing any existing one
 		
 		(if script
 			(script dispose:)
@@ -685,8 +645,6 @@
 	)
 	
 	(method (cue)
-		;; Just cue: any attached script.
-
 		(if script
 			(script cue:)
 		)
@@ -701,7 +659,6 @@
 	(method (masterVolume newVol)
 		;
 		; Return old masterVolume setting and set it to newVol if present
-
 		(return
 			(if argc
 				(DoSound MasterVol newVol)
@@ -722,7 +679,7 @@
 	(method (pragmaFail)
 		;
 		; This method is called when no one in the cast, features, addToPics,
-		;  regions, handlers, or the Game responds to an event	
+		;  regions, handlers, or the Game responds to an event
 	)
 )
 
@@ -730,53 +687,52 @@
 	;;; A Region is an area of a game which is larger than a Room and which
 	;;; has global actions associated with it.  Music which needs to be played
 	;;; across rooms needs to be owned by a Region so that it is not disposed
-	;;; on a room change.
-	
+	;;; on a room change.	
 	(properties
 		name "Rgn"
 		script 0		;the ID of a script attached to the Region
 		number 0		;the module number of the Region
 		timer 0			;the ID of a timer attached to the Region
 		keep 0			;0->dispose Region on newRoom:, 1->keep Region on newRoom:
-		initialized 0	;has the Region been initialized?	
+		initialized 0	;has the Region been initialized?
 		lookStr 0
 	)
+;;;   (methods
+;;;      handleEvent    ;handle user input
+;;;      doVerb         ;respond to a given verb
+;;;      setScript      ;set the script for this Region
+;;;      cue            ;cue the Region
+;;;      newRoom        ;invoked when the Game changes rooms
+;;;      notify         ;communication mechanism between Game, Regions, and Rooms
+;;;   )
 	
-;;;	(methods
-;;;		handleEvent    ;handle user input
-;;;		doVerb         ;respond to a given verb
-;;;		setScript      ;set the script for this Region
-;;;		cue            ;cue the Region
-;;;		newRoom        ;invoked when the Game changes rooms
-;;;		notify         ;communication mechanism between Game, Regions, and Rooms
-;;;	)
-
 	
 	(method (init)
-		;; Initialize the Region.  Region initialization is controlled by the
-		;; 'initialized' property, so that the Region is only initialized
-		;; once, upon entry, not each time rooms are changed.
+		;
+		; Initialize the Region.  Region initialization is controlled by the
+		;  'initialized' property, so that the Region is only initialized once,
+		;  upon entry, not each time rooms are changed
 		
 		(if (not initialized)
-				(= initialized TRUE)
-				(if (not (regions contains: self))
-						(regions addToEnd: self)
+			(= initialized TRUE)
+			(if (not (regions contains: self))
+				(regions addToEnd: self)
 			)
 			(super init:)
 		)
 	)
 	
 	(method (doit)
-		;; Default is to check the script.
-		
 		(if script
 			(script doit:)
-		)	
+		)
 	)
 	
 	(method (dispose)
-		;Delete this region from the region list, then dispose any
-		;objects attached to/owned by it.
+		;
+		; Delete this region from the region list, then dispose any objects
+		;  attached to/owned by it
+		
 		(regions delete: self)
 		(if (IsObject script)
 			(script dispose:)
@@ -786,7 +742,7 @@
 		)
 		(sounds eachElementDo: #clean self)
 		
-		;Remove the Region module from the heap.
+		; Remove the Region module from the heap.
 		(DisposeScript number)
 	)
 	
@@ -795,34 +751,36 @@
 			((event claimed?)
 				TRUE
 			)
-			((not (and script   
-				(or   (script handleEvent: event)
-					TRUE
+			(
+				(not
+					(if
+					(and script (or (script handleEvent: event) TRUE))
+						(event claimed?)
+					)
 				)
-				(event claimed?)  ;??? BKH
-				  )
-			 )
-			 (event claimed:
+				(event claimed:
 					(self doVerb: (event message?)
 						(if
 							(and
-								inventory theIconBar
+								inventory
+								theIconBar
 								(== (event message?) JOY_DOWNRIGHT)
 							)
-							(inventory indexOf: (theIconBar curInvIcon?))
-							else FALSE
+						(inventory indexOf: (theIconBar curInvIcon?))
+						else
+							FALSE
 						)
 					)
 				)
 			)
 		)
-		(return (event claimed?))
+		(event claimed?)
 	)
 	
 	(method (doVerb theVerb)
 		(return
 			(if (and (== theVerb verbLook) lookStr)
-				(Printf 994 2 lookStr)
+				(Printf "%s" lookStr)
 				(return TRUE)
 			else
 				(return FALSE)
@@ -831,21 +789,24 @@
 	)
 	
 	(method (setScript newScript)
-		;; Attach a new script to this object, removing any existing one.
+		;
+		; Attach a new script to this object, removing any existing one
 		
-		(if (IsObject script) (script dispose:))
-		(if newScript (newScript init: self &rest))
-	)
-	
-	(method (cue)
-		;; Just cue: any attached script.
-		
-		(if script
-			(script cue:)
+		(if (IsObject script)
+			(script dispose:)
+		)
+		(if newScript
+			(newScript init: self &rest)
 		)
 	)
 	
-	(method (newRoom)
+	(method (cue)
+		(if
+			script (script cue:)
+		)
+	)
+	
+	(method (newRoom n)
 	)
 	
 	(method (notify)
@@ -863,48 +824,43 @@
 		keep 0
 		initialized 0
 		lookStr 0
-		picture 0			;number of picture for this Room
-		style -1			;the style in which to draw this Room's picture
-		horizon 0			;y coordinate of Room's horizon
-		controls 0			;a list of controls (buttons, etc.) in the Room
-		north 0				;module number of Room to the north
-		east 0				;module number of Room to the east
-		south 0				;module number of Room to the south
-		west 0				;module number of Room to the west
-		curPic 0			;picture number of currently visible picture
-		picAngle 0			;how far from vertical is our view? 0-89
+		picture 0		;number of picture for this Room
+		style -1		;the style in which to draw this Room's picture
+		horizon 0		;y coordinate of Room's horizon
+		controls 0		;a list of controls (buttons, etc.) in the Room
+		north 0			;module number of Room to the north
+		east 0			;module number of Room to the east
+		south 0			;module number of Room to the south
+		west 0			;module number of Room to the west
+		curPic 0		;picture number of currently visible picture
+		picAngle 0		;how far from vertical is our view? 0-89
 		vanishingX 160
 		vanishingY -30000
 		obstacles 0
 	)
 	
-;;;	(methods
-;;;		handleEvent		;handle user input
-;;;		setRegions		;set the Regions which contain this Room
-;;;		setFeatures		;set the Features for this Room
-;;;		setLocales		;set the Locales for this Room
-;;;		drawPic			;draw the picture for this Room
-;;;		overlay			;overlay a picture
-;;;		addObstacle		;add a Polygon or Feature to the obstacle list
-;;;		reflectPosn		;reposition (user alterEgo?) after room change
-;;;		edgeToRoom		;return 0 or number of an adjacent room
-;;;		roomToEdge		;return 0 or edge value leading to this room
-;;;	)
-
+;;;   (methods
+;;;      handleEvent    ;handle user input
+;;;      setRegions     ;set the Regions which contain this Room
+;;;      drawPic        ;draw the picture for this Room
+;;;      overlay        ;overlay a picture
+;;;      addObstacle    ;add a Polygon or Feature to the obstacle list
+;;;      reflectPosn    ;reposition (user alterEgo?) after room change
+;;;      edgeToRoom     ;return 0 or number of an adjacent room
+;;;      roomToEdge     ;return 0 or edge value leading to this room
+;;;      setInset       ;to set up an inset
+;;;   )
 	
 	(method (init)
 		(= number curRoomNum)
 		(= controls roomControls)
 		(= perspective picAngle)
-		
-		;Draw a picture (if non zero) in proper style
+		; Draw a picture (if non zero) in proper style
 		(if picture
 			(self drawPic: picture)
 		)
-		
 		; Reposition ego if he hit an edge in the previous room
-		(self reflectPosn: (user alterEgo?) ((user alterEgo?) edgeHit?)
-		)
+		(self reflectPosn: (user alterEgo?) ((user alterEgo?) edgeHit?))
 		((user alterEgo?) edgeHit: 0)
 	)
 	
@@ -912,7 +868,7 @@
 		;
 		; Send the doit: to any script, then check to see if ego has hit the edge
 		;  of the screen
-
+		
 		(if script
 			(script doit:)
 		)
@@ -925,17 +881,18 @@
 		(if controls
 			(controls dispose:)
 		)
-		(if
-			obstacles
+		(if obstacles
 			(obstacles dispose:)
 		)
 		(super dispose:)
 	)
 	
 	(method (handleEvent event)
-		(cond 
-			((super handleEvent: event))
-			(controls (controls handleEvent: event))
+		(or
+			(super handleEvent: event)
+			(if controls
+				(controls handleEvent: event)
+			)
 		)
 		(return (event claimed?))
 	)
@@ -944,7 +901,6 @@
 		;
 		; Remove this Room from the regions, let the rest of the regions know
 		;  about the room change, then put ourselves back in the action
-		
 		(regions
 			delete: self
 			eachElementDo: #newRoom n
@@ -955,42 +911,48 @@
 	)
 	
 	(method (setRegions region &tmp i n regID)
-		;
-		; Set the regions used by a room
+		;; Set the regions used by a room.
 
-		(= i 0)
-		(while (< i argc)
+		(for	((= i 0))
+				(< i argc)
+				((++ i))
+
 			(= n [region i])
-			((= regID (ScriptID n))
-				number: n
-			)
+			(= regID (ScriptID n))
+			(regID number: n)
 			(regions add: regID)
-			(if (not (regID initialized?)) (regID init:))
-			(++ i)
+			(if (not (regID initialized?))
+				(regID init:)
+			)
 		)
 	)
+
 	
 	(method (setFeatures feature &tmp i)
 		;; Set the features used by a room.
-		(= i 0)
-		(while (< i argc)
+
+		(for	((= i 0))
+				(< i argc)
+				((++ i))
+
 			(features add: [feature i])
-			(++ i)
 		)
 	)
 	
 	; attach a locale to the locale list and send it it's init
 	(method (setLocales locale &tmp i n locID)
 		;; Set the locales used by a room.
-		(= i 0)
-		(while (< i argc)
+
+		(for	((= i 0))
+				(< i argc)
+				((++ i))
+
 			(= n [locale i])
 			((= locID (ScriptID n))
 				number: n
 			)
 			(locales add: locID)
 			(locID init:)
-			(++ i)
 		)
 	)
 	
@@ -998,47 +960,57 @@
 		;
 		; Draw the given picture in the appropriate style
 
-		; Dispose of addToPics list that is now invalid		
+		; Dispose of addToPics list that is now invalid
 		(if addToPics
 			(addToPics
 				eachElementDo: #dispose
 				release:
 			)
 		)
-		
 		(= curPic pic)
 		(= overlays -1)
 		(DrawPic pic
 			(cond 
-				((== argc 2) theStyle)		;use passed style
-				((!= style -1) style)		;use default room style
-				(else showStyle)			;use global style
+				((== argc 2)	; use style passed
+					theStyle
+				)
+				((!= style -1)	; use default room style
+					style
+				)
+				(else
+					showStyle	;use global style
+				)
 			)
-			TRUE
-			currentPalette					; defaults to 0
+			TRUE				
+			currentPalette		; defaults to 0
 		)
 	)
 	
 	(method (overlay pic theStyle)
-		;; Overlay the current picture with another.
+		;
+		; Overlay the current picture with another
 		
 		(= overlays pic)
-		(DrawPic
-			pic
+		(DrawPic pic
 			(cond 
-				((== argc 2) theStyle)		;use passed style
-				((!= style -1) style)		;use default room style
-				(else showStyle)			;use global style
+				((== argc 2)
+					theStyle	; use style passed
+				)
+				((!= style -1)
+					style		; use default room style
+				)
+				(else
+					showStyle	;use global style
+				)
 			)
 			FALSE
-			currentPalette					; defaults to 0
+			currentPalette		; defaults to 0
 		)
 	)
 	
 	(method (addObstacle obstacle)
 		;
 		; Add a polygon to the obstacles list
-		
 		(if (not (IsObject obstacles))
 			(= obstacles (List new:))
 		)
@@ -1046,8 +1018,8 @@
 	)
 	
 	(method (reflectPosn theActor theEdge)
-		
-		;Reposition ego if he hit an edge in the previous room.
+		;
+		; Reposition the actor on the screen, depending on which side he is
 		(switch theEdge
 			(NORTH
 				(theActor y: (- southEdge 1))
@@ -1073,21 +1045,20 @@
 				(NORTH   north)
 				(EAST    east)
 				(SOUTH   south)
-				(WEST    west)
+ 				(WEST    west)
 			)
 		)
 	)
-
 	
 	(method (roomToEdge rm)
 		;
 		; Return edge that leads to this room or 0
 		(return
 			(switch rm
-				(north NORTH)
-				(south SOUTH)
-				(east EAST)
-				(west WEST)
+				(north   NORTH)
+				(south   SOUTH)
+				(east    EAST)
+				(west    WEST)
 			)
 		)
 	)
@@ -1101,7 +1072,7 @@
 	;;; to a Room with the setLocales: method.
 	
 	(properties
-		number 0		;script number of this Locale
+		number 0	;module number of this Locale
 	)
 	
 ;;;	(methods
@@ -1111,46 +1082,42 @@
 	(method (dispose)
 		;Delete this locale from the locale list.
 		(locales delete: self)
-
+		
 		;Remove the Locale module from the heap.
 		(DisposeScript number)
 	)
 	
 	(method (handleEvent event)
 		;; Game programmer must redefine this method.
-		(return (event claimed?))
+		(return (event claimed?)
+		)
 	)
 )
 
 (class StatusLine of Object
-	;;; The StatusLine class provides a status line at the top of the
-	;;; screen which is programmer-definable.  When enabled, it overlays
-	;;; the menu bar.  The user may still access the menu by pressing Esc
-	;;; or positioning the mouse pointer in the status line end pressing
-	;;; the mouse button.  The status line usually shows the player's
-	;;; score.
-	;;; To use a status line in a game, create an instance of class Code
-	;;; whose doit: method takes a pointer to an array.  The Code should
-	;;; format the desired text string into the array.
-	;;; To display the status line, execute (StatusLine enable:).
-
+   ;;; The StatusLine class provides a status line at the top of the
+   ;;; screen which is programmer-definable.  When enabled, it overlays
+   ;;; the menu bar.  The user may still access the menu by pressing Esc
+   ;;; or positioning the mouse pointer in the status line end pressing
+   ;;; the mouse button.  The status line usually shows the player's
+   ;;; score.
+   ;;; To use a status line in a game, create an instance of class Code
+   ;;; whose doit: method takes a pointer to an array.  The Code should
+   ;;; format the desired text string into the array.
+   ;;; To display the status line, execute (StatusLine enable:).
+   	
 	(properties
 		name "SL"
 		state FALSE		;enabled/disabled
 		code 0			;ID of Code to display status line
 	)
 	
-;;;	(methods
-;;;		enable         ;display the status line
-;;;		disable        ;hide the status line
-;;;	)
-	
+;;;   (methods
+;;;      enable         ;display the status line
+;;;      disable        ;hide the status line
+;;;   )	
 	
 	(method (doit &tmp theLine)
-		;
-		; This method calls the application code to format the status line string
-		;  at theLine, then draws it
-
 		(if code
 			(= theLine (Memory MNeedPtr (if 0 240 else 82)))
 			(code doit: theLine)
@@ -1162,7 +1129,7 @@
 	(method (enable)
 		;
 		; Display the status line
-
+		
 		(= state TRUE)
 		(self doit:)
 	)
@@ -1170,16 +1137,68 @@
 	(method (disable)
 		;
 		; Hide the status line
-
+		
 		(= state FALSE)
 		(self doit:)
 	)
 )
 
+(procedure (PromptForDiskChange saveDisk
+		&tmp ret [saveDevice 40] [curDevice 40] str
+		   )
+	(= str (Memory MNeedPtr (if 0 200 else 80)))
+	
+	;; Used by restore: to prompt the user to change disks if running
+	;; on single-drive removable media.
+	
+	(= ret TRUE)
+	(DeviceInfo GetDevice curSaveDir @saveDevice)
+	(DeviceInfo CurDevice @curDevice)
+	(if
+		(and
+			(DeviceInfo DevRemovable @curDevice)
+			(or (DeviceInfo SameDevice @saveDevice @curDevice)
+				(not (DeviceInfo SaveDirMounted (theGame name?)))
+			)
+		)
+		(Format str
+			"Please insert your %s disk in drive %s."
+			(if saveDisk {SAVE GAME} else {GAME})
+			@saveDevice
+		)
+		
+		;Do whatever is necessary to prepare for switching disks.
+		(Load RES_FONT userFont)
+		(DeviceInfo CloseDevice)
+		(= ret
+			(if saveDisk
+				(Print str
+					#font SYSFONT
+					#button {OK} TRUE
+					#button {Cancel} FALSE
+					#button {Change Directory} 2
+				)
+				else
+				(Print str
+					#font SYSFONT
+					#button {OK} TRUE
+				)
+			)
+		)
+		
+		(if (== ret 2)
+			(= ret (GetDirectory curSaveDir))
+		)
+		
+	)
+	(Memory MDisposePtr str)
+	(return ret)
+)
+
 (instance RestoreUpdate of Code
 	;;; Used by replay: to properly deal with members of the cast which were
 	;;; not updating when the game was saved.
-
+	
 	(properties
 		name "RU"
 	)
@@ -1188,20 +1207,19 @@
 		;; If the object has underBits, it was not updating.  Its underBits
 		;; property is now invalid, so clear it.  Also, set the signal bits
 		;; to draw the object and stopUpd: it.
-
 		(if (obj underBits?)
 			(= sigBits (obj signal?))
 			(|= sigBits stopUpdOn)
 			(&= sigBits (~ notUpd))
-			(obj underBits: 0, signal: sigBits)
+			(obj underBits:0, signal:sigBits)
 		)
 	)
 )
 
-(instance DisposeNonKeptRegions of Code
+(instance DisposeNonKeptRegion of Code
 	;;; Used during room changes to dispose any Regions whose 'keep' property
 	;;; is not TRUE.
-
+	
 	(properties
 		name "DNKR"
 	)
@@ -1223,12 +1241,12 @@
 	)
 	
 	(method (doit theFeature)
-		(if (theFeature respondsTo: #delete)
+		(if (theFeature respondsTo: #delete:)
 			;; it's kindOf a View, make sure it's not added to 
 			;; addToPics again, and do a complete disposal
-			(theFeature
-				signal: (& (theFeature signal?) (~ viewAdded))
-				dispose:
+			(theFeature 
+				signal:(& (theFeature signal?) (~ viewAdded)), 
+				dispose:, 
 				delete:
 			)
 		else

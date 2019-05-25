@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 950)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use PolyPath)
@@ -16,6 +16,8 @@
 		cycles 0
 		seconds 0
 		lastSeconds 0
+		ticks 0
+		lastTicks 0
 		register 0
 		script 0
 		caller 0
@@ -133,7 +135,7 @@
 						setMotion: PolyPath approachX (+ (ego z?) approachY) CueObj
 					)
 				else
-					(if (user canControl:) (ego setMotion: 0))
+					(ego setMotion: 0)
 					(CueObj changeState: 3)
 				)
 			)
