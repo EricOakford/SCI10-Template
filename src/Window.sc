@@ -1,173 +1,203 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 981)
+;; The window class defines visible BORDERED rectangular areas of the screen.
+;; A window, ID'ed by systemWindow, is used by Dialog to specify various
+;; aspects of its appearence. 
+
+
+(script# WINDOW)
 (include game.sh)
 (use System)
 
 
-(class SysWindow of Object
-	(properties
-		top 0
-		left 0
-		bottom 0
-		right 0
-		color 0
-		back 15
-		priority 15
-		window 0
-		type $0000
-		title 0
-		brTop 0
-		brLeft 0
-		brBottom 190
-		brRight 320
-	)
-	
-	(method (dispose)
-		(if window (DisposeWindow window) (= window 0))
-		(super dispose:)
-	)
-	
-	(method (open)
-		(= window
-			(NewWindow
-				top
-				left
-				bottom
-				right
-				title
-				type
-				priority
-				color
-				back
-			)
-		)
-	)
+(class SysWindow kindof Object
+   (properties
+      top      0
+      left     0
+      bottom   0
+      right    0
+      color    0        ; foreground color
+      back     15       ; background color
+      priority 15       ; priority
+      window   0        ; handle/pointer to system window
+      type  0           ; generally corresponds to system window types
+      title    0        ; text appearing in title bar if present
+
+      ;; this rectangle is the working area for X/Y centering
+      ;; these coordinates can define a subsection of the picture
+      ;; in which a window will be centered
+      brTop    0
+      brLeft   0
+      brBottom 190
+      brRight  320
+      lsTop    0
+      lsLeft   0
+      lsBottom 0
+      lsRight  0
+      eraseOnly FALSE
+   )
+
+;;;   (methods
+;;;      open
+;;;      dispose
+;;;   )
+
+   ;; Open corresponding system window structure
+   ;; Custom window type 0x81 indicates that system
+   ;; will NOT draw the window, only get a port and link into list
+   (method (open)
+      (= window 
+         (NewWindow 
+            ;; port dimensions
+            top 
+            left 
+            bottom 
+            right 
+            ;; underBits dimensions
+            lsTop    
+            lsLeft   
+            lsBottom
+            lsRight  
+
+            title 
+            type
+            priority 
+            color
+            back
+         )
+      )
+   )
+   (method (dispose)
+      (if window
+         (DisposeWindow window eraseOnly)
+         (= window 0)
+      )
+      (super dispose:)
+   )
 )
 
-(class Window of SysWindow
-	(properties
-		top 0
-		left 0
-		bottom 0
-		right 0
-		color 0
-		back 15
-		priority -1
-		window 0
-		type $0000
-		title 0
-		brTop 0
-		brLeft 0
-		brBottom 190
-		brRight 320
-		underBits 0
-	)
-	
-	(method (doit)
-	)
-	
-	(method (dispose)
-		(self restore:)
-		(if window (DisposeWindow window) (= window 0))
-		(super dispose:)
-	)
-	
-	(method (open)
-		(= window
-			(NewWindow
-				top
-				left
-				bottom
-				right
-				title
-				type
-				priority
-				color
-				back
-			)
-		)
-	)
-	
-	(method (handleEvent)
-		(return 0)
-	)
-	
-	(method (setMapSet &tmp temp0)
-		(= temp0 0)
-		(if (!= -1 color) (= temp0 (| temp0 $0001)))
-		(if (!= -1 priority) (= temp0 (| temp0 $0002)))
-		(return temp0)
-	)
-	
-	(method (move param1 param2)
-		(= left (+ left param1))
-		(= right (+ right param2))
-		(= right (+ right param1))
-		(= bottom (+ bottom param2))
-	)
-	
-	(method (moveTo param1 param2)
-		(self move: (- param1 left) (- param2 top))
-	)
-	
-	(method (draw theColor thePriority)
-		(if (>= argc 1) (= color theColor))
-		(if (>= argc 2) (= priority thePriority))
-		(Graph
-			GFillRect
-			top
-			left
-			bottom
-			right
-			(self setMapSet:)
-			color
-			priority
-		)
-	)
-	
-	(method (save)
-		(= underBits
-			(Graph
-				GSaveBits
-				top
-				left
-				bottom
-				right
-				(self setMapSet:)
-			)
-		)
-	)
-	
-	(method (restore)
-		(if underBits (Graph GRestoreBits underBits))
-	)
-	
-	(method (inset param1 param2)
-		(= top (+ top param2))
-		(= left (+ left param1))
-		(= bottom (- bottom param2))
-		(= right (- right param1))
-	)
-	
-	(method (show)
-		(Graph GShowBits
-			top
-			left
-			bottom
-			right
-			(self setMapSet:)
-		)
-	)
-	
-	(method (erase)
-		(self draw: back -1)
-	)
-	
-	(method (center)
-		(self
-			moveTo:
-				(/ (- (- brRight left) (- right left)) 2)
-				(/ (- (- brBottom top) (- bottom top)) 2)
-		)
-	)
+(class Window kindof SysWindow
+   (properties
+      top      0
+      left     0
+      bottom   0
+      right    0
+      color    0        ; foreground color
+      back     15       ; background color
+      priority -1       ; priority
+      underBits 0       ; handle to saved region of opened window
+      window   0        ; handle/pointer to system window
+      type  0           ; generally corresponds to system window types
+      title    0        ; text appearing in title bar if present
+
+      ;; this rectangle is the working area for X/Y centering
+      ;; these coordinates can define a subsection of the picture
+      ;; in which a window will be centered
+      brTop    0
+      brLeft   0
+      brBottom 190
+      brRight  320
+   )
+
+;;;   (methods
+;;;      doit
+;;;      handleEvent
+;;;      setMapSet
+;;;      move
+;;;      moveTo
+;;;      draw
+;;;      save
+;;;      restore
+;;;      inset
+;;;      show
+;;;      draw
+;;;      open
+;;;      erase
+;;;      center
+;;;   )
+   (method (center)
+      ;; Center the window in the working rectangle.
+
+      (self moveTo:
+         (/ (- (- brRight left) (- right left)) 2) 
+         (/ (- (- brBottom top) (- bottom top)) 2)
+      )  
+   )
+
+   (method (move h v)
+      (+= left h)
+      (+= right v)
+      (+= right h)
+      (+= bottom v)
+   )
+
+   (method (moveTo h v)
+      (self move: (- h left) (- v top))
+   )
+
+   (method (inset h v)
+      (+= top v)
+      (+= left h)
+      (-= bottom v)
+      (-= right h)
+   )
+   
+   (method (setMapSet &tmp mapSet)
+      (= mapSet 0)
+      (if (!= -1 color)
+         (|= mapSet VMAP)
+      )
+      (if (!= -1 priority)
+         (|= mapSet PMAP)
+      )
+      (return mapSet)
+   )
+
+   (method (show)
+      (Graph GShowBits top left bottom right (self setMapSet:))
+   )
+
+;  (method (open)
+;     (= lsTop top)
+;     (= lsLeft left)
+;     (= lsBottom bottom)
+;     (= lsRight right)
+;     (super open:)
+;  )
+   (method (draw v p)
+      (if (>= argc 1)
+         (= color v)
+      )
+      (if (>= argc 2)
+         (= priority p)
+      )
+      (Graph GFillRect top left bottom right (self setMapSet:) color priority)
+   )
+   (method (save)
+      (= underBits (Graph GSaveBits top left bottom right (self setMapSet:)))
+   )
+   (method (restore)
+      (if underBits
+         (Graph GRestoreBits underBits)
+      )
+   )
+
+   (method (doit)
+   )
+
+   (method (handleEvent event)
+      (return FALSE)
+   )
+
+   (method (dispose)
+      (self restore:)
+      (if window
+         (DisposeWindow window)
+         (= window 0)
+      )
+      (super dispose:)
+   )
+
+   (method (erase)
+      (self draw: back -1)
+   )
 )

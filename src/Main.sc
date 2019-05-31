@@ -145,6 +145,7 @@
 	global98
 	lastSysGlobal
 	theMusic
+	dongle = TRUE	;EO: Don't mess with this, or you'll get Error 11 shortly after startup!
 	globalSound
 	soundFx
 	deathMusic = sDeath
@@ -569,7 +570,7 @@
 		(= version {x.yyy.zzz})
 		(= gStopGroop stopGroop)
 		(= deathMusic sDeath)
-		(= useSortedFeatures TRUE)
+;		(= useSortedFeatures TRUE)
 		(super init:)
 		(StrCpy @sysLogPath {})
 		(= doVerbCode gameDoVerbCode)

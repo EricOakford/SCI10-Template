@@ -1,13 +1,12 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# TIMER)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Main)
 (use System)
 
-      (define  ticksPerSec    60)
-      (define  ticksPerMin    3600)
-      (define  minPerHr       60)
- 
+(define  ticksPerSec    60)
+(define  ticksPerMin    3600)
+(define  minPerHr       60)
 
 (class Timer kindof Object
    ;;; The Timer class implements the concept of an alarm clock,
@@ -48,7 +47,17 @@
       ticks       -1       ;ticks before done
       lastTime    -1       ;private
       client      0        ;who to cue: when done
-   )   
+   )
+   
+;;;   (methods
+;;;      set               ;set number of game-time seconds
+;;;      setCycle          ;set number of animation cycles
+;;;      setReal           ;set number of real-time seconds
+;;;      delete            ;do actual disposal of the Time
+;;;      setTicks          ;set time based on 60ths of a second
+;;;      cue               ; left to the application to define if needed
+;;;   )
+   
    
    (procedure (CueClient &tmp who)
       ;; A helper procedure.  Timer has expired, so detach from client
@@ -168,8 +177,8 @@
    (method (set caller sec min hr &tmp aTimer theTicks theSpeed)
       ;; Set the timer to go off after a certain number of seconds of
       ;; game time (real time on fast machines, slower on slow
-      ;; machines).      
-     
+      ;; machines).
+      
       (= theSpeed 6)
       (if (== theSpeed 0) (= theSpeed 1))
       (= theTicks (/ (* sec ticksPerSec) theSpeed))
@@ -220,16 +229,6 @@
       )
       (return aTimer)
    )
-   	(method (set60ths param1 param2 &tmp temp0)
-		(= lastTime (GetTime))
-		(= temp0 (if (& -info- $8000) (self new:) else self))
-		(temp0
-			init: param1
-			ticksToDo: param2
-			lastTime: (GetTime)
-		)
-		(return temp0)
-	)
 )
 
 (class TimeOut of Object
@@ -241,7 +240,11 @@
       name {TO}
       timeLeft 0
    )
-      
+   
+;;;   (methods
+;;;      set
+;;;   )
+   
    (method (set cToCount)
       (= timeLeft cToCount)
    )

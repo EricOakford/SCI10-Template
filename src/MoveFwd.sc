@@ -18,7 +18,7 @@
 ;;;;
 ;;;; modified 4/24/91 to be a kind of PolyPath (JMH)
 (script# MOVEFWD)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use PolyPath)
 
 

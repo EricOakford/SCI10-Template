@@ -19,40 +19,40 @@
 	(= temp0 0)
 	(while (< temp0 argc)
 		(switch (= temp8 [param1 temp0])
-			(106
+			(#new
 				(= newDTextNsBottom (newDText nsBottom?))
 				(= newDTextNsRight 0)
 			)
-			(67
+			(#at
 				(= temp10 [param1 (++ temp0)])
 				(= temp11 [param1 (++ temp0)])
 			)
-			(80
+			(#title
 				(= temp12 [param1 (++ temp0)])
 			)
-			(121
+			(#first
 				(= temp14 [param1 (++ temp0)])
 			)
 			(else 
 				(++ temp0)
 				(switch temp8
-					(26
+					(#text
 						((= newDText (DText new:)) text: [param1 temp0])
 					)
-					(81
+					(#button
 						((= newDText (DButton new:))
 							text: [param1 temp0]
 							value: [param1 (++ temp0)]
 						)
 					)
-					(82
+					(#icon
 						((= newDText (DIcon new:))
 							view: [param1 temp0]
 							loop: [param1 (++ temp0)]
 							cel: [param1 (++ temp0)]
 						)
 					)
-					(41
+					(#edit
 						((= newDText (DEdit new:))
 							text: [param1 temp0]
 							max: [param1 (++ temp0)]

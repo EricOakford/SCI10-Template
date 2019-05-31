@@ -33,7 +33,7 @@
 ;;;;    MoveCycle 
 
 (script# MOVECYC)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Main)
 (use Motion)
 (use System)

@@ -59,12 +59,6 @@
 	)
 )
 
-(instance theFastCast of EventHandler
-	(properties
-		name "fastCast"
-	)
-)
-
 (instance sFeatures of EventHandler
 	(properties)
 	
@@ -234,7 +228,7 @@
 		((= addToPics theAddToPics) add:)
 		((= timers theTimers) add:)
 		((= theDoits demons) add:)
-		((= fastCast theFastCast) add:)
+		(= fastCast NULL)
 		
 		; Set the current save/restore directory
 		(= curSaveDir (GetSaveDir))
@@ -255,7 +249,16 @@
 		; This is the code which is repeatedly executed in order to run the game
 		
 		(= gameTime (+ tickOffset (GetTime)))
-		(if (fastCast isEmpty:)
+		(if fastCast
+			(while fastCast
+				(fastCast eachElementDo: #doit)
+				(if
+				(and ((= event (Event new:)) type?) fastCast)
+					(fastCast firstTrue: #handleEvent event)
+				)
+				(event dispose:)
+			)
+		else
 			;Check all sounds and timers for completion, which will do any
 			;appropriate cue:ing.
 			(sounds eachElementDo: #check)
@@ -303,14 +306,6 @@
 			; Remove any expired timers.
 			(timers eachElementDo: #delete)
 			(GameIsRestarting FALSE)
-		else
-			(while (not (fastCast isEmpty:))
-				(fastCast eachElementDo: #doit)
-				(if ((= event (Event new:)) type?)
-					(fastCast firstTrue: #handleEvent event)
-				)
-				(event dispose:)
-			)
 		)
 	);Game doit
 	

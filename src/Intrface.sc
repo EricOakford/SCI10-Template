@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 255)
-(include game.sh)
+(include sci.sh)
 (use Main)
 (use System)
 
@@ -99,19 +99,19 @@
 	(= temp5 temp5)
 	(while (< temp5 argc)
 		(switch [param1 temp5]
-			(30
+			(#mode
 				(++ temp5)
 				(if (and newDText_2 (not temp1025))
 					(newDText_2 mode: [param1 temp5])
 				)
 			)
-			(33
+			(#font
 				(++ temp5)
 				(if newDText_2
 					(newDText_2 font: [param1 temp5] setSize: temp8)
 				)
 			)
-			(70
+			(#width
 				(= temp1028 1)
 				(= temp8 [param1 (++ temp5)])
 				(temp1024 setSize: temp8)
@@ -122,28 +122,28 @@
 					)
 				)
 			)
-			(25
+			(#time
 				(++ temp5)
 				(newDialog time: [param1 temp5])
 			)
-			(80
+			(#title
 				(++ temp5)
 				(newDialog text: [param1 temp5])
 			)
-			(67
+			(#at
 				(= temp6 [param1 (++ temp5)])
 				(= temp7 [param1 (++ temp5)])
 			)
-			(83
-				(Animate (cast elements?) 0)
+			(#draw
+				(Animate (cast elements?) FALSE)
 			)
-			(41
+			(#edit
 				(++ temp5)
 				((= newDEdit (DEdit new:)) text: [param1 temp5])
 				(++ temp5)
 				(newDEdit max: [param1 temp5] setSize:)
 			)
-			(81
+			(#button
 				((= [newDButton temp19] (DButton new:))
 					text: [param1 (++ temp5)]
 					value: [param1 (++ temp5)]
@@ -152,7 +152,7 @@
 				(= temp18 (+ temp18 ([newDButton temp19] nsRight?) 4))
 				(++ temp19)
 			)
-			(82
+			(#icon
 				(= temp1029 1)
 				(if (IsObject [param1 (+ temp5 1)])
 					((= newDIcon ([param1 (+ temp5 1)] new:)) setSize:)
@@ -168,7 +168,7 @@
 					(= temp5 (+ temp5 3))
 				)
 			)
-			(107
+			(#dispose
 				(if
 					(and
 						(< (+ temp5 1) argc)
@@ -182,11 +182,11 @@
 					(= theModelessDialog newDialog)
 				)
 			)
-			(35
+			(#window
 				(++ temp5)
 				(newDialog window: [param1 temp5])
 			)
-			(120 (= temp1032 1))
+			(#first (= temp1032 1))
 		)
 		(++ temp5)
 	)
@@ -370,12 +370,12 @@
 	)
 	
 	(method (draw)
-		(= state 1)
-		(DrawMenuBar 1)
+		(= state TRUE)
+		(DrawMenuBar TRUE)
 	)
 	
 	(method (hide)
-		(DrawMenuBar 0)
+		(DrawMenuBar FALSE)
 	)
 	
 	(method (handleEvent pEvent &tmp temp0 temp1)
@@ -786,6 +786,7 @@
 	)
 	
 	(method (doit param1 &tmp temp0 temp1 temp2 theEatMice temp4)
+		(= gameTime (+ tickOffset (GetTime)))
 		(= temp0 0)
 		(= busy 1)
 		(self eachElementDo: #init)
@@ -806,6 +807,7 @@
 		)
 		(= temp2 0)
 		(while (not temp2)
+			(= gameTime (+ tickOffset (GetTime)))
 			(self eachElementDo: #cycle)
 			(= temp1 ((Event new:) localize:))
 			(if theEatMice
@@ -830,6 +832,7 @@
 	)
 	
 	(method (dispose &tmp theCaller)
+		(self eachElementDo: #dispose release:)
 		(if (== self modelessDialog)
 			(SetPort modelessPort)
 			(= modelessDialog 0)

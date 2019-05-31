@@ -42,18 +42,45 @@
 		(super init: &rest)
 	)
 	
-	(method (dispose)
-		(if actions (actions dispose:) (= actions 0))
-		(features delete: self)
-		(DisposeClone self)
-	)
-	
 	(method (showSelf)
 		(Print name #icon view loop cel)
 	)
 	
-	(method (onMe)
-		(if (& signal $0080) 0 else (super onMe: &rest))
+	(method (onMe param1 param2 &tmp temp0 temp1)
+		(if (IsObject param1)
+			(= temp0 (param1 x?))
+			(= temp1 (param1 y?))
+		else
+			(= temp0 param1)
+			(= temp1 param2)
+		)
+		(cond 
+			((& signal $0080) 0)
+			(
+			(and (not (IsObject onMeCheck)) (& signal skipCheck))
+				(if
+					(or
+						(not (if (or nsLeft nsRight nsTop) else nsBottom))
+						(and
+							(<= nsLeft temp0)
+							(<= temp0 nsRight)
+							(<= nsTop temp1)
+							(<= temp1 nsBottom)
+						)
+					)
+					(not
+						(kernel_125
+							view
+							loop
+							cel
+							(- temp1 nsTop)
+							(- temp0 nsLeft)
+						)
+					)
+				)
+			)
+			(else (super onMe: temp0 temp1))
+		)
 	)
 )
 
@@ -119,8 +146,41 @@
 		(return (not (& signal $0088)))
 	)
 	
-	(method (onMe)
-		(return (if (self isNotHidden:) (super onMe: &rest) else 0))
+	(method (onMe param1 param2 &tmp temp0 temp1)
+		(if (IsObject param1)
+			(= temp0 (param1 x?))
+			(= temp1 (param1 y?))
+		else
+			(= temp0 param1)
+			(= temp1 param2)
+		)
+		(cond 
+			((& signal $0080) 0)
+			(
+			(and (not (IsObject onMeCheck)) (& signal skipCheck))
+				(if
+					(or
+						(not (if (or nsLeft nsRight nsTop) else nsBottom))
+						(and
+							(<= nsLeft temp0)
+							(<= temp0 nsRight)
+							(<= nsTop temp1)
+							(<= temp1 nsBottom)
+						)
+					)
+					(not
+						(kernel_125
+							view
+							loop
+							cel
+							(- temp1 nsTop)
+							(- temp0 nsLeft)
+						)
+					)
+				)
+			)
+			(else (super onMe: temp0 temp1))
+		)
 	)
 	
 	(method (posn theX theY theZ)
@@ -169,10 +229,9 @@
 	
 	(method (setCel param1)
 		(cond 
-			((== argc 0) (= signal (| signal skipCheck)))
-			((== param1 -1) (= signal (& signal $efff)))
+			((== argc 0) 0)
+			((== param1 -1) 0)
 			(else
-				(= signal (| signal skipCheck))
 				(= cel
 					(if (>= param1 (self lastCel:))
 						(self lastCel:)
@@ -223,7 +282,7 @@
 				)
 				(features add: self)
 			else
-				(DisposeClone self)
+				(super dispose:)
 			)
 			(if (IsObject actions) (actions dispose:))
 			(= actions 0)
@@ -347,7 +406,6 @@
 	(method (setCycle theCycler)
 		(if cycler (cycler dispose:))
 		(if theCycler
-			(self setCel: -1)
 			(self startUpd:)
 			(= cycler
 				(if (& (theCycler -info-?) $8000)
@@ -745,7 +803,7 @@
 			)
 			(= temp2 (- (WordAt temp6 2) x))
 			(= temp3 (- (WordAt temp6 3) y))
-			(Memory MDisposePtr temp6)
+			(Memory 3 temp6)
 		)
 		(cond 
 			((or temp2 temp3) (self setMotion: MoveTo (+ x temp2) (+ y temp3)))

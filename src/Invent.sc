@@ -22,9 +22,9 @@
 		nsRight 0
 		nsBottom 0
 		state $0000
-		cursor ARROW_CURSOR
+		cursor 999
 		type $4000
-		message verbUse
+		message 4
 		modifiers $0000
 		signal $0000
 		helpStr 0
@@ -52,12 +52,12 @@
 		(= temp1 (- nsLeft 2))
 		(= temp2 (+ nsBottom 1))
 		(= temp3 (+ nsRight 1))
-		(Graph GDrawLine temp0 temp1 temp0 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp0 temp3 temp2 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp3 temp2 temp1 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp1 temp0 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp1 temp0 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp3 temp2 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp3 temp2 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp1 temp0 temp1 temp4 -1 -1)
 		(Graph
-			GShowBits
+			grUPDATE_BOX
 			(- nsTop 2)
 			(- nsLeft 2)
 			(+ nsBottom 2)
@@ -85,13 +85,14 @@
 	
 	(method (doVerb theVerb)
 		(switch theVerb
-			(verbLook (Printf "%s" description))
+			(2 (Printf 995 0 description))
 		)
 	)
 )
 
 (class Inventory of IconBar
 	(properties
+		name "Inv"
 		elements 0
 		size 0
 		height 0
@@ -172,7 +173,7 @@
 			(= inventoryFirst (inventory next: inventoryFirst))
 		)
 		(if (not temp0)
-			(Printf "%s %s" normalHeading empty)
+			(Printf 995 1 normalHeading empty)
 			(return)
 		)
 		(if (> (* (= temp16 (Sqrt temp0)) temp16) temp0)
@@ -404,11 +405,15 @@
 						)
 						(if (== highlightedIcon okButton) (break))
 						(if (== highlightedIcon helpIconItem)
-							(if (!= (highlightedIcon cursor?) -1)
-								(theGame setCursor: (helpIconItem cursor?))
-							)
-							(if helpIconItem
-								(helpIconItem signal: (| (helpIconItem signal?) $0010))
+							(if (& state $0800)
+								(self noClickHelp:)
+							else
+								(if (!= (highlightedIcon cursor?) -1)
+									(theGame setCursor: (helpIconItem cursor?))
+								)
+								(if helpIconItem
+									(helpIconItem signal: (| (helpIconItem signal?) $0010))
+								)
 							)
 						else
 							(= curIcon highlightedIcon)
@@ -443,14 +448,14 @@
 							(if (systemWindow respondsTo: #eraseOnly)
 								(= systemWindowEraseOnly (systemWindow eraseOnly?))
 								(systemWindow eraseOnly: 1)
-								(Printf "%s" (theCurIcon helpStr?))
+								(Printf 995 0 (theCurIcon helpStr?))
 								(systemWindow eraseOnly: systemWindowEraseOnly)
 							else
-								(Printf "%s" (theCurIcon helpStr?))
+								(Printf 995 0 (theCurIcon helpStr?))
 							)
 						)
 						(helpIconItem signal: (& (helpIconItem signal?) $ffef))
-						(theGame setCursor: ARROW_CURSOR)
+						(theGame setCursor: 999)
 					else
 						(if (== theCurIcon okButton) (break))
 						(cond 

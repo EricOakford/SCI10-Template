@@ -25,7 +25,7 @@
 
 (script# STOPWALK)
 
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use Motion)
 
 (public

@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# NAMEFIND)
-(include system.sh) (include sci2.sh)
+(include game.sh)
 (use System)
 
 (public
