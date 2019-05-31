@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 928)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use Sync)
@@ -132,7 +132,7 @@
 				(mouth setCycle: 0)
 			)
 			(cond 
-				(cDAudio (DoAudio 3))
+				(cDAudio (DoAudio Stop))
 				(modelessDialog (modelessDialog dispose:))
 			)
 			(if eyes (eyes setCycle: 0))
@@ -163,9 +163,9 @@
 	)
 	
 	(method (hide)
-		(Graph grRESTORE_BOX underBits)
+		(Graph GRestoreBits underBits)
 		(= underBits 0)
-		(Graph grREDRAW_BOX nsTop nsLeft nsBottom nsRight)
+		(Graph GReAnimate nsTop nsLeft nsBottom nsRight)
 	)
 	
 	(method (show &tmp temp0)
@@ -235,7 +235,7 @@
 		)
 		(if (not underBits)
 			(= underBits
-				(Graph grSAVE_BOX nsTop nsLeft nsBottom nsRight 1)
+				(Graph GSaveBits nsTop nsLeft nsBottom nsRight 1)
 			)
 		)
 		(= temp0 (PicNotValid))
@@ -271,7 +271,7 @@
 			)
 		)
 		(DrawCel view loop cel nsLeft nsTop -1)
-		(Graph grUPDATE_BOX nsTop nsLeft nsBottom nsRight 1)
+		(Graph GShowBits nsTop nsLeft nsBottom nsRight 1)
 		(PicNotValid temp0)
 	)
 	
@@ -291,9 +291,9 @@
 	
 	(method (startAudio param1 &tmp temp0)
 		(= temp0 param1)
-		(DoAudio 1 temp0)
+		(DoAudio WPlay temp0)
 		(if mouth (mouth setCycle: MouthSync temp0))
-		(= ticks (DoAudio 2 temp0))
+		(= ticks (DoAudio Play temp0))
 		(if eyes (eyes setCycle: RTRandCycle ticks))
 	)
 	
@@ -333,8 +333,7 @@
 							(CelHigh (param1 view?) (param1 loop?) (param1 cel?))
 						)
 				)
-				(Graph
-					grUPDATE_BOX
+				(Graph GShowBits
 					(+ (param1 nsTop?) nsTop)
 					(+ (param1 nsLeft?) nsLeft)
 					(+ (param1 nsBottom?) nsTop)

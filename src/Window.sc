@@ -114,7 +114,7 @@
 		(if (>= argc 1) (= color theColor))
 		(if (>= argc 2) (= priority thePriority))
 		(Graph
-			grFILL_BOX
+			GFillRect
 			top
 			left
 			bottom
@@ -128,7 +128,7 @@
 	(method (save)
 		(= underBits
 			(Graph
-				grSAVE_BOX
+				GSaveBits
 				top
 				left
 				bottom
@@ -139,7 +139,7 @@
 	)
 	
 	(method (restore)
-		(if underBits (Graph grRESTORE_BOX underBits))
+		(if underBits (Graph GRestoreBits underBits))
 	)
 	
 	(method (inset param1 param2)
@@ -150,8 +150,7 @@
 	)
 	
 	(method (show)
-		(Graph
-			grUPDATE_BOX
+		(Graph GShowBits
 			top
 			left
 			bottom

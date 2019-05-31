@@ -291,9 +291,6 @@
 	)
 ;EO: This is adapted from SCI16's SAVE.SC. It doesn't fully match the commented 
 ;assembly code below.
-;A known issue is that pressing ESC when in the Save Game dialog causes some junk text to
-;appear on the description field. No idea why. Somebody might want to check the original disassembly,
-;or, better yet, unearth an earlier version of SAVE.SC...
 	
    (method  (doit theComment
                   &tmp  fd ret offset 
@@ -472,8 +469,8 @@
                (break)
             )
 
-            ((or (== i -1) (== i cancelI))
-               (= ret -1)
+            ((or (== i 0) (== i cancelI)) ;EO: changed from -1 so that pressing ESC exits the window.
+               (= ret 0) 
                (break)
             )
 

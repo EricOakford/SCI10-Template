@@ -7,6 +7,7 @@
 (use PMouse)
 (use SlideIcon)
 (use BordWind)
+(use Feature)
 (use IconBar)
 (use GameEgo)
 (use RandCyc)
@@ -32,15 +33,13 @@
 	Bset 7
 	Bclr 8
 	EgoHeadMove 9
-	proc0_10 10
-	SolvePuzzle 11
-	WindowlessPrint 12
-	AimToward 13
-	proc0_15 15
-	VerbFail 16
-	proc0_17 17
-	proc0_18 18
-	EgoDead 19
+	SolvePuzzle 10
+	WindowlessPrint 11
+	AimToward 12
+	VerbFail 13
+	proc0_17 14
+	EGAOrVGA 15
+	EgoDead 16
 )
 
 (local
@@ -145,92 +144,26 @@
 	global97
 	global98
 	lastSysGlobal
-	music
+	theMusic
+	globalSound
+	soundFx
 	deathMusic = sDeath
-	global102
-	global103 =  1
-	global104
 	colorCount
 	musicChannels
 	startingRoom
-	global108
-	global109
-	global110
-	global111
+	pMouseX
+	pMouseY
 	gEgoHead
 	gStopGroop
 	[gameFlags 10]
-	global124
-	global125
-	global126
-	global127
-	global128
-	global129
-	global130
-	global131
-	global132
-	global133
-	global134
-	global135
-	global136
-	global137
-	global138
-	global139
-	global140
-	global141
-	global142
-	global143
-	global144
-	global145
-	global146
-	global147
-	global148
-	global149
-	global150
-	global151
-	global152
-	global153
-	SFX
-	global155
-	global156
-	global157
-	global158
-	numBuckazoids =  59
-	global160
-	global161
-	global162
-	global163
-	global164
-	global165
-	global166
-	global167
-	global168
-	global169 =  2001
-	global170
-	global171
-	global172
-	global173 =  10
-	global174
-	global175
-	global176
-	global177
-	global178
-	global179
-	global180
-	global181
-	global182
-	global183
-	global184
-	global185
-	global186
-	global187
-	global188
-	global189
-	global190
-	global191
-	global192
-	global193
-	global194
+	myTextColor
+	myEGABordColor
+	myEGABackColor
+	myVGABordColor
+	myVGABackColor
+	myVGABordColor2
+	myEGABordColor2
+	myHighlightColor
 	debugging
 )
 (procedure (NormalEgo param1 param2)
@@ -264,8 +197,8 @@
 	(theIconBar disable: ICON_WALK ICON_LOOK ICON_DO ICON_TALK ICON_ITEM ICON_INVENTORY ICON_SMELL ICON_TASTE)
 	(theIconBar curIcon: theIconBarCurIcon)
 	(if (not (HaveMouse))
-		(= global192 ((User curEvent?) x?))
-		(= global193 ((User curEvent?) y?))
+		(= pMouseX ((User curEvent?) x?))
+		(= pMouseY ((User curEvent?) y?))
 		(theGame setCursor: waitCursor TRUE 304 172)
 	else
 		(theGame setCursor: waitCursor TRUE)
@@ -281,7 +214,7 @@
 	)
 	(if (not (HaveMouse))
 		(theGame
-			setCursor: ((theIconBar curIcon?) cursor?) 1 global192 global193
+			setCursor: ((theIconBar curIcon?) cursor?) TRUE pMouseX pMouseY
 		)
 	else
 		(theGame setCursor: ((theIconBar curIcon?) cursor?))
@@ -331,25 +264,6 @@
 	(egoHead init: ego view: (ego view?) cycleSpeed: 24)
 )
 
-
-(procedure (proc0_10 param1 param2)
-	(if (> argc 0)
-		(= global186 param1)
-		(if (OneOf (ego view?) 373 374 993)
-			(if (== global186 0) (= global186 7))
-			(if (== global186 8) (= global186 9))
-		)
-	else
-		(= global186 0)
-	)
-	(if (> argc 1)
-		(= global187 param2)
-	else
-		(= global187 0)
-	)
-	(curRoom newRoom: 900)
-)
-
 (procedure (SolvePuzzle flag points)
 	(if (not (Btst flag))
 		(theGame changeScore: points)
@@ -368,7 +282,7 @@
 			(= temp1 68)
 			(= temp2 69)
 			(= temp3 -1)
-			(= temp6 global130)
+			(= temp6 myVGABordColor)
 			(= temp7 0)
 			(= temp8 1)
 			(while (< temp8 argc)
@@ -450,10 +364,6 @@
 	)
 )
 
-(procedure (proc0_15 param1 param2)
-	(return (if (== (param1 onControl:) param2) (return 1) else 0))
-)
-
 (procedure (VerbFail &tmp newList [temp1 2] temp3 userCurEvent temp5 [temp6 5])
 	(= temp3 (theGame setCursor: 69 1))
 	(= userCurEvent (User curEvent?))
@@ -497,12 +407,12 @@
 	)
 )
 
-(procedure (proc0_18 param1 param2)
-	(if (< param1 0) (= param1 0))
-	(if (> param1 255) (= param1 255))
-	(if (< param2 0) (= param2 0))
-	(if (> param2 15) (= param2 15))
-	(return (if (Btst 21) param1 else param2))
+(procedure (EGAOrVGA vga ega)
+	(if (< vga 0) (= vga 0))			;if color is less than zero, make it equal zero
+	(if (> vga 255) (= vga 255))		;if color is more than 255, make it equal 255 
+	(if (< ega 0) (= ega 0))			;if color is less than zero, make it equal zero
+	(if (> ega 15) (= ega 15))			;if color is more than 15, make it equal 15
+	(return (if (Btst fIsVGA) vga else ega))
 )
 
 (procedure (EgoDead &tmp printRet)
@@ -514,8 +424,8 @@
 	(= normalCursor ARROW_CURSOR)
 	(theGame setCursor: normalCursor TRUE)
 
-	(sounds eachElementDo: #stop)	; Stop any other music
-	(music number: deathMusic play:)
+	(sounds eachElementDo: #stop)	; Stop any other theMusic
+	(theMusic number: deathMusic play:)
 	(repeat
 		(= printRet
 			(Print
@@ -552,15 +462,22 @@
 	
 	(method (doVerb theVerb theItem)
 		(switch theVerb
-			(verbTalk (Print "You talk to yourself but are stumped for a reply."))
-			(verbDo (Print "Hey! Keep your hands off yourself! This is a family game."))
-			(verbTaste (Print "I'll bet you wish you could!"))
-			(verbSmell (Print "Ahhh!  The aroma of several adventure games emanates from your person."))
+			(verbTalk
+				(Print "You talk to yourself but are stumped for a reply.")
+			)
+			(verbDo
+				(Print "Hey! Keep your hands off yourself! This is a family game.")
+			)
+			(verbTaste
+				(Print "I'll bet you wish you could!")
+			)
+			(verbSmell
+				(Print "Ahhh!  The aroma of several adventure games emanates from your person.")
+			)
 			(verbUse
 				(switch theItem
-					(iCoin (Print "There isn't much you can do to it what inflation hasn't already."))
+					(iCoin (Print "You pay yourself some money."))
 					(iBomb (EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea..."))
-					(else  (VerbFail))
 				)
 			)
 			(else  (super doVerb: theVerb))
@@ -579,7 +496,7 @@
 	)
 )
 
-(instance longSong of Sound
+(instance music of Sound
 	(properties
 		number 1
 	)
@@ -669,57 +586,57 @@
 			cycleSpeed: (self egoMoveSpeed?)
 		)
 		(User alterEgo: ego canControl: FALSE canInput: FALSE)
-		((= music longSong) owner: self priority: 15 init:)
-		((= SFX longSong2) owner: self init:)
+		((= theMusic music) owner: self priority: 15 init:)
+		((= soundFx longSong2) owner: self init:)
 		(= waitCursor HAND_CURSOR)
 		(= possibleScore 0)
 		(= userFont 1)
 		(StatusLine code: statusCode disable:) ;hide the status code at startup
-		(= version {x.yyy})
 		(= musicChannels (DoSound NumVoices))
 		(if
 			(and
 				(>= (= colorCount (Graph GDetect)) 2)
 				(<= colorCount 16)
 			)
-			(Bclr 21)
+			(Bclr fIsVGA)
 		else
-			(Bset 21)
+			(Bset fIsVGA)
 		)
 		(gameWindow
-			color: 0
-			back: (proc0_18 global158 global155)
-			topBordColor: global130
-			lftBordColor: (proc0_18 global161 global130)
-			rgtBordColor: (proc0_18 global157 global156)
-			botBordColor: global156
+			color: myTextColor
+			back: (EGAOrVGA myVGABackColor myEGABackColor)
+			topBordColor: myEGABordColor2
+			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
+			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
+			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
 		)
 		(gcWin
-			color: 0
-			back: (proc0_18 global158 global155)
-			topBordColor: global130
-			lftBordColor: (proc0_18 global161 global130)
-			rgtBordColor: (proc0_18 global157 global156)
-			botBordColor: global156
+			color: myTextColor
+			back: (EGAOrVGA myVGABackColor myEGABackColor)
+			topBordColor: myEGABordColor2
+			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
+			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
+			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
 		)
 		(invWin
-			color: 0
-			back: (proc0_18 global156 global155)
-			topBordColor: (proc0_18 global158 global130)
-			lftBordColor: (proc0_18 global157 global130)
-			rgtBordColor: (proc0_18 global155 global156)
-			botBordColor: (proc0_18 global129 global156)
-			insideColor: (proc0_18 global155 global156)
-			topBordColor2: global129
-			lftBordColor2: global129
-			botBordColor2: (proc0_18 global158 global130)
-			rgtBordColor2: (proc0_18 global161 global130)
+			color: myTextColor
+			back: (EGAOrVGA myEGABackColor myEGABordColor)
+			topBordColor: (EGAOrVGA myVGABackColor myEGABordColor2)
+			lftBordColor: (EGAOrVGA myVGABordColor myEGABordColor2)
+			rgtBordColor: (EGAOrVGA myEGABordColor myEGABackColor)
+			botBordColor: (EGAOrVGA myTextColor myEGABackColor)
+			insideColor: (EGAOrVGA myEGABordColor myEGABackColor)
+			topBordColor2: myTextColor
+			lftBordColor2: myTextColor
+			botBordColor2: (EGAOrVGA myVGABackColor myEGABordColor2)
+			rgtBordColor2: (EGAOrVGA myVGABordColor2 myEGABordColor2)
+			botBordHgt: 25
 		)
 		((= theIconBar IconBar)
 			add: icon0 icon1 icon2 icon3 icon6 icon7 icon4 icon5 icon8 icon9
 			eachElementDo: #init
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (proc0_18 global158 global155)
+			eachElementDo: #lowlightColor (EGAOrVGA myVGABackColor myEGABackColor)
 			curIcon: icon0
 			useIconItem: icon4
 			helpIconItem: icon9
@@ -737,7 +654,7 @@
 				invHelp
 				ok
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (proc0_18 global155 global156)
+			eachElementDo: #lowlightColor (EGAOrVGA myEGABordColor myEGABackColor)
 			eachElementDo: #init
 			window: invWin
 			helpIconItem: invHelp
@@ -750,21 +667,17 @@
 				iconOk
 				(detailSlider theObj: self selector: #detailLevel yourself:)
 				(volumeSlider theObj: self selector: #masterVolume yourself:)
-				(speedSlider theObj: self selector: #setSpeed yourself:)
+				speedSlider
 				(iconSave theObj: self selector: #save yourself:)
 				(iconRestore theObj: self selector: #restore yourself:)
 				(iconRestart theObj: self selector: #restart yourself:)
 				(iconQuit theObj: self selector: #quitGame yourself:)
-				(iconAbout
-					theObj: (ScriptID 811 0)
-					selector: #doit
-					yourself:
-				)
+				(iconAbout theObj: self selector: #doit yourself:)
 				iconHelp
-			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (proc0_18 global157 global156)
 			helpIconItem: iconHelp
 			curIcon: iconRestore
+			eachElementDo: #highlightColor 0
+			eachElementDo: #lowlightColor (EGAOrVGA myVGABordColor myEGABordColor)
 		)
 		(Coin owner: ego)
 		(Bomb owner: ego)
@@ -779,7 +692,7 @@
 	
 	(method (replay)
 ;		(ShowStatus -1)
-		(Palette 4 0 255 100)
+		(Palette PALIntensity 0 255 100)
 		(super replay:)
 	)
 	
@@ -790,16 +703,18 @@
 	(method (startRoom roomNum)
 		(if pMouse (pMouse stop:))
 		((ScriptID 801) doit: roomNum)
-		(if
-			(and
-				(u> (MemoryInfo FreeHeap) (+ 10 (MemoryInfo )))
-				(Print "Memory fragmented." 
-					#button {Who cares} 0
-					#button {Debug} 1
-				)
-			)
-			(SetDebug)
-		)
+		;EO: Commenting this out until I can figure out how to not trigger this when
+		;changing rooms.
+;;;		(if
+;;;			(and
+;;;				(!= (- (MemoryInfo FreeHeap) 2) (MemoryInfo LargestPtr))
+;;;				(Print "Memory fragmented." 
+;;;					#button {Who cares} FALSE
+;;;					#button {Debug} TRUE
+;;;				)
+;;;			)
+;;;			(SetDebug)
+;;;		)
 		(super startRoom: roomNum)
 		(if (cast contains: ego)
 			(if (not (ego looper?)) (ego setLoop: stopGroop))
@@ -904,7 +819,8 @@
 	)
 	
 	(method (pragmaFail)
-		(if (User canInput:) (VerbFail))
+		(if (User canInput:) (VerbFail)
+		)
 	)
 )
 
@@ -922,7 +838,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (proc0_18 global158 global155)
+			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
 		)
 		(super init:)
 	)
@@ -941,7 +857,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (proc0_18 global158 global155)
+			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
 		)
 		(super init:)
 	)
@@ -960,7 +876,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (proc0_18 global158 global155)
+			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
 		)
 		(super init:)
 	)
@@ -978,7 +894,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (proc0_18 global158 global155)
+			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
 		)
 		(super init:)
 	)
@@ -996,7 +912,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (proc0_18 global158 global155)
+			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
 		)
 		(super init:)
 	)
@@ -1008,8 +924,15 @@
 		cel 0
 		cursor 1
 		signal $0002
-		description {It's a buckazoid coin.}
+		description {the buckazoid coin}
 		owner 40
+	)
+	(method (doVerb theVerb param2)
+		(switch theVerb
+			(verbLook
+				(Print "It's a buckazoid coin.")
+			)
+		)
 	)
 )
 
@@ -1019,8 +942,15 @@
 		cel 1
 		cursor 22
 		signal $0002
-		description {It's a piece of unstable ordinance.}
+		description {the unstable ordinance}
 		owner 40
+	)
+	(method (doVerb theVerb param2)
+		(switch theVerb
+			(verbLook
+				(Print "It's a piece of unstable ordinance.")
+			)
+		)
 	)
 )
 
@@ -1199,12 +1129,9 @@
 				(if (param2 facingMe: ego)
 					(if (param2 lookStr?)
 						(Print (param2 lookStr?))
-					else
-						(VerbFail)
 					)
 				)
 			)
-			(else  (VerbFail))
 		)
 	)
 )
@@ -1231,7 +1158,11 @@
 (instance gcWin of BorderWindow
 	(properties)
 	
-	(method (open &tmp temp0 temp1 temp2 temp3 temp4 temp5 temp6 temp7 temp8 temp9 temp10 temp11 temp12 temp13 [temp14 15] [temp29 4])
+	(method (open &tmp temp0 temp1 temp2 temp3 temp4 temp5
+			temp6 temp7 temp8 temp9 temp10 temp11 temp12
+			[temp13 15] [temp28 4]
+			)
+			
 		(self
 			top: (/ (- 200 (+ (CelHigh 947 1 1) 6)) 2)
 			left: (/ (- 320 (+ 151 (CelWide 947 0 1))) 2)
@@ -1250,10 +1181,7 @@
 			priority: 15
 		)
 		(super open:)
-		(DrawCel
-			947
-			0
-			5
+		(DrawCel 947 0 5
 			(+
 				(/
 					(-
@@ -1265,8 +1193,7 @@
 				4
 				(CelWide 947 1 1)
 			)
-			6
-			15
+			3 15
 		)
 		(DrawCel 947 1 1 4 3 15)
 		(DrawCel 947 1 0 94 38 15)
@@ -1274,101 +1201,98 @@
 		(DrawCel 947 0 4 63 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
 		(DrawCel 947 0 3 101 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
 		(DrawCel 947 0 2 146 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
-		(= temp5 (+ (= temp2 (+ 46 (CelHigh 947 0 1))) 13))
-		(= temp4
+		(Graph GShowBits 12 1 15 (+ 151 (CelWide 947 0 1)) 1)
+		(= temp4 (+ (= temp1 (+ 46 (CelHigh 947 0 1))) 13))
+		(= temp3
 			(+
-				(= temp3 (+ 10 (CelWide 947 1 1)))
+				(= temp2 (+ 10 (CelWide 947 1 1)))
 				(-
 					(+ 151 (CelWide 947 0 1))
 					(+ 10 (CelWide 947 1 1) 6)
 				)
 			)
 		)
-		(= temp12 15)
-		(= temp6 0)
-		(= temp8 global156)
-		(= temp11 (proc0_18 global157 global156))
-		(= temp10 (proc0_18 global161 global130))
-		(= temp9 global130)
-		(= temp1 3)
-		(= temp7 3)
+		(= temp11 15)
+		(= temp5 0)
+		(= temp7 (EGAOrVGA myEGABackColor myEGABackColor))
+		(= temp10 (EGAOrVGA myVGABordColor myEGABackColor))
+		(= temp9 (EGAOrVGA myVGABordColor2 myEGABordColor2))
+		(= temp8 myEGABordColor2)
+		(= temp0 3)
+		(= temp6 3)
 		(Graph
-			grFILL_BOX
+			GFillRect
+			temp1
 			temp2
-			temp3
-			(+ temp5 1)
 			(+ temp4 1)
-			temp7
+			(+ temp3 1)
 			temp6
-			temp12
-		)
-		(= temp2 (- temp2 temp1))
-		(= temp3 (- temp3 temp1))
-		(= temp4 (+ temp4 temp1))
-		(= temp5 (+ temp5 temp1))
-		(Graph
-			grFILL_BOX
-			temp2
-			temp3
-			(+ temp2 temp1)
-			temp4
-			temp7
-			temp8
-			temp12
-		)
-		(Graph
-			grFILL_BOX
-			(- temp5 temp1)
-			temp3
 			temp5
-			temp4
-			temp7
-			temp9
-			temp12
+			temp11
 		)
-		(= temp13 0)
-		(while (< temp13 temp1)
+		(= temp1 (- temp1 temp0))
+		(= temp2 (- temp2 temp0))
+		(= temp3 (+ temp3 temp0))
+		(= temp4 (+ temp4 temp0))
+		(Graph
+			GFillRect
+			temp1
+			temp2
+			(+ temp1 temp0)
+			temp3
+			temp6
+			temp7
+			temp11
+		)
+		(Graph
+			GFillRect
+			(- temp4 temp0)
+			temp2
+			temp4
+			temp3
+			temp6
+			temp8
+			temp11
+		)
+		(= temp12 0)
+		(while (< temp12 temp0)
 			(Graph
 				GDrawLine
-				(+ temp2 temp13)
-				(+ temp3 temp13)
-				(- temp5 (+ temp13 1))
-				(+ temp3 temp13)
-				temp11
-				temp12
-				-1
-			)
-			(Graph
-				GDrawLine
-				(+ temp2 temp13)
-				(- temp4 (+ temp13 1))
-				(- temp5 (+ temp13 1))
-				(- temp4 (+ temp13 1))
+				(+ temp1 temp12)
+				(+ temp2 temp12)
+				(- temp4 (+ temp12 1))
+				(+ temp2 temp12)
 				temp10
-				temp12
+				temp11
 				-1
 			)
-			(++ temp13)
+			(Graph
+				GDrawLine
+				(+ temp1 temp12)
+				(- temp3 (+ temp12 1))
+				(- temp4 (+ temp12 1))
+				(- temp3 (+ temp12 1))
+				temp9
+				temp11
+				-1
+			)
+			(++ temp12)
 		)
 		(Graph
 			GShowBits
+			temp1
 			temp2
-			temp3
-			(+ temp5 1)
 			(+ temp4 1)
+			(+ temp3 1)
 			1
 		)
-		(Format @temp14 "Score: %d of %d" score possibleScore)
-		(TextSize @temp29 @temp14 999 0)
-		(Display
-			@temp14
-			dsFONT
-			999
-			dsCOLOR
-			(proc0_18 global161 global130)
-			dsCOORD
-			(+
-				10
+		(Format @temp13 "Score: %d of %d" score possibleScore)
+		(TextSize @temp28 @temp13 999 0)
+		(Display @temp13
+			p_font 999
+			p_color (EGAOrVGA myVGABackColor myEGABordColor2)
+			p_at
+			(+ 10
 				(CelWide 947 1 1)
 				(/
 					(-
@@ -1376,7 +1300,7 @@
 							(+ 151 (CelWide 947 0 1))
 							(+ 10 (CelWide 947 1 1) 6)
 						)
-						[temp29 3]
+						[temp28 3]
 					)
 					2
 				)

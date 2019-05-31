@@ -1320,7 +1320,7 @@ code_0623:
 		(if (== temp100 2) (return 1))
 		(if
 			(and
-				(FileIO 10 @fileName)
+				(FileIO fileExists @fileName)
 				(not
 					(= temp100
 						(PrintD

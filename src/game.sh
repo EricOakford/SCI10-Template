@@ -49,3 +49,6 @@
 (define verbSmell 11)
 
 ;Event flags
+(enum
+	fIsVGA
+)

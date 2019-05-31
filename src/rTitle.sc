@@ -26,7 +26,7 @@
 	
 	(method (init)
 		(super init: &rest)
-		(music number: sOpening play:)
+		(theMusic number: sOpening play:)
 		(keyDownHandler addToFront: self)
 		(mouseDownHandler addToFront: self)
 		(theGame setCursor: waitCursor TRUE)
@@ -61,7 +61,7 @@
 				(skipIt
 					(theIconBar enable:)
 					(self newRoom: rTestRoom)
-					(music dispose:)
+					(theMusic dispose:)
 				)
 				(watchIt (Sound pause: FALSE)
 				)

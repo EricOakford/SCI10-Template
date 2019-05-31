@@ -22,9 +22,9 @@
 		nsRight 0
 		nsBottom 0
 		state $0000
-		cursor 999
+		cursor ARROW_CURSOR
 		type $4000
-		message 4
+		message verbUse
 		modifiers $0000
 		signal $0000
 		helpStr 0
@@ -52,12 +52,12 @@
 		(= temp1 (- nsLeft 2))
 		(= temp2 (+ nsBottom 1))
 		(= temp3 (+ nsRight 1))
-		(Graph grDRAW_LINE temp0 temp1 temp0 temp3 temp4 -1 -1)
-		(Graph grDRAW_LINE temp0 temp3 temp2 temp3 temp4 -1 -1)
-		(Graph grDRAW_LINE temp2 temp3 temp2 temp1 temp4 -1 -1)
-		(Graph grDRAW_LINE temp2 temp1 temp0 temp1 temp4 -1 -1)
+		(Graph GDrawLine temp0 temp1 temp0 temp3 temp4 -1 -1)
+		(Graph GDrawLine temp0 temp3 temp2 temp3 temp4 -1 -1)
+		(Graph GDrawLine temp2 temp3 temp2 temp1 temp4 -1 -1)
+		(Graph GDrawLine temp2 temp1 temp0 temp1 temp4 -1 -1)
 		(Graph
-			grUPDATE_BOX
+			GShowBits
 			(- nsTop 2)
 			(- nsLeft 2)
 			(+ nsBottom 2)
@@ -85,7 +85,7 @@
 	
 	(method (doVerb theVerb)
 		(switch theVerb
-			(verbLook (Printf 995 0 description))
+			(verbLook (Printf "%s" description))
 		)
 	)
 )
@@ -172,7 +172,7 @@
 			(= inventoryFirst (inventory next: inventoryFirst))
 		)
 		(if (not temp0)
-			(Printf 995 1 normalHeading empty)
+			(Printf "%s %s" normalHeading empty)
 			(return)
 		)
 		(if (> (* (= temp16 (Sqrt temp0)) temp16) temp0)
@@ -443,14 +443,14 @@
 							(if (systemWindow respondsTo: #eraseOnly)
 								(= systemWindowEraseOnly (systemWindow eraseOnly?))
 								(systemWindow eraseOnly: 1)
-								(Printf 995 0 (theCurIcon helpStr?))
+								(Printf "%s" (theCurIcon helpStr?))
 								(systemWindow eraseOnly: systemWindowEraseOnly)
 							else
-								(Printf 995 0 (theCurIcon helpStr?))
+								(Printf "%s" (theCurIcon helpStr?))
 							)
 						)
 						(helpIconItem signal: (& (helpIconItem signal?) $ffef))
-						(theGame setCursor: 999)
+						(theGame setCursor: ARROW_CURSOR)
 					else
 						(if (== theCurIcon okButton) (break))
 						(cond 

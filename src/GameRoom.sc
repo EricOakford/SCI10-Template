@@ -9,26 +9,36 @@
 (use User)
 (use System)
 
+(use Main)
+(use Intrface)
+(use PolyPath)
+(use Game)
+(use User)
+(use System)
+
 (public
 	eRS 0
+	sWI 1
+	sWO 2
+	sRW 3
 )
 
-(procedure (localproc_0404)
+(local
+	local0
+	local1
+)
+(procedure (localproc_0322)
 	(cond 
 		((< (ego x?) 0) (ego x: (+ 0 (* (ego xStep?) 2))))
 		((> (ego x?) 319) (ego x: (- 319 (* (ego xStep?) 2))))
 	)
 )
 
-(procedure (localproc_0451)
+(procedure (localproc_036f)
 	(cond 
 		((< (ego y?) (curRoom horizon?)) (ego y: (+ (curRoom horizon?) (* (ego yStep?) 2))))
 		((> (ego y?) 189) (ego y: (- 189 (* (ego yStep?) 2))))
 	)
-)
-
-(instance theControls of Controls
-	(properties)
 )
 
 (class GameRoom of Room
@@ -40,7 +50,7 @@
 		initialized 0
 		lookStr 0
 		picture 0
-		style $ffff
+		style $000a
 		horizon 0
 		controls 0
 		north 0
@@ -52,57 +62,17 @@
 		vanishingX 160
 		vanishingY -30000
 		obstacles 0
+		x 0
+		y 0
 	)
 	
-	(method (init &tmp temp0 temp1)
+	(method (init &tmp [temp0 2])
 		(= number curRoomNum)
-		(= controls theControls)
 		(= perspective picAngle)
 		(if picture (self drawPic: picture))
 		(cond 
 			((not (cast contains: ego)) 0)
 			(script 0)
-			((OneOf style 11 12 13 14)
-				(= temp0
-					(+
-						1
-						(/
-							(CelWide
-								((User alterEgo?) view?)
-								((User alterEgo?) loop?)
-								((User alterEgo?) cel?)
-							)
-							2
-						)
-					)
-				)
-				(= temp1
-					(+
-						1
-						(/
-							(CelHigh
-								((User alterEgo?) view?)
-								((User alterEgo?) loop?)
-								((User alterEgo?) cel?)
-							)
-							2
-						)
-					)
-				)
-				(switch ((User alterEgo?) edgeHit?)
-					(1 ((User alterEgo?) y: 188))
-					(4
-						((User alterEgo?) x: (- 319 temp0))
-					)
-					(3
-						((User alterEgo?) y: (+ horizon temp1))
-					)
-					(2
-						((User alterEgo?) x: (+ 0 temp0))
-					)
-				)
-				((User alterEgo?) edgeHit: 0)
-			)
 			(else (self setScript: eRS 0 prevRoomNum))
 		)
 	)
@@ -120,9 +90,19 @@
 						(4 west)
 					)
 				)
-				(self setScript: lRS 0 temp0)
+				(HandsOff)
+				(if (== temp0 -1)
+					(self setScript: sRW 0 ((User alterEgo?) edgeHit?))
+				else
+					(self setScript: lRS 0 temp0)
+				)
 			)
 		)
+	)
+	
+	(method (posn theX theY)
+		(= x theX)
+		(= y theY)
 	)
 )
 
@@ -133,31 +113,33 @@
 		(switch (= state newState)
 			(0
 				(HandsOff)
-				(= temp1 (CelWide (ego view?) (ego loop?) (ego cel?)))
+				(= temp1
+					(/ (CelWide (ego view?) (ego loop?) (ego cel?)) 2)
+				)
 				(switch register
 					((client north?)
 						(curRoom newRoom: register)
 					)
-					((client south:)
+					((client south?)
 						(= temp0 (CelHigh (ego view?) (ego loop?) (ego cel?)))
-						(if (IsObject (ego _head?))
+						(if (IsObject (ego head?))
 							(= temp0
 								(+
 									temp0
 									(CelHigh
-										((ego _head?) view?)
-										((ego _head?) loop?)
-										((ego _head?) cel?)
+										((ego head?) view?)
+										((ego head?) loop?)
+										((ego head?) cel?)
 									)
 								)
 							)
 						)
 						(ego setMotion: PolyPath (ego x?) (+ 189 temp0) self)
 					)
-					((client east:)
+					((client east?)
 						(ego setMotion: PolyPath (+ 319 temp1) (ego y?) self)
 					)
-					((client west:)
+					((client west?)
 						(ego setMotion: PolyPath (- 0 temp1) (ego y?) self)
 					)
 				)
@@ -179,32 +161,34 @@
 				(= cycles 0)
 				(HandsOff)
 				(= temp0 (CelHigh (ego view?) (ego loop?) (ego cel?)))
-				(= temp1 (CelWide (ego view?) (ego loop?) (ego cel?)))
+				(= temp1
+					(/ (CelWide (ego view?) (ego loop?) (ego cel?)) 2)
+				)
 				(switch register
 					((client north?)
-						(localproc_0404)
+						(localproc_0322)
 						(ego y: (+ (curRoom horizon?) (ego yStep?)))
 						(= cycles 1)
 					)
-					((client south:)
-						(localproc_0404)
+					((client south?)
+						(localproc_0322)
 						(ego
 							y: (+ 189 temp0)
-							setMotion: nBMT (ego x?) (- 189 (* (ego yStep?) 2)) self
+							setMotion: PolyPath (ego x?) (- 189 (* (ego yStep?) 2)) self
 						)
 					)
-					((client east:)
-						(localproc_0451)
+					((client east?)
+						(localproc_036f)
 						(ego
-							x: (+ 319 (/ temp1 2))
-							setMotion: nBMT (- 319 (* (ego xStep?) 2)) (ego y?) self
+							x: (+ 319 temp1)
+							setMotion: PolyPath (- 319 (* (ego xStep?) 2)) (ego y?) self
 						)
 					)
-					((client west:)
-						(localproc_0451)
+					((client west?)
+						(localproc_036f)
 						(ego
-							x: (- 0 (/ temp1 2))
-							setMotion: nBMT (+ 0 (* (ego xStep?) 2)) (ego y?) self
+							x: (- 0 temp1)
+							setMotion: PolyPath (+ 0 (* (ego xStep?) 2)) (ego y?) self
 						)
 					)
 					(else  (= cycles 1))
@@ -215,13 +199,93 @@
 	)
 )
 
-(instance nBMT of MoveTo
+(instance sWO of Script
 	(properties)
 	
-	(method (doit)
-		(super doit:)
-		(if (client isBlocked:) (self moveDone:))
+	(method (changeState newState)
+		(switch (= state newState)
+			(0
+				(HandsOff)
+				(ego
+					ignoreActors: 1
+					setMotion: PolyPath (curRoom x?) (curRoom y?) self
+				)
+			)
+			(1
+				(curRoom posn: 0 0 setScript: 0 newRoom: register)
+			)
+		)
 	)
 )
 
+(instance sWI of Script
+	(properties)
+	
+	(method (changeState newState &tmp [temp0 2])
+		(switch (= state newState)
+			(0
+				(HandsOff)
+				(ego setMotion: PolyPath (curRoom x?) (curRoom y?) self)
+			)
+			(1
+				(curRoom posn: 0 0)
+				(HandsOn)
+				(ego ignoreActors: 0 setPri: -1)
+				(self dispose:)
+			)
+		)
+	)
+)
 
+(instance sRW of Script
+	(properties)
+	
+	(method (changeState newState &tmp egoX egoY temp2 temp3)
+		(switch (= state newState)
+			(0
+				(= local0 (= egoX (ego x?)))
+				(= local1 (= egoY (ego y?)))
+				(= temp3 (CelWide (ego view?) (ego loop?) (ego cel?)))
+				(= temp2 (CelHigh (ego view?) (ego loop?) (ego cel?)))
+				(if (IsObject (ego head?))
+					(= temp2
+						(+
+							temp2
+							(CelHigh
+								((ego head?) view?)
+								((ego head?) loop?)
+								((ego head?) cel?)
+							)
+						)
+					)
+				)
+				(switch register
+					(1 (= local1 (+ local1 5)))
+					(2
+						(= egoX (+ egoX temp3))
+						(= local0 (- local0 5))
+					)
+					(3
+						(= egoY (+ egoY temp2))
+						(= local1 (- local1 5))
+					)
+					(4
+						(= egoX (- egoX temp3))
+						(= local0 (+ local0 5))
+					)
+				)
+				(ego ignoreActors: 1 setMotion: PolyPath egoX egoY self)
+			)
+			(1 (= seconds 2))
+			(2
+				(ego setMotion: PolyPath local0 local1 self)
+			)
+			(3
+				(ego ignoreActors: 0)
+				(Print 896 0)
+				(HandsOn)
+				(self dispose:)
+			)
+		)
+	)
+)

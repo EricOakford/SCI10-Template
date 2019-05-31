@@ -33,8 +33,8 @@
 	
 	(method (handleEvent event &tmp temp0 temp1 [temp2 2] castFirst [temp5 80] temp85 temp86)
 		(switch (event type?)
-			(evKEYBOARD
-				(event claimed: 1)
+			(keyDown
+				(event claimed: TRUE)
 				(switch (event message?)
 					(KEY_ALT_t
 						;(Bset 4)
@@ -124,7 +124,7 @@ ILLBITS=$%x"
 						(if singleStepOn (theGame doit:))
 					)
 					(KEY_ALT_l
-						(if (> (MemoryInfo 0) 1536)
+						(if (> (MemoryInfo LargestPtr) 1536)
 							((ScriptID LOGGER) doit: @sysLogPath)
 						else
 							(Print "Not Enough Memory!!")
@@ -154,7 +154,7 @@ ILLBITS=$%x"
 					)
 					(KEY_ALT_w (CreateObject doit:))
 					(KEY_ALT_x (= quit TRUE))
-					(else  (event claimed: 0))
+					(else  (event claimed: FALSE))
 				)
 			)
 		)

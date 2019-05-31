@@ -745,7 +745,7 @@
 			)
 			(= temp2 (- (WordAt temp6 2) x))
 			(= temp3 (- (WordAt temp6 3) y))
-			(Memory 3 temp6)
+			(Memory MDisposePtr temp6)
 		)
 		(cond 
 			((or temp2 temp3) (self setMotion: MoveTo (+ x temp2) (+ y temp3)))
