@@ -9,7 +9,7 @@
 (define TRUE		1)
 (define FALSE		0)
 
-/* Since this is not SCI0, this is unneeded
+/* Since this is SCI1.1, this is unneeded
 #ifdef SCI_0
 (define ENABLED		1)
 (define DISABLED	0)
@@ -403,6 +403,7 @@
 /*************************************************************************
  * Directions
  *************************************************************************/ 
+/* NOTE: Already defined in MENU.SH
 (define CENTER						0)
 (define UP							1)
 (define UPRIGHT						2)
@@ -412,7 +413,7 @@
 (define DOWNLEFT					6)
 (define LEFT						7)
 (define UPLEFT						8)
-
+*/
 // Cycle Directions
 (define cdFORWARD                   1)
 (define cdNONE                      0)

@@ -1,5 +1,5 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 812)
+(script# GAME_ROOM)
 (include game.sh)
 (use Main)
 (use Intrface)
@@ -43,25 +43,6 @@
 
 (class GameRoom of Room
 	(properties
-		script 0
-		number 0
-		timer 0
-		keep 0
-		initialized 0
-		lookStr 0
-		picture 0
-		style $000a
-		horizon 0
-		controls 0
-		north 0
-		east 0
-		south 0
-		west 0
-		curPic 0
-		picAngle 0
-		vanishingX 160
-		vanishingY -30000
-		obstacles 0
 		x 0
 		y 0
 	)
@@ -84,10 +65,10 @@
 			(
 				(= temp0
 					(switch ((User alterEgo?) edgeHit?)
-						(1 north)
-						(2 east)
-						(3 south)
-						(4 west)
+						(NORTH north)
+						(EAST east)
+						(SOUTH south)
+						(WEST west)
 					)
 				)
 				(HandsOff)
@@ -282,7 +263,6 @@
 			)
 			(3
 				(ego ignoreActors: 0)
-				(Print 896 0)
 				(HandsOn)
 				(self dispose:)
 			)

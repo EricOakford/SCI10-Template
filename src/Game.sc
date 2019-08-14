@@ -59,7 +59,7 @@
 	)
 )
 
-(instance sFeatures of EventHandler
+(instance theSortedFeatures of EventHandler
 	(properties)
 	
 	(method (delete param1)
@@ -221,7 +221,7 @@
 		; Initialize the Collections
 		((= cast theCast) add:)
 		((= features theFeatures) add:)
-		((= sortedFeatures sFeatures) add:)
+		((= sortedFeatures theSortedFeatures) add:)
 		((= sounds theSounds) add:)
 		((= regions theRegions) add:)
 		((= locales theLocales) add:)

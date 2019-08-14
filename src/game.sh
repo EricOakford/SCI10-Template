@@ -9,14 +9,33 @@
 ;View defines
 (define vEgo 0)
 
-;Script defines
-(define rTestRoom 98)
-(define rSpeedTest 99)
+;Game modules
+(enum
+	MAIN			;0
+	GAME_WINDOW		;1
+	DODISP			;2
+	GAME_ROOM		;3
+	SPEED_TEST		;4
+	GAME_CONTROLS	;5
+	GAME_INV		;6
+	GAME_EGO		;7
+	DEBUG			;8
+	GAME_ABOUT		;9
+	DEATHROOM		;10
+	GAME_ICONBAR	;11
+	GAME_INIT		;12
+	WHERE_TO		;13
+	DISPOSE_CODE	;14
+	COLOR_INIT		;15
+)
+
+;Actual rooms
 (define rTitle 100)
+(define rTestRoom 110)
 
 ;Pic defines
-(define pTestRoom 98)
 (define pSpeedTest 99)
+(define pTestRoom 110)
 
 ;Sound defines
 (define sOpening 1)

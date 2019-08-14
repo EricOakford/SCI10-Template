@@ -3,13 +3,14 @@
 (include game.sh)
 (use Intrface)
 (use Window)
-(use PalInit)
+(use ColorInit)
 (use PMouse)
 (use SlideIcon)
 (use BordWind)
 (use Feature)
 (use IconBar)
 (use GameEgo)
+(use BordWind)
 (use RandCyc)
 (use StopWalk)
 (use DCIcon)
@@ -34,12 +35,11 @@
 	Bclr 8
 	EgoHeadMove 9
 	SolvePuzzle 10
-	WindowlessPrint 11
-	AimToward 12
-	VerbFail 13
-	proc0_17 14
-	EGAOrVGA 15
-	EgoDead 16
+	AimToward 11
+	VerbFail 12
+	Say 13
+	EGAOrVGA 14
+	EgoDead 15
 )
 
 (local
@@ -155,7 +155,7 @@
 	pMouseX
 	pMouseY
 	gEgoHead
-	gStopGroop
+	theStopGroop
 	[gameFlags 10]
 	myTextColor
 	myEGABordColor
@@ -167,11 +167,11 @@
 	myHighlightColor
 	debugging
 )
-(procedure (NormalEgo param1 param2)
+(procedure (NormalEgo theView theLoop)
 	(if (> argc 0)
-		(if (!= param1 -1) (ego view: param1))
-		(if (and (> argc 1) (!= param2 -1))
-			(ego loop: param2)
+		(if (!= theView -1) (ego view: theView))
+		(if (and (> argc 1) (!= theLoop -1))
+			(ego loop: theLoop)
 		)
 	)
 	(ego
@@ -191,12 +191,12 @@
 )
 
 
-(procedure (HandsOff &tmp theIconBarCurIcon)
+(procedure (HandsOff &tmp oldIcon)
 	(User canControl: FALSE canInput: FALSE)
 	(ego setMotion: 0)
-	(= theIconBarCurIcon (theIconBar curIcon?))
+	(= oldIcon (theIconBar curIcon?))
 	(theIconBar disable: ICON_WALK ICON_LOOK ICON_DO ICON_TALK ICON_ITEM ICON_INVENTORY ICON_SMELL ICON_TASTE)
-	(theIconBar curIcon: theIconBarCurIcon)
+	(theIconBar curIcon: oldIcon)
 	(if (not (HaveMouse))
 		(= pMouseX ((User curEvent?) x?))
 		(= pMouseY ((User curEvent?) y?))
@@ -226,8 +226,13 @@
 	(return (u> (MemoryInfo LargestPtr) memSize))
 )
 
-(procedure (IsObjectOnControl param1 param2)
-	(return (if (& (param1 onControl: 1) param2) (return 1) else 0))
+(procedure (IsObjectOnControl obj param2)
+	(return
+		(if (& (obj onControl: TRUE) param2)
+			(return TRUE)
+			else FALSE
+		)
+	)
 )
 
 (procedure (Btst flagEnum)
@@ -270,79 +275,6 @@
 		(theGame changeScore: points)
 		(Bset flag)
 		(pointsSound play:)
-	)
-)
-
-(procedure (WindowlessPrint param1 &tmp temp0 temp1 temp2 temp3 temp4 temp5 temp6 temp7 temp8)
-	(return
-		(if (== argc 1)
-			(Display 0 26 108 [param1 0])
-		else
-			(= temp4 (= temp5 -1))
-			(= temp0 0)
-			(= temp1 68)
-			(= temp2 69)
-			(= temp3 -1)
-			(= temp6 myVGABordColor)
-			(= temp7 0)
-			(= temp8 1)
-			(while (< temp8 argc)
-				(switch [param1 temp8]
-					(30
-						(= temp0 [param1 (++ temp8)])
-					)
-					(33
-						(= temp2 (+ (= temp1 [param1 (++ temp8)]) 1))
-					)
-					(70
-						(= temp3 [param1 (++ temp8)])
-					)
-					(67
-						(= temp4 [param1 (++ temp8)])
-						(= temp5 [param1 (++ temp8)])
-					)
-					(28
-						(= temp6 [param1 (++ temp8)])
-					)
-					(29
-						(= temp7 [param1 (++ temp8)])
-					)
-				)
-				(++ temp8)
-			)
-			(= temp8
-				(Display
-					[param1 0]
-					dsCOORD
-					temp4
-					temp5
-					dsCOLOR
-					temp7
-					dsWIDTH
-					temp3
-					dsALIGN
-					temp0
-					dsFONT
-					temp2
-					dsSAVEPIXELS
-				)
-			)
-			(Display
-				[param1 0]
-				dsCOORD
-				temp4
-				temp5
-				dsCOLOR
-				temp6
-				dsWIDTH
-				temp3
-				dsALIGN
-				temp0
-				dsFONT
-				temp1
-			)
-			(return temp8)
-		)
 	)
 )
 
@@ -391,7 +323,7 @@
 	(theGame setCursor: temp3)
 )
 
-(procedure (proc0_17 param1 param2 param3 &tmp [temp0 500])
+(procedure (Say param1 param2 param3 &tmp [temp0 500])
 	(if (u< param2 1000)
 		(GetFarText param2 param3 @temp0)
 	else
@@ -425,7 +357,7 @@
 	(= normalCursor ARROW_CURSOR)
 	(theGame setCursor: normalCursor TRUE)
 
-	(sounds eachElementDo: #stop)	; Stop any other theMusic
+	(sounds eachElementDo: #stop)	; Stop any other music
 	(theMusic number: deathMusic play:)
 	(repeat
 		(= printRet
@@ -477,11 +409,17 @@
 			)
 			(verbUse
 				(switch theItem
-					(iCoin (Print "You pay yourself some money."))
-					(iBomb (EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea..."))
+					(iCoin
+						(Print "You pay yourself some money.")
+					)
+					(iBomb
+						(EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea...")
+					)
 				)
 			)
-			(else  (super doVerb: theVerb))
+			(else
+				(super doVerb: theVerb)
+			)
 		)
 	)
 )
@@ -511,7 +449,7 @@
 
 (instance pointsSound of Sound
 	(properties
-		flags $0001
+		flags mNOPAUSE
 		number sScore
 		priority 15
 	)
@@ -564,13 +502,7 @@
 	)
 	
 	(method (init &tmp temp0)
-		(= debugging TRUE)
-		(= systemWindow gameWindow)
-		(PalInit)
-		(= version {x.yyy.zzz})
-		(= gStopGroop stopGroop)
-		(= deathMusic sDeath)
-;		(= useSortedFeatures TRUE)
+		(= theStopGroop stopGroop)
 		(super init:)
 		(StrCpy @sysLogPath {})
 		(= doVerbCode gameDoVerbCode)
@@ -586,105 +518,14 @@
 			moveSpeed: (self egoMoveSpeed?)
 			cycleSpeed: (self egoMoveSpeed?)
 		)
-		(User alterEgo: ego canControl: FALSE canInput: FALSE)
+		;Moved the icon bar, inventory, and control panel into their own scripts.
+		((ScriptID GAME_ICONBAR 0) init:)
+		((ScriptID GAME_INV 0) init:)
+		((ScriptID GAME_CONTROLS 0) init:)	
 		((= theMusic music) owner: self priority: 15 init:)
 		((= soundFx longSong2) owner: self init:)
-		(= waitCursor HAND_CURSOR)
-		(= possibleScore 0)
-		(= userFont 1)
 		(StatusLine code: statusCode disable:) ;hide the status code at startup
-		(= musicChannels (DoSound NumVoices))
-		(if
-			(and
-				(>= (= colorCount (Graph GDetect)) 2)
-				(<= colorCount 16)
-			)
-			(Bclr fIsVGA)
-		else
-			(Bset fIsVGA)
-		)
-		(gameWindow
-			color: myTextColor
-			back: (EGAOrVGA myVGABackColor myEGABackColor)
-			topBordColor: myEGABordColor2
-			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
-			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
-		)
-		(gcWin
-			color: myTextColor
-			back: (EGAOrVGA myVGABackColor myEGABackColor)
-			topBordColor: myEGABordColor2
-			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
-			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
-		)
-		(invWin
-			color: myTextColor
-			back: (EGAOrVGA myEGABackColor myEGABordColor)
-			topBordColor: (EGAOrVGA myVGABackColor myEGABordColor2)
-			lftBordColor: (EGAOrVGA myVGABordColor myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myEGABordColor myEGABackColor)
-			botBordColor: (EGAOrVGA myTextColor myEGABackColor)
-			insideColor: (EGAOrVGA myEGABordColor myEGABackColor)
-			topBordColor2: myTextColor
-			lftBordColor2: myTextColor
-			botBordColor2: (EGAOrVGA myVGABackColor myEGABordColor2)
-			rgtBordColor2: (EGAOrVGA myVGABordColor2 myEGABordColor2)
-			botBordHgt: 25
-		)
-		((= theIconBar IconBar)
-			add: icon0 icon1 icon2 icon3 icon6 icon7 icon4 icon5 icon8 icon9
-			eachElementDo: #init
-			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myVGABackColor myEGABackColor)
-			curIcon: icon0
-			useIconItem: icon4
-			helpIconItem: icon9
-			disable:
-		)
-		(icon5 message: (if (HaveMouse) 3840 else 9))
-		(Inventory
-			init:
-			add:
-				Coin
-				Bomb
-				invLook
-				invHand
-				invSelect
-				invHelp
-				ok
-			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myEGABordColor myEGABackColor)
-			eachElementDo: #init
-			window: invWin
-			helpIconItem: invHelp
-			selectIcon: invSelect
-			okButton: ok
-		)
-		(GameControls
-			window: gcWin
-			add:
-				iconOk
-				(detailSlider theObj: self selector: #detailLevel yourself:)
-				(volumeSlider theObj: self selector: #masterVolume yourself:)
-				speedSlider
-				(iconSave theObj: self selector: #save yourself:)
-				(iconRestore theObj: self selector: #restore yourself:)
-				(iconRestart theObj: self selector: #restart yourself:)
-				(iconQuit theObj: self selector: #quitGame yourself:)
-				(iconAbout theObj: self selector: #doit yourself:)
-				iconHelp
-			helpIconItem: iconHelp
-			curIcon: iconRestore
-			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myVGABordColor myEGABordColor)
-		)
-		(Coin owner: ego)
-		(Bomb owner: ego)
-		(= startingRoom rTitle)
-		(theIconBar disable: hide:)
-		(self newRoom: rSpeedTest)
+		((ScriptID GAME_INIT 0) init:)
 	)
 	
 	(method (doit)
@@ -703,7 +544,7 @@
 	
 	(method (startRoom roomNum)
 		(if pMouse (pMouse stop:))
-		((ScriptID 801) doit: roomNum)
+		((ScriptID DISPOSE_CODE) doit: roomNum)
 		;EO: Commenting this out until I can figure out how to not trigger this when
 		;changing rooms.
 ;;;		(if
@@ -743,10 +584,10 @@
 			(if (event claimed?) (return))
 			(switch (event type?)
 				(keyDown
-					((ScriptID 800) handleEvent: event)
+					((ScriptID DEBUG) handleEvent: event)
 				)
 				(mouseDown
-					((ScriptID 800) handleEvent: event)
+					((ScriptID DEBUG) handleEvent: event)
 				)
 			)
 		else
@@ -759,13 +600,13 @@
 				(keyDown
 					(switch (event message?)
 						(TAB
-							(if (not (& (icon5 signal?) $0004))
-								(Inventory showSelf: ego)
+							(if (not (& ((theIconBar at: ICON_INVENTORY) signal?) DISABLED))
+								(inventory showSelf: ego)
 							)
 						)
 						(SHIFTTAB
-							(if (not (& (icon5 signal?) $0004))
-								(Inventory showSelf: ego)
+							(if (not (& ((theIconBar at: ICON_INVENTORY) signal?) DISABLED))
+								(inventory showSelf: ego)
 							)
 						)
 						(KEY_CONTROL
@@ -819,138 +660,12 @@
 		)
 	)
 	
+	(method (showAbout)
+		((ScriptID GAME_ABOUT 0) doit:)
+	)
+	
 	(method (pragmaFail)
 		(if (User canInput:) (VerbFail)
-		)
-	)
-)
-
-(instance ok of IconItem
-	(properties
-		view 901
-		loop 3
-		cel 0
-		nsLeft 40
-		cursor ARROW_CURSOR
-		signal $0043
-		helpStr {Select this Icon to close this window.}
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
-		)
-		(super init:)
-	)
-)
-
-(instance invLook of IconItem
-	(properties
-		view 901
-		loop 2
-		cel 0
-		cursor 19
-		message verbLook
-		helpStr {Select this Icon then select an inventory item you'd like a description of.}
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
-		)
-		(super init:)
-	)
-)
-
-(instance invHand of IconItem
-	(properties
-		view 901
-		loop 0
-		cel 0
-		cursor 20
-		message verbDo
-		helpStr {This allows you to do something to an item.}
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
-		)
-		(super init:)
-	)
-)
-
-(instance invHelp of IconItem
-	(properties
-		view 901
-		loop 1
-		cel 0
-		cursor 29
-		message verbHelp
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
-		)
-		(super init:)
-	)
-)
-
-(instance invSelect of IconItem
-	(properties
-		view 901
-		loop 4
-		cel 0
-		cursor ARROW_CURSOR
-		helpStr {This allows you to select an item.}
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
-		)
-		(super init:)
-	)
-)
-
-(instance Coin of InvItem
-	(properties
-		view 700
-		cel 0
-		cursor 1
-		signal $0002
-		description {the buckazoid coin}
-		owner 40
-	)
-	(method (doVerb theVerb param2)
-		(switch theVerb
-			(verbLook
-				(Print "It's a buckazoid coin.")
-			)
-		)
-	)
-)
-
-(instance Bomb of InvItem
-	(properties
-		view 700
-		cel 1
-		cursor 22
-		signal $0002
-		description {the unstable ordinance}
-		owner 40
-	)
-	(method (doVerb theVerb param2)
-		(switch theVerb
-			(verbLook
-				(Print "It's a piece of unstable ordinance.")
-			)
 		)
 	)
 )
@@ -961,164 +676,6 @@
 	)
 )
 
-(instance icon0 of IconItem
-	(properties
-		view 900
-		loop 0
-		cel 0
-		cursor 6
-		message verbWalk
-		signal $0041
-		helpStr {This icon is for walking.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
-	)
-)
-
-(instance icon1 of IconItem
-	(properties
-		view 900
-		loop 1
-		cel 0
-		cursor 19
-		message verbLook
-		signal $0041
-		helpStr {This icon is for looking.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
-	)
-)
-
-(instance icon2 of IconItem
-	(properties
-		view 900
-		loop 2
-		cel 0
-		cursor 20
-		message verbDo
-		signal $0041
-		helpStr {This icon is for doing.}
-		maskView 900
-		maskLoop 14
-	)
-)
-
-(instance icon3 of IconItem
-	(properties
-		view 900
-		loop 3
-		cel 0
-		cursor 7
-		message verbTalk
-		signal $0041
-		helpStr {This icon is for talking.}
-		maskView 900
-		maskLoop 14
-		maskCel 3
-	)
-)
-
-(instance icon4 of IconItem
-	(properties
-		view 900
-		loop 4
-		cel 0
-		cursor 999
-		message verbUse
-		signal $0041
-		helpStr {This window displays the current inventory item.}
-		maskView 900
-		maskLoop 14
-		maskCel 4
-	)
-)
-
-(instance icon5 of IconItem
-	(properties
-		view 900
-		loop 5
-		cel 0
-		cursor 999
-		type $0000
-		message 0
-		signal $0043
-		helpStr {This icon brings up the inventory window.}
-		maskView 900
-		maskLoop 14
-		maskCel 2
-	)
-	
-	(method (select)
-		(if (super select:) (Inventory showSelf: ego))
-	)
-)
-
-(instance icon6 of IconItem
-	(properties
-		view 900
-		loop 10
-		cel 0
-		cursor 30
-		message verbSmell
-		signal $0041
-		helpStr {This icon is for smelling.}
-		maskView 900
-		maskLoop 14
-	)
-)
-
-(instance icon7 of IconItem
-	(properties
-		view 900
-		loop 11
-		cel 0
-		cursor 31
-		message verbTaste
-		signal $0041
-		helpStr {This icon is for tasting.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
-	)
-)
-
-(instance icon8 of IconItem
-	(properties
-		view 900
-		loop 7
-		cel 0
-		cursor 999
-		message 8
-		signal $0043
-		helpStr {This icon brings up the control panel.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
-	)
-	
-	(method (select)
-		(if (super select:)
-			(theIconBar hide:)
-			(GameControls show:)
-		)
-	)
-)
-
-(instance icon9 of IconItem
-	(properties
-		view 900
-		loop 9
-		cel 0
-		cursor 29
-		message verbHelp
-		signal $0003
-		helpStr {This icon tells you about other icons.}
-		maskView 900
-		maskLoop 14
-	)
-)
 
 (instance gameDoVerbCode of Code
 	(properties)
@@ -1145,315 +702,5 @@
 			(param1 sightAngle: 90)
 		)
 		(if (== (param1 actions?) 26505) (param1 actions: 0))
-	)
-)
-
-(instance gameWindow of BorderWindow
-	(properties)
-)
-
-(instance invWin of InsetWindow
-	(properties)
-)
-
-(instance gcWin of BorderWindow
-	(properties)
-	
-	(method (open &tmp temp0 temp1 temp2 temp3 temp4 temp5
-			temp6 temp7 temp8 temp9 temp10 temp11 temp12
-			[temp13 15] [temp28 4]
-			)
-			
-		(self
-			top: (/ (- 200 (+ (CelHigh 947 1 1) 6)) 2)
-			left: (/ (- 320 (+ 151 (CelWide 947 0 1))) 2)
-			bottom:
-				(+
-					(CelHigh 947 1 1)
-					6
-					(/ (- 200 (+ (CelHigh 947 1 1) 6)) 2)
-				)
-			right:
-				(+
-					151
-					(CelWide 947 0 1)
-					(/ (- 320 (+ 151 (CelWide 947 0 1))) 2)
-				)
-			priority: 15
-		)
-		(super open:)
-		(DrawCel 947 0 5
-			(+
-				(/
-					(-
-						(- (+ 151 (CelWide 947 0 1)) (+ 4 (CelWide 947 1 1)))
-						(CelWide 947 0 5)
-					)
-					2
-				)
-				4
-				(CelWide 947 1 1)
-			)
-			3 15
-		)
-		(DrawCel 947 1 1 4 3 15)
-		(DrawCel 947 1 0 94 38 15)
-		(DrawCel 947 1 0 135 38 15)
-		(DrawCel 947 0 4 63 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
-		(DrawCel 947 0 3 101 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
-		(DrawCel 947 0 2 146 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
-		(Graph GShowBits 12 1 15 (+ 151 (CelWide 947 0 1)) 1)
-		(= temp4 (+ (= temp1 (+ 46 (CelHigh 947 0 1))) 13))
-		(= temp3
-			(+
-				(= temp2 (+ 10 (CelWide 947 1 1)))
-				(-
-					(+ 151 (CelWide 947 0 1))
-					(+ 10 (CelWide 947 1 1) 6)
-				)
-			)
-		)
-		(= temp11 15)
-		(= temp5 0)
-		(= temp7 (EGAOrVGA myEGABackColor myEGABackColor))
-		(= temp10 (EGAOrVGA myVGABordColor myEGABackColor))
-		(= temp9 (EGAOrVGA myVGABordColor2 myEGABordColor2))
-		(= temp8 myEGABordColor2)
-		(= temp0 3)
-		(= temp6 3)
-		(Graph
-			GFillRect
-			temp1
-			temp2
-			(+ temp4 1)
-			(+ temp3 1)
-			temp6
-			temp5
-			temp11
-		)
-		(= temp1 (- temp1 temp0))
-		(= temp2 (- temp2 temp0))
-		(= temp3 (+ temp3 temp0))
-		(= temp4 (+ temp4 temp0))
-		(Graph
-			GFillRect
-			temp1
-			temp2
-			(+ temp1 temp0)
-			temp3
-			temp6
-			temp7
-			temp11
-		)
-		(Graph
-			GFillRect
-			(- temp4 temp0)
-			temp2
-			temp4
-			temp3
-			temp6
-			temp8
-			temp11
-		)
-		(= temp12 0)
-		(while (< temp12 temp0)
-			(Graph
-				GDrawLine
-				(+ temp1 temp12)
-				(+ temp2 temp12)
-				(- temp4 (+ temp12 1))
-				(+ temp2 temp12)
-				temp10
-				temp11
-				-1
-			)
-			(Graph
-				GDrawLine
-				(+ temp1 temp12)
-				(- temp3 (+ temp12 1))
-				(- temp4 (+ temp12 1))
-				(- temp3 (+ temp12 1))
-				temp9
-				temp11
-				-1
-			)
-			(++ temp12)
-		)
-		(Graph
-			GShowBits
-			temp1
-			temp2
-			(+ temp4 1)
-			(+ temp3 1)
-			1
-		)
-		(Format @temp13 "Score: %d of %d" score possibleScore)
-		(TextSize @temp28 @temp13 999 0)
-		(Display @temp13
-			p_font 999
-			p_color (EGAOrVGA myVGABackColor myEGABordColor2)
-			p_at
-			(+ 10
-				(CelWide 947 1 1)
-				(/
-					(-
-						(-
-							(+ 151 (CelWide 947 0 1))
-							(+ 10 (CelWide 947 1 1) 6)
-						)
-						[temp28 3]
-					)
-					2
-				)
-			)
-			(+ 46 (CelHigh 947 0 1) 3)
-		)
-	)
-)
-
-(instance detailSlider of Slider
-	(properties
-		view 947
-		loop 0
-		cel 1
-		nsLeft 67
-		nsTop 37
-		signal $0280
-		helpStr {The graphics detail level.}
-		sliderView 947
-		yStep 2
-		topValue 3
-	)
-)
-
-(instance volumeSlider of Slider
-	(properties
-		view 947
-		loop 0
-		cel 1
-		nsLeft 107
-		nsTop 37
-		signal $0080
-		helpStr {Overall sound volume.}
-		sliderView 947
-		yStep 2
-		topValue 15
-	)
-)
-
-(instance speedSlider of Slider
-	(properties
-		view 947
-		loop 0
-		cel 1
-		nsLeft 147
-		nsTop 37
-		signal $0280
-		helpStr {The speed at which the player character moves.}
-		sliderView 947
-		yStep 2
-		bottomValue 15
-	)
-	
-	(method (doit param1)
-		(if argc
-			(theGame egoMoveSpeed: param1)
-			(ego
-				moveSpeed: (theGame egoMoveSpeed?)
-				cycleSpeed: (theGame egoMoveSpeed?)
-			)
-		)
-		(theGame egoMoveSpeed?)
-	)
-)
-
-(instance iconSave of ControlIcon
-	(properties
-		view 947
-		loop 2
-		cel 0
-		nsLeft 8
-		nsTop 6
-		message 7
-		signal $01c3
-		helpStr {Allows you to save your game.}
-	)
-)
-
-(instance iconRestore of ControlIcon
-	(properties
-		view 947
-		loop 3
-		cel 0
-		nsLeft 8
-		nsTop 26
-		message 7
-		signal $01c3
-		helpStr {Allows you to restore a previously saved game.}
-	)
-)
-
-(instance iconRestart of ControlIcon
-	(properties
-		view 947
-		loop 4
-		cel 0
-		nsLeft 8
-		nsTop 46
-		message 7
-		signal $01c3
-		helpStr {Allows you to restart the game.}
-	)
-)
-
-(instance iconQuit of ControlIcon
-	(properties
-		view 947
-		loop 5
-		cel 0
-		nsLeft 8
-		nsTop 66
-		message 7
-		signal $01c3
-		helpStr {Allows you to quit the game.}
-	)
-)
-
-(instance iconAbout of ControlIcon
-	(properties
-		view 947
-		loop 6
-		cel 0
-		nsLeft 34
-		nsTop 106
-		message 7
-		signal $01c3
-		helpStr {Information about the game.}
-	)
-)
-
-(instance iconHelp of IconItem
-	(properties
-		view 947
-		loop 7
-		cel 0
-		nsLeft 8
-		nsTop 106
-		cursor 29
-		message 6
-		signal $0183
-	)
-)
-
-(instance iconOk of IconItem
-	(properties
-		view 947
-		loop 8
-		cel 0
-		nsLeft 8
-		nsTop 86
-		message 7
-		signal $01c3
-		helpStr {Returns you to the game.}
 	)
 )
