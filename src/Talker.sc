@@ -1,9 +1,8 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 928)
-(include game.sh)
+(include sci.sh)
 (use Main)
 (use Intrface)
-(use Sync)
 (use RandCyc)
 (use Actor)
 (use System)
@@ -46,45 +45,6 @@
 
 (class Talker of Prop
 	(properties
-		x 0
-		y 0
-		z 0
-		heading 0
-		noun 0
-		nsTop 0
-		nsLeft 0
-		nsBottom 0
-		nsRight 0
-		description 0
-		sightAngle 26505
-		actions 0
-		onMeCheck $6789
-		approachX 0
-		approachY 0
-		approachDist 0
-		_approachVerbs 26505
-		lookStr 0
-		yStep 2
-		view 0
-		loop 0
-		cel 0
-		priority 0
-		underBits 0
-		signal $0000
-		lsTop 0
-		lsLeft 0
-		lsBottom 0
-		lsRight 0
-		brTop 0
-		brLeft 0
-		brBottom 0
-		brRight 0
-		palette 0
-		cycleSpeed 0
-		script 0
-		cycler 0
-		timer 0
-		detailLevel 0
 		bust 0
 		eyes 0
 		mouth 0
@@ -123,7 +83,9 @@
 	)
 	
 	(method (dispose param1 &tmp theCaller)
-		(fastCast delete: self)
+		(fastCast delete: self release:)
+		(fastCast dispose:)
+		(= fastCast 0)
 		(if (or (not argc) param1)
 			(if (and mouth (mouth cycler?))
 				(if ((mouth cycler?) respondsTo: #cue)
@@ -132,7 +94,7 @@
 				(mouth setCycle: 0)
 			)
 			(cond 
-				(cDAudio (DoAudio Stop))
+				(cDAudio (DoAudio 3))
 				(modelessDialog (modelessDialog dispose:))
 			)
 			(if eyes (eyes setCycle: 0))
@@ -163,9 +125,9 @@
 	)
 	
 	(method (hide)
-		(Graph GRestoreBits underBits)
+		(Graph grRESTORE_BOX underBits)
 		(= underBits 0)
-		(Graph GReAnimate nsTop nsLeft nsBottom nsRight)
+		(Graph grREDRAW_BOX nsTop nsLeft nsBottom nsRight)
 	)
 	
 	(method (show &tmp temp0)
@@ -235,7 +197,7 @@
 		)
 		(if (not underBits)
 			(= underBits
-				(Graph GSaveBits nsTop nsLeft nsBottom nsRight 1)
+				(Graph grSAVE_BOX nsTop nsLeft nsBottom nsRight 1)
 			)
 		)
 		(= temp0 (PicNotValid))
@@ -271,7 +233,7 @@
 			)
 		)
 		(DrawCel view loop cel nsLeft nsTop -1)
-		(Graph GShowBits nsTop nsLeft nsBottom nsRight 1)
+		(Graph grUPDATE_BOX nsTop nsLeft nsBottom nsRight 1)
 		(PicNotValid temp0)
 	)
 	
@@ -285,20 +247,53 @@
 		else
 			(self startText: param1 param2 param3)
 		)
-		(fastCast add: self)
+		(if fastCast
+			(fastCast add: self)
+		else
+			(= fastCast (EventHandler new:))
+			(fastCast name: {fastCast} add: self)
+		)
 		(= ticks (+ ticks 60 (GetTime)))
 	)
 	
 	(method (startAudio param1 &tmp temp0)
-		(= temp0 param1)
-		(DoAudio WPlay temp0)
-		(if mouth (mouth setCycle: MouthSync temp0))
-		(= ticks (DoAudio Play temp0))
-		(if eyes (eyes setCycle: RTRandCycle ticks))
+		(asm
+			lap      param1
+			sat      temp0
+			pushi    2
+			pushi    1
+			push    
+			callk    DoAudio,  4
+			pToa     mouth
+			bnt      code_0452
+			pushi    #setCycle
+			pushi    2
+			class    40
+			push    
+			lst      temp0
+			pToa     mouth
+			send     8
+code_0452:
+			pushi    2
+			pushi    2
+			lst      temp0
+			callk    DoAudio,  4
+			aTop     ticks
+			pToa     eyes
+			bnt      code_046d
+			pushi    #setCycle
+			pushi    2
+			class    RTRandCycle
+			push    
+			pTos     ticks
+			pToa     eyes
+			send     8
+code_046d:
+			ret     
+		)
 	)
 	
 	(method (startText param1 param2 &tmp [temp0 500])
-		(if modelessDialog (modelessDialog dispose:))
 		(Format @temp0 param1 param2)
 		(= ticks (* 5 (StrLen @temp0)))
 		(if mouth (mouth setCycle: RTRandCycle ticks))
@@ -333,7 +328,8 @@
 							(CelHigh (param1 view?) (param1 loop?) (param1 cel?))
 						)
 				)
-				(Graph GShowBits
+				(Graph
+					grUPDATE_BOX
 					(+ (param1 nsTop?) nsTop)
 					(+ (param1 nsLeft?) nsLeft)
 					(+ (param1 nsBottom?) nsTop)

@@ -1,75 +1,55 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# POLYPATH)
+(script# 945)
 (include game.sh)
 (use Main)
 (use Motion)
 (use System)
 
 
-;; Path around an arbitrary set of obstacles, all of which are
-;; defined as Polygons and added to the obstacle list via the
-;; Rooms setObstacle method. 07/24/90 J.M.H.
-
-
-(class PolyPath   kindof Motion
-   (properties
-      value    2  ; current location in path
-      points   0  ; pointer to path array allocated in the kernel
-      finalX   0
-      finalY   0
-      obstacles 0
-   )
-
-   (method (init actor theX theY whoCares opt obstList &tmp [buffer 30])
-      (if argc                                
-         (= client actor)
-         (if (> argc 1)
-            (cond
-               ((>= argc 6)
-                  (= obstacles obstList)
-               )
-               ((not (IsObject obstacles))
-                  (= obstacles (curRoom obstacles?))
-               )
-            )
-            (if points (Memory MDisposePtr points))
-            (= points 
-               (AvoidPath 
-                  (actor x?)
-                  (actor y?) 
-                  (= finalX theX) (= finalY theY) 
-                  (if obstacles
-                     (obstacles elements?)
-                  )
-                  (if obstacles
-                     (obstacles size?)
-                  )
-                  (if (>= argc 5)
-                     opt
-                  else
-                     TRUE
-                  )
-               )
-            )
-            (if (> argc 3)
-               (= caller whoCares)
-            )
-         )
-         (self setTarget:)
-      )
-      (super init:)
-   )
-
+(class PolyPath of Motion
+	(properties
+		value 2
+		points 0
+		finalX 0
+		finalY 0
+		obstacles 0
+	)
 	
-   (method (dispose)
-      (if points (Memory MDisposePtr points))
-      (= points NULL)
-      (super dispose:)
-   )
-
+	(method (init theClient theFinalX theFinalY theCaller param5 theObstacles)
+		(if argc
+			(= client theClient)
+			(if (> argc 1)
+				(cond 
+					((>= argc 6) (= obstacles theObstacles))
+					((not (IsObject obstacles)) (= obstacles (curRoom obstacles?)))
+				)
+				(if points (Memory MDisposePtr points))
+				(= points
+					(AvoidPath
+						(theClient x?)
+						(theClient y?)
+						(= finalX theFinalX)
+						(= finalY theFinalY)
+						(if obstacles (obstacles elements?) else 0)
+						(if obstacles (obstacles size?) else 0)
+						(if (>= argc 5) param5 else 1)
+					)
+				)
+				(if (> argc 3) (= caller theCaller))
+			)
+		)
+		(self setTarget:)
+		(super init:)
+	)
+	
+	(method (dispose)
+		(if points (Memory MDisposePtr points))
+		(= points 0)
+		(super dispose:)
+	)
 	
 	(method (moveDone)
-		(if (== (WordAt points value) $7777)
+		(if (== (WordAt points value) 30583)
 			(super moveDone:)
 		else
 			(self init:)
@@ -77,7 +57,7 @@
 	)
 	
 	(method (setTarget)
-		(if (!= (WordAt points value) $7777)
+		(if (!= (WordAt points value) 30583)
 			(= x (WordAt points value))
 			(= y (WordAt points (++ value)))
 			(++ value)

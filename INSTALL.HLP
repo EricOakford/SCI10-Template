@@ -1,4 +1,4 @@
-\\		VIDEO DRIVERS
+\\ VIDEO DRIVERS
 \\vga320.drv
 VGA or IBM PS2 - 256 Colors
 \\vga320.hlp
@@ -15,12 +15,17 @@ You must have a VGA card and a VGA monitor.
 This selection will allow 256 shades of grey with
 320 x 200 pixel resolution. 
 \\ega320.drv
-EGA/VGA with RGB monitor - 16 Colors
+EGA/VGA - 16 Colors
 \\ega320.hlp
 This selection works with any adaptor that claims 
 hardware compatibility with an IBM Enhanced Graphics 
-Adaptor.  You do not need an EGA monitor.  Any monitor 
-compatible with an IBM Color Display will work. 
+Adaptor.
+\\ega640.drv
+EGA/VGA - 16 Colors
+\\ega640.hlp
+This selection works with any adaptor that claims 
+hardware compatibility with an IBM Enhanced Graphics 
+Adaptor.
 \\mcga320.drv
 IBM PS2, Models 25 & 30 - 16/256 Colors
 \\mcga320.hlp
@@ -73,7 +78,7 @@ Monochrome Graphics Adaptor (or compatible) and a
 monochrome monitor.  It uses various patterns to 
 produce 16 shades. 
 \\
-\\		AUDIO DRIVERS
+\\AUDIO DRIVERS
 \\
 \\audcdrom.drv
 CD-Audio
@@ -98,8 +103,8 @@ IBM PS1
 
 The Audio/Joystick Card can be used to playback
 the digitally-sampled sounds and voices of Sierra
-On-Line's CD-ROM based games.  This card may only
-be installed into IBM PS/1 computers.
+On-Line's games.  This card may only be installed
+into IBM PS/1 computers.
 
 \\audtandy.drv
 Tandy with DAC
@@ -108,22 +113,81 @@ Tandy with DAC
 
 Tandy computers that have a DAC can be used to
 playback the digitally-sampled sounds and voices
-of Sierra On-Line's CD-ROM based games.  However,
-due to computer hardware limitations, joystick
-control is not available when sampled sounds are
-played. 
+of Sierra On-Line's games.  However, due to
+computer hardware limitations, joystick control
+is not available when sampled sounds are played. 
+
+\\audpro.drv
+Pro Audio Spectrum
+\\audpro.hlp
+            PRO AUDIO SPECTRUM CARD
+
+The Pro Audio Spectrum card can be used to playback
+the digitally-sampled sounds and voices of Sierra
+On-Line's games.
+
+\\audpro16.drv
+Pro Audio Spectrum 16
+\\audpro16.hlp
+            PRO AUDIO SPECTRUM 16 CARD
+
+The Pro Audio Spectrum 16 card can be used to playback
+the digitally-sampled sounds and voices of Sierra
+On-Line's games.
+
+
+\\aria.drv
+Aria Synthesizer
+\\aria.hlp
+                  ARIA SYNTHESIZER
+
+The Aria Synthesizer plays back MIDI sampled sounds, in 
+addition to the digitally-sampled sounds and voices of
+Sierra On-Line's games.
+
 
 \\audblast.drv
-CMS Sound Blaster
+Sound Blaster
 \\audblast.hlp
        CREATIVE LABS SOUND BLASTER CARD
 
 The Sound Blaster card can be used to playback
 the digitally-sampled sounds and voices of Sierra
-On-Line's CD-ROM based games.
+On-Line's games.
 
 Contact Sierra On-Line to order the Sound Blaster 
 Card. 
+\\audthund.drv
+ThunderBoard
+\\audthund.hlp
+
+           MEDIAVISION THUNDERBOARD 
+
+The ThunderBoard card can be used to playback
+the digitally-sampled sounds and voices of Sierra
+On-Line's games.
+
+Contact Sierra On-Line to order the ThunderBoard 
+Card. 
+
+\\audmssys.drv
+Microsoft Windows Sound System
+\\audmssys.hlp
+         MICROSOFT WINDOWS SOUND SYSTEM
+This card can be used to playback
+the digitally-sampled sounds and voices of Sierra
+On-Line's games.
+
+
+
+\\audcompu.drv
+CompuAdd Multimedia Card
+\\audcompu.hlp
+            COMPUADD MULTIMEDIA CARD
+
+The CompuAdd Multimedia card can be used to playback
+the digitally-sampled sounds and voices of Sierra
+On-Line's games.
 
 \\auddisny.drv
 Disney Sound Source
@@ -132,10 +196,19 @@ Disney Sound Source
 
 The Disney Sound Source can be used to playback
 the digitally-sampled sounds and voices of Sierra
-On-Line's CD-ROM based games.
+On-Line's games.
+
+\\audnone.drv
+No Audio/Voice Card
+\\audnone.hlp
+               NO AUDIO DRIVER
+
+Choose this driver if you do not have a sound card
+capable of playing digitally-sampled sounds and
+voices.
 
 \\
-\\		JOYSTICK DRIVERS
+\\JOYSTICK DRIVERS
 \\
 \\joystick.drv
 IBM or Compatible Joystick
@@ -155,7 +228,7 @@ you start the game.
 \\super.drv
 Tandy Super Joystick
 \\
-\\		MOUSE DRIVERS
+\\MOUSE DRIVERS
 \\
 \\stdmouse.hlp
 This program supports any mouse that is supplied
@@ -164,7 +237,7 @@ driver must be installed before starting the game.
 If you have a mouse, but do not wish to use it,
 select NO in response to this item.
 \\
-\\		KEYBOARD DRIVERS
+\\KEYBOARD DRIVERS
 \\
 \\ibmkbd.drv
 IBM or IBM-compatible keyboard
@@ -172,9 +245,6 @@ IBM or IBM-compatible keyboard
 Select this keyboard if you have any of the many
 IBM compatible key layouts.  You will be able to
 control your character using the numeric keypad.
-\\ibmkbd.inf
-Make certain that NUMLOCK is OFF if you wish to
-use your numeric keypad to control your character.
 \\tandykbd.drv
 Tandy 1000 keyboard
 \\tandykbd.hlp
@@ -194,25 +264,9 @@ LOWER/LEFT corner of the keyboard.
 Make certain that NUMLOCK is ON if you wish to
 use your numeric keypad to control your character.
 \\
-\\		ARM
+\\ARM
 \\
-\\arm.inf
-To use EXTENDED memory, you must make sure you have
-no other memory-resident programs loaded that use
-extended memory, such as RAM disks or disk caches.
-
-To use EXPANDED memory, your EMS driver software
-must be loaded before you start the game.
-
-To use XMS memory, your XMS driver must be loaded
-before you start the game.
-
-NOTE:  Not all machines support our use of extended
-memory.  If your computer locks up or otherwise 
-exhibits undesirable behavior while playing the 
-game, try reinstalling without selecting this option.
-\\
-\\		SOUND DRIVERS
+\\SOUND DRIVERS
 \\
 \\mtpro.drv
 Roland MT-32 with Pro Audio Spectrum
@@ -238,8 +292,9 @@ WARNING:  THE MIDI SOUND DRIVER WILL WRITE NEW
           SOUNDS THAT YOU WANT TO KEEP, BACK THEM 
           UP BEFORE RUNNING THE GAME.  
           (This driver writes to unit #17)
+
 \\mtblast.drv
-Roland MT-32 with CMS SoundBlaster
+Roland MT-32 with Sound Blaster
 \\mtblast.hlp
  ROLAND MT-32, MT-100, LAPC-I, CM-32L, or CM-64
               WITH SOUND BLASTER
@@ -259,8 +314,6 @@ speakers (such as your home stereo or amplified
 speakers) are necessary to amplify and reproduce the 
 sound.
 
-Contact Sierra On-Line to order the Roland PC
-Desktop Music Studio and Sound Blaster Card.
 \\mtblast.inf
   ROLAND MT-32, LAPC-I, CM-32L, or CM-64 & SOUND BLASTER
 Before running your game, be sure to:
@@ -279,6 +332,7 @@ WARNING:  THE MIDI SOUND DRIVER WILL WRITE NEW
           SOUNDS THAT YOU WANT TO KEEP, BACK THEM 
           UP BEFORE RUNNING THE GAME.  
           (This driver writes to unit #17) 
+
 \\mt32.drv
 Roland MT-32, MT-100, LAPC-I, CM-32L, or CM-64
 \\mt32.hlp
@@ -294,9 +348,6 @@ MPU-IPC) and an external amplifier and speakers
 (such as your home stereo or amplified speakers) are 
 necessary to amplify and reproduce the sound.  The 
 LAPC-I card does not require a MIDI interface card. 
-
-Contact Sierra On-Line to order the Roland PC
-Desktop Music Studio.
 
 \\mt32.inf
      ROLAND MT-32, MT-100, CM-32L, or CM-64
@@ -315,63 +366,119 @@ WARNING:  THE MIDI SOUND DRIVER WILL WRITE NEW
           SOUNDS THAT YOU WANT TO KEEP, BACK THEM 
           UP BEFORE RUNNING THE GAME.  
           (This driver writes to unit #17) 
+
 \\mt32ibm.drv
 Roland MT-32, MT-100, LAPC-I, CM-32L, or CM-64
-\\GMBlast.drv
-General MIDI with SoundBlaster
-\\GMBlast.hlp
-General MIDI Device with SoundBlaster Sound Effects
+
+\\genmidi.drv
+General MIDI Sound Driver
+\\genmidi.hlp
+           GENERAL MIDI SOUND DRIVER
 
 This driver follows the IMA spec for General MIDI.
-This will work on such devices as the Roland 
-Sound Canvas and SCC-1 when connected to a Roland
-MPU interface or compatible.  The Roland SCC-1
-card does not require a MIDI interface card.
+It will work with General MIDI compatible devices 
+such as the Roland Sound Canvas that are connected
+through an MPU-401 compatible MIDI interface.  It
+will also work with any General MIDI sound card 
+that is MPU-401 compatible.
 
-GMBLAST.DRV is the GENMIDI.DRV with sound effects 
-code appended from MTBLAST.DRV and some supporting 
-logic.
+An external amplifier and speakers (such as your 
+home stereo or amplified speakers) may be 
+necessary to amplify and reproduce the sound.
+
+\\genmidi.inf
+           GENERAL MIDI SOUND DRIVER
+
+Before running your game, be sure to:
+1.  Make sure the module is connected to your MIDI
+    computer port and an external amplifier or 
+    stereo or powered speakers. 
+2.  Set the volume of your stereo to a moderate 
+    listening level. 
+
+\\genmidmv.drv
+General MIDI for MediaVision MIDI interface
+\\genmidmv.hlp
+General MIDI for MediaVision MIDI interface
+
+This driver follows the IMA spec for General MIDI.
+This will work with General MIDI devices as the Roland 
+Sound Canvas when connected through a ProAudio Spectrum
+MIDI interface.
+
+In order to use this MIDI driver with your Sierra 
+game you must have the Media Vision MIDI interface
+plugged into your ProAudio Spectrum card and a 
+General MIDI compatible synthesizer plugged into
+the MIDI interface. An external amplifier and speakers 
+(such as your home stereo or amplified speakers) are 
+necessary to amplify and reproduce the sound.
+
+\\genmidmv.inf
+General MIDI for MediaVision MIDI interface
+
+Before running your game, be sure to:
+1.  Make sure the module is connected to your MIDI
+    computer port and an external amplifier or 
+    stereo or powered speakers. 
+2.  Set the volume of your stereo to a moderate 
+    listening level. 
 
 \\proaudio.drv
 Pro Audio Spectrum
 \\proaudio.hlp
             PRO AUDIO SPECTRUM CARD
 
-The Pro Audio Spectrum card can produce up to 22
-simultaneous voices.  These voices are created 
-using frequency modulation (FM) and can reproduce 
-both melodic and percussive instruments.  It can 
-also reproduce realistic sampled sound effects. 
+The Pro Audio Spectrum card can produce up to 11
+simultaneous voices in stereo.  These voices are 
+created using frequency modulation (FM) and can 
+reproduce both melodic and percussive instruments.
 
 \\fb01.drv
 Yamaha FB-01 FM Sound Generator
+
 \\sndblast.drv
 Sound Blaster Card
 \\sndblast.hlp
        CREATIVE LABS SOUND BLASTER CARD
 
-The Sound Blaster card can produce 12 simultaneous 
+The Sound Blaster card can produce 11 simultaneous 
 voices.  These voices are created using frequency 
 modulation (FM) and can reproduce both melodic and 
 percussive instruments.  It can also reproduce 
 realistic sampled sound effects. 
 
-Contact Sierra On-Line to order the Sound Blaster 
-Card. 
 
 \\adl.drv
-AdLib Music Synthesizer Card
+Sound Blaster / AdLib Card (or compatibles)
 \\adl.hlp
+       CREATIVE LABS SOUND BLASTER CARD
          ADLIB MUSIC SYNTHESIZER CARD
 
-The AdLib Music Synthesizer Card can produce 12 
-simultaneous voices.  These voices are created 
-using frequency modulation (FM) and can reproduce 
+These cards can produce 11 simultaneous voices.
+These voices are created using frequency
+modulation (FM) and can reproduce both melodic
+and percussive instruments. 
+
+\\microsof.drv
+Microsoft Windows Sound System
+\\microsof.hlp
+  MICROSOFT WINDOWS SOUND SYSTEM
+
+This card can produce 12 simultaneous voices
+in stereo.  These voices are created using
+frequency modulation (FM) and can reproduce
+both melodic and percussive instruments.
+
+\\sbpro.drv
+Sound Blaster Pro
+\\sbpro.hlp
+     CREATIVE LABS SOUND BLASTER PRO CARD
+
+These cards can produce 12 simultaneous voices
+in stereo.  These voices are created using
+frequency modulation (FM) and can reproduce
 both melodic and percussive instruments. 
-
-
-Contact Sierra On-Line to order the AdLib Music 
-Synthesizer Card. 
 
 \\cms.drv
 Game Blaster Card
@@ -416,7 +523,6 @@ Tandy 3 Voice
 Many Tandy computers can play three
 simultaneous instrument tones.
 
-
 \\ibmps1.drv
 IBM PS/1 Audio/Joystick Card
 \\ibmps1.hlp
@@ -437,10 +543,13 @@ simultaneous instrument tones.
 
 \\imf.drv
 IBM PC Music Feature card
+
 \\audiojoy.drv
 IBM PS/1 Audio/Joystick Card
+
 \\mt540.drv
 Casiotone MT-540 or CT-460
+
 \\std.drv
 IBM PC or Compatible Internal Speaker
 \\std.hlp
@@ -455,4 +564,12 @@ selected.
 
 \\noload.drv
 MT-32 NoLoad Driver (not for shipping)
+
+\\midnone.drv
+No Music Card
+\\midnone.hlp
+               NO MUSIC DRIVER
+
+Choose this driver if you do not have a music card or
+you do not want to hear music through your present card.
 

@@ -9,19 +9,6 @@
 
 (class CueObj of Script
 	(properties
-		client 0
-		state $ffff
-		start 0
-		timer 0
-		cycles 0
-		seconds 0
-		lastSeconds 0
-		ticks 0
-		lastTicks 0
-		register 0
-		script 0
-		caller 0
-		next 0
 		theVerb 0
 		theInvItem 0
 	)
@@ -95,25 +82,25 @@
 		(super dispose:)
 	)
 	
-	(method (handleEvent event &tmp temp0)
+	(method (handleEvent pEvent &tmp temp0)
 		(cond 
-			((event claimed?) (return 1))
+			((pEvent claimed?) (return 1))
 			(
 				(and
-					(== (event type?) 16384)
-					(self onMe: event)
+					(== (pEvent type?) 16384)
+					(self onMe: pEvent)
 					(self isNotHidden:)
 				)
 				(CueObj
 					state: 0
 					cycles: 0
 					client: self
-					theVerb: (event message?)
+					theVerb: (pEvent message?)
 					theInvItem:
 						(if
 							(and
 								theIconBar
-								(== (event message?) JOY_DOWNRIGHT)
+								(== (pEvent message?) JOY_DOWNRIGHT)
 								inventory
 							)
 							(inventory indexOf: (theIconBar curInvIcon?))
@@ -121,14 +108,14 @@
 							0
 						)
 				)
-				(event claimed: TRUE)
+				(pEvent claimed: 1)
 				(if
 					(and
 						(user canControl:)
 						(!= _approachVerbs 26505)
 						(&
 							_approachVerbs
-							(<< $0001 (- (event message?) JOY_UP))
+							(<< $0001 (- (pEvent message?) JOY_UP))
 						)
 					)
 					(ego
@@ -140,7 +127,7 @@
 				)
 			)
 		)
-		(return (event claimed?))
+		(return (pEvent claimed?))
 	)
 	
 	(method (doVerb theVerb)
@@ -233,22 +220,24 @@
 (instance dftDoVerb of Code
 	(properties)
 	
-	(method (doit theVerb theNoun theItem &tmp noun item)
-		(= noun (theNoun description?))
-		(switch theVerb
+	(method (doit param1 param2 param3 &tmp temp0 temp1)
+		(= temp0 (param2 description?))
+		(switch param1
 			(verbLook
-				(if (theNoun lookStr?)
-					(Print (theNoun lookStr?))
+				(if (param2 lookStr?)
+					(Print (param2 lookStr?))
 				else
-					(Printf "The %s looks like any other %s." noun noun)
+					(Printf "The %s looks like any other %s." temp0 temp0)
 				)
 			)
 			(verbUse
-				(if (= item (inventory at: theItem))
-					(Printf "You clicked inv item %s on %s." (item description?) noun)
+				(if (= temp1 (inventory at: param3))
+					(Printf "You clicked inv item %s on %s." (temp1 description?) temp0)
 				)
 			)
-			(verbTalk (Printf "The %s has nothing to say." noun))
+			(verbTalk
+				(Printf "The %s has nothing to say." temp0)
+			)
 		)
 	)
 )

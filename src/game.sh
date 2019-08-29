@@ -5,9 +5,7 @@
 ; * Put all the defines specific to your game in here
 
 (include system.sh) (include sci2.sh)
-
-;View defines
-(define vEgo 0)
+(include views.sh) (include pics.sh)
 
 ;Game modules
 (enum
@@ -32,10 +30,6 @@
 ;Actual rooms
 (define rTitle 100)
 (define rTestRoom 110)
-
-;Pic defines
-(define pSpeedTest 99)
-(define pTestRoom 110)
 
 ;Sound defines
 (define sOpening 1)
@@ -64,8 +58,10 @@
 
 ;Game-specific verbs
 ;(for generic verbs, refer to SYSTEM.SH)
-(define verbTaste 10)
-(define verbSmell 11)
+(enum 10
+	verbTaste
+	verbSmell
+)
 
 ;Event flags
 (enum

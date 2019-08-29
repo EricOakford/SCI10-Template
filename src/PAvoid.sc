@@ -1,100 +1,299 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 927)
-(include sci.sh)
+;;;;
+;;;;	PAVOID.SC
+;;;;
+;;;;	(c) Sierra On-Line, Inc, 1992
+;;;;
+;;;;	Author: 	J. Mark Hood & Jack Magn‚
+;;;;	Updated:
+;;;;		Brian K. Hughes
+;;;;		August 6, 1992
+;;;;
+;;;;	This is the polygon avoider class
+;;;;
+;;;;	Classes:
+;;;;		PAvoider
+;;;;
+;;;;	Procedures:
+;;;;		GetPolySize
+;;;;		RestoreMergedGons
+
+
+(script# PAVOID)
+(include game.sh)
 (use PolyPath)
 (use Polygon)
-(use Sight)
 (use System)
 
 
-(class PAvoider of Code
+;;;(procedure
+;;;	GetPolySize
+;;;	RestoreMergedGons
+;;;
+;;;)
+
+
+(class PAvoider kindof Code
 	(properties
-		blocker 0
-		client 0
+		client				0
+		oldBlocker			0
+		oldBlockerMover	0
+		oldMoverX		 	-99
+		oldMoverY		 	-99	
 	)
-	
-	(method (init theClient)
-		(if (>= argc 1) (= client theClient))
+
+	(method (init aClient)
+		(if (>= argc 1)
+			(= client aClient)
+		)
 	)
-	
-	(method (doit &tmp temp0 temp1 theBlocker temp3 temp4 clientMover)
-		(if (and blocker (blocker respondsTo: #mover))
-			(if
-				(and
-					(blocker mover?)
-					(>
-						(AngleDiff
-							(GetAngle (blocker nsLeft?))
-							(client heading?)
-						)
-						45
-					)
-					(>
-						(AngleDiff
-							(GetAngle (blocker nsTop?))
-							(client heading?)
-						)
-						45
-					)
-					(>
-						(AngleDiff
-							(GetAngle (blocker nsRight?))
-							(client heading?)
-						)
-						45
-					)
-					(>
-						(AngleDiff
-							(GetAngle (blocker nsBottom?))
-							(client heading?)
-						)
-						45
-					)
-				)
-				(blocker signal: (| (blocker signal?) $0100))
-			else
-				(blocker signal: (& (blocker signal?) $feff))
-				(= blocker 0)
+
+	(method (dispose)
+		(if (IsObject oldBlockerMover)
+			(oldBlockerMover dispose:)
+		)
+		(super dispose:)
+
+	)
+
+	(method (doit &tmp mDx mDy dX dY theBlocker  l t r b clMover h xDist yDist
+							i 	case mergedPoly mergedPolyPts thePoly [str 5]  head)
+
+		(= clMover (client mover?))
+		(if (and
+				oldBlocker
+;					(or
+;						(not clMover)
+						(>= (client distanceTo: oldBlocker) 20)
+;						(!= (clMover finalX?) oldMoverX)
+;						(!= (clMover finalY?) oldMoverY)
+;					)
+			)
+
+			(oldBlocker ignoreActors: FALSE)		; restore ignore actors
+			(if oldBlockerMover
+				(oldBlocker mover: oldBlockerMover)
+			)
+
+			(= oldMoverX -99)
+ 			(= oldMoverY -99)
+			(= oldBlockerMover 0)
+			(= oldBlocker 0)
+
+			(if (and	clMover
+						(IsObject (clMover obstacles?))
+						((clMover obstacles?) isEmpty:)
+			 	)
+				((clMover obstacles?) dispose:)
+				(clMover obstacles: 0)
 			)
 		)
-		(if
-			(and
-				(= clientMover (client mover?))
-				(IsObject (= theBlocker (clientMover doit:)))
-				(not (clientMover completed?))
-				(clientMover isKindOf: PolyPath)
+
+		(if (and 
+				(= clMover (client mover?))
+				(IsObject (= theBlocker (clMover doit:)))
+				(not (clMover completed?))
+				(clMover isKindOf: PolyPath)
+;				(IsObject ((clMover?) obstacles?))
+			)				 									; we are blocked
+
+			(if (theBlocker respondsTo: #mover)
+				(= oldBlockerMover (theBlocker mover?))
+				(if oldBlockerMover
+					(theBlocker mover: 0)
+				)
+			else
+				(= oldBlockerMover 0)
 			)
-			(= blocker theBlocker)
-			(= temp0
-				(+ (client xStep?) (/ (CelWide (client view?) 2 0) 2))
-			)
-			(= temp1 (* (client yStep?) 2))
-			(if (IsObject (clientMover obstacles?))
-				((clientMover obstacles?)
-					add:
-						(= temp3
-							((Polygon new:)
-								init:
-									(- (theBlocker brLeft?) temp0)
-									(- (CoordPri 1 (CoordPri (theBlocker y?))) temp1)
-									(+ (theBlocker brRight?) temp0)
-									(- (CoordPri 1 (CoordPri (theBlocker y?))) temp1)
-									(+ (theBlocker brRight?) temp0)
-									(+ (theBlocker y?) temp1)
-									(- (theBlocker brLeft?) temp0)
-									(+ (theBlocker y?) temp1)
-								name: {isBlockedPoly?}
-								yourself:
+			
+			(= oldMoverX (clMover finalX?))
+			(= oldMoverY (clMover finalY?))
+
+			(= oldBlocker theBlocker)
+			(theBlocker ignoreActors: TRUE)		  ; set ignore actors until ready
+
+			;; first, set initial rectangle around obstacle
+			;; with no account for motion	taking cel width and xStep
+			;;	for client and base rect for blocker (width),
+			;; and priority band of blocker and yStep of client (height)
+			(= l 
+				(- 
+					(theBlocker brLeft?) 
+					(= dX 
+						(+ 
+							(* 2 (client xStep?)) 
+							(/ 
+								(Max 
+									(CelWide (client view?) facingSouth 0) 
+									(CelWide (client view?) facingEast 0) 
+								)
+								2
 							)
 						)
+					)
 				)
 			)
-			(clientMover
-				value: 2
-				init: client (clientMover finalX?) (clientMover finalY?)
+
+			(= t (CoordPri PTopOfBand (CoordPri (theBlocker y?))))
+			(= dY (* 2 (theBlocker yStep?)))
+
+			(= r (+ (theBlocker brRight?) dX))
+			(= b (+ (theBlocker y?) dY 2))
+			;; add the polygon to the appropriate list
+				
+
+			(if (<= (- b t) 3)					; extend degenerate polygons
+				(-= t 2)
+				(+= b 2)
 			)
-			((clientMover obstacles?) delete: temp3)
-			(temp3 dispose:)
+
+			(= mDx (- (clMover finalX?) (client x?)))
+			(= mDy (- (clMover finalY?) (client y?)))
+
+														; modify gon based on client heading
+			(= head (client heading?))
+
+			(cond
+				((<= 85 head 95)
+					(= case facingEast)
+				)
+				((<= 265 head 275)
+					(= case facingWest)
+
+				)
+				(else
+					(if (>= mDy 0)
+						(= case facingSouth)
+					else
+						(= case facingNorth)
+					)
+				)
+
+			)
+ 														; construct gon
+			(switch case
+				(facingNorth
+					(= thePoly
+						((Polygon new:)
+							init:	   
+									l (client y?) l t r t r (client y?)  
+									$7777 0,
+
+							type:		PBarredAccess
+							name		{isBlockedPoly},
+							yourself:
+						)
+					)
+				)
+				(facingSouth
+					(= thePoly
+						((Polygon new:)
+							init: 	
+									r (client y?) r b l b l (client y?) 
+									$7777 0,
+ 
+
+							type:		PBarredAccess
+							name		{isBlockedPoly}
+							yourself:
+						)
+					)
+				)
+				(facingEast
+					(= thePoly
+						((Polygon new:)
+							init:		 
+									(client x?) t r t r b (client x?) b 
+									$7777 0,
+ 
+ 
+							type:		PBarredAccess
+							name		{isBlockedPoly}
+							yourself:
+						)
+					)
+				)
+
+				(facingWest
+					(= thePoly
+						((Polygon new:)
+							init:	   
+									(client x?) b l b l t (client x?) t 
+									$7777 0,
+	
+
+							type:		PBarredAccess
+							name		{isBlockedPoly}
+							yourself:
+						)
+					)
+				)
+			) 
+
+; Actually merge new polygon into list
+			(if (not (clMover obstacles?))
+				(clMover obstacles: (List new:))
+			)
+			(=  mergedPolyPts	 (MergePoly (thePoly points?) ((clMover obstacles?) elements?)
+						((clMover obstacles?) size?)))
+
+			(if mergedPolyPts
+				((= mergedPoly (Polygon new:))
+					points: 	mergedPolyPts,
+					size:		(GetPolySize mergedPolyPts),
+					type: 	PBarredAccess,
+					dynamic:	TRUE
+				)
+		
+			)
+			; add merged gon to the list
+			((clMover obstacles?)
+				add: mergedPoly
+			)
+
+			;; recalculate path and restart the mover
+			(clMover
+				value:	2,
+				init: 	client (clMover finalX?) (clMover finalY?)
+			)
+			
+			;; dump the polygon
+			((clMover obstacles?) delete: mergedPoly)
+			((clMover obstacles?) delete: thePoly)
+
+			; If we already had a polygon list, 
+			; restore gons that were previously absorbed into the merge op
+			(if (IsObject (clMover obstacles?))
+				(RestoreMergedGons (clMover obstacles?))
+			)
+
+			(thePoly dispose:)
+			(mergedPoly dispose:)
+		)
+	)
+)
+
+; procedure to obtain the size of a polygon
+
+(procedure (GetPolySize tPoly &tmp i j thePts theX theY)
+	(= theX -100)
+	(= i 0)
+	(while (!= theX $7777)
+		(= theX	(WordAt tPoly (* 2 i)))
+		(++ i)
+	)
+	(return (-- i))
+)
+
+; procedure to restore gons absorbed by the merge op
+
+(procedure (RestoreMergedGons  pList &tmp i tPoly tType sz)
+	(= sz (pList size?))
+	(for ((= i 0)) (< i sz) ((++ i))
+		(= tPoly (pList at: i))
+		(= tType (tPoly type?))
+		(if (>=  tType  16)
+			(tPoly type: (- tType 16))
 		)
 	)
 )

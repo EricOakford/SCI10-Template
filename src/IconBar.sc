@@ -156,10 +156,6 @@
 	)
 )
 
-(instance ibEvent of Event
-	(properties)
-)
-
 (class IconBar of Set
 	(properties
 		elements 0
@@ -181,44 +177,35 @@
 		y 0
 	)
 	
-	(method (doit)
-		(while (& state $0020)
-			(ibEvent
-				type: 0
-				message: 0
-				modifiers: 0
-				y: 0
-				x: 0
-				claimed: 0
-				port: 0
-			)
-			(GetEvent 32767 ibEvent)
-			(Wait 1)
-			(if (== (ibEvent type?) 256)
-				(ibEvent
+	(method (doit &tmp newEvent)
+		(while
+		(and (= newEvent (Event new:)) (& state $0020))
+			(if (== (newEvent type?) 256)
+				(newEvent
 					type: 4
-					message: (if (& (ibEvent modifiers?) $0003) 27 else 13)
+					message: (if (& (newEvent modifiers?) $0003) 27 else 13)
 					modifiers: 0
 				)
 			)
-			(ibEvent localize:)
+			(newEvent localize:)
 			(if
 				(and
 					(or
-						(== (ibEvent type?) 1)
+						(== (newEvent type?) 1)
 						(and
-							(== (ibEvent type?) 4)
-							(== (ibEvent message?) 13)
+							(== (newEvent type?) 4)
+							(== (newEvent message?) 13)
 						)
 					)
 					(IsObject helpIconItem)
 					(& (helpIconItem signal?) $0010)
 				)
-				(ibEvent type: 16384 message: (helpIconItem message?))
+				(newEvent type: 16384 message: (helpIconItem message?))
 			)
-			(MapKeyToDir ibEvent)
-			(if (self dispatchEvent: ibEvent) (break))
+			(MapKeyToDir newEvent)
+			(if (self dispatchEvent: newEvent) (break))
 		)
+		(if (IsObject newEvent) (newEvent dispose:))
 	)
 	
 	(method (handleEvent pEvent &tmp temp0 pEventType theTheCursor theCurIcon temp4 theCurInvIcon newEvent)
@@ -228,8 +215,8 @@
 			(
 				(or
 					(and
-						(not (= pEventType (pEvent type?)))
 						(& state $0400)
+						(not (= pEventType (pEvent type?)))
 						(<= -10 (pEvent y?))
 						(<= (pEvent y?) height)
 						(<= 0 (pEvent x?))
@@ -301,14 +288,11 @@
 						)
 					)
 					(KEY_NUMPAD0
-						(if (user canInput:)
-							(self swapCurIcon:)
-							(pEvent claimed: 1)
-						)
+						(self swapCurIcon:)
+						(pEvent claimed: 1)
 					)
 					(JOY_NULL
-						(if
-						(and (& (pEvent type?) evJOYSTICK) (user canInput:))
+						(if (& (pEvent type?) evJOYSTICK)
 							(self advanceCurIcon:)
 							(pEvent claimed: 1)
 						)
@@ -317,10 +301,8 @@
 			)
 			((& pEventType evMOUSEBUTTON)
 				(cond 
-					(
-					(and (& (pEvent modifiers?) emSHIFT) (user canInput:)) (self advanceCurIcon:) (pEvent claimed: 1))
-					(
-					(and (& (pEvent modifiers?) emCTRL) (user canInput:)) (self swapCurIcon:) (pEvent claimed: 1))
+					((& (pEvent modifiers?) emSHIFT) (self advanceCurIcon:) (pEvent claimed: 1))
+					((& (pEvent modifiers?) emCTRL) (self swapCurIcon:) (pEvent claimed: 1))
 					((IsObject curIcon)
 						(pEvent
 							type: (curIcon type?)
@@ -417,32 +399,37 @@
 		(PicNotValid temp1)
 		(Graph grUPDATE_BOX y 0 (+ y height) 320 1)
 		(self highlight: curIcon)
+		(theGame
+			setCursor:
+				theCursor
+				(+
+					(curIcon nsLeft?)
+					(/ (- (curIcon nsLeft?) (curIcon nsRight?)) 2)
+				)
+		)
 	)
 	
 	(method (hide &tmp temp0 temp1 temp2)
 		(if (& state $0020)
 			(sounds pause: 0)
 			(= state (& state $ffdf))
-			(if helpIconItem
-				(helpIconItem signal: (& (helpIconItem signal?) $ffef))
-			)
-			(= temp0 (FirstNode elements))
-			(while temp0
-				(= temp1 (NextNode temp0))
-				(if (not (IsObject (= temp2 (NodeValue temp0))))
-					(return)
-				)
-				((= temp2 (NodeValue temp0))
-					signal: (& (temp2 signal?) $ffdf)
-				)
-				(= temp0 temp1)
-			)
-			(Graph grRESTORE_BOX underBits)
-			(Graph grUPDATE_BOX y 0 (+ y height) 320 1)
-			(Graph grREDRAW_BOX y 0 (+ y height) 320)
-			(SetPort port)
-			(= height activateHeight)
 		)
+		(= temp0 (FirstNode elements))
+		(while temp0
+			(= temp1 (NextNode temp0))
+			(if (not (IsObject (= temp2 (NodeValue temp0))))
+				(return)
+			)
+			((= temp2 (NodeValue temp0))
+				signal: (& (temp2 signal?) $ffdf)
+			)
+			(= temp0 temp1)
+		)
+		(Graph grRESTORE_BOX underBits)
+		(Graph grUPDATE_BOX y 0 (+ y height) 320 1)
+		(Graph grREDRAW_BOX y 0 (+ y height) 320)
+		(SetPort port)
+		(= height activateHeight)
 	)
 	
 	(method (advance &tmp temp0 temp1)
@@ -459,16 +446,26 @@
 			(breakif (not (& (temp0 signal?) $0004)))
 			(= temp1 (mod (+ temp1 1) size))
 		)
-		(self highlight: temp0 (& state $0020))
+		(if (& state $0020)
+			(theGame
+				setCursor:
+					theCursor
+					1
+					(+
+						(temp0 nsLeft?)
+						(/ (- (temp0 nsRight?) (temp0 nsLeft?)) 2)
+					)
+					(- (temp0 nsBottom?) 3)
+			)
+		)
+		(self highlight: temp0)
 	)
 	
 	(method (retreat &tmp temp0 temp1)
 		(= temp1 1)
 		(while (<= temp1 size)
 			(= temp0
-				(self
-					at: (mod (- (self indexOf: highlightedIcon) temp1) size)
-				)
+				(self at: (- (self indexOf: highlightedIcon) temp1))
 			)
 			(if (not (IsObject temp0))
 				(= temp0 (NodeValue (self last:)))
@@ -476,7 +473,19 @@
 			(breakif (not (& (temp0 signal?) $0004)))
 			(= temp1 (mod (+ temp1 1) size))
 		)
-		(self highlight: temp0 (& state $0020))
+		(if (& state $0020)
+			(theGame
+				setCursor:
+					theCursor
+					1
+					(+
+						(temp0 nsLeft?)
+						(/ (- (temp0 nsRight?) (temp0 nsLeft?)) 2)
+					)
+					(- (temp0 nsBottom?) 3)
+			)
+		)
+		(self highlight: temp0)
 	)
 	
 	(method (select theCurIcon param2)
@@ -492,30 +501,12 @@
 		)
 	)
 	
-	(method (highlight theHighlightedIcon param2 &tmp temp0)
+	(method (highlight theHighlightedIcon &tmp temp0)
 		(if (not (& (theHighlightedIcon signal?) $0004))
 			(if (IsObject highlightedIcon)
 				(highlightedIcon highlight: 0)
 			)
 			((= highlightedIcon theHighlightedIcon) highlight: 1)
-		)
-		(if (and (>= argc 2) param2)
-			(theGame
-				setCursor:
-					theCursor
-					1
-					(+
-						(theHighlightedIcon nsLeft?)
-						(/
-							(-
-								(theHighlightedIcon nsRight?)
-								(theHighlightedIcon nsLeft?)
-							)
-							2
-						)
-					)
-					(- (theHighlightedIcon nsBottom?) 3)
-			)
 		)
 	)
 	
@@ -576,8 +567,8 @@
 							(not
 								(if
 									(and
-										(<= 0 pEventY)
-										(<= pEventY (+ y height))
+										(<= -10 pEventY)
+										(<= pEventY height)
 										(<= 0 pEventX)
 									)
 									(<= pEventX 320)
@@ -615,11 +606,7 @@
 							(if (theHighlightedIcon cursor?)
 								(theGame setCursor: (theHighlightedIcon cursor?))
 							)
-							(if (& state $0800)
-								(self noClickHelp:)
-							else
-								(helpIconItem signal: (| (helpIconItem signal?) $0010))
-							)
+							(helpIconItem signal: (| (helpIconItem signal?) $0010))
 						else
 							(= pEventClaimed (& (theHighlightedIcon signal?) $0040))
 						)
@@ -660,7 +647,7 @@
 						(if
 						(and theHighlightedIcon (theHighlightedIcon helpStr?))
 							(= temp6 (GetPort))
-							(Printf 937 0 (theHighlightedIcon helpStr?))
+							(Printf "%s" (theHighlightedIcon helpStr?))
 							(SetPort temp6)
 						)
 						(if helpIconItem
@@ -713,42 +700,6 @@
 			)
 		else
 			(= state (& state $fffb))
-		)
-	)
-	
-	(method (noClickHelp &tmp newEvent temp1 temp2 [temp3 100] temp103 systemWindowEraseOnly)
-		(= temp1 (= temp2 0))
-		(= temp103 (GetPort))
-		(= systemWindowEraseOnly (systemWindow eraseOnly?))
-		(systemWindow eraseOnly: 1)
-		(while (not ((= newEvent (Event new:)) type?))
-			(newEvent name: {nchEvent})
-			(if (not (self isMemberOf: IconBar))
-				(newEvent localize:)
-			)
-			(cond 
-				((= temp2 (self firstTrue: #onMe newEvent))
-					(if (and (!= temp2 temp1) (temp2 helpStr?))
-						(= temp1 temp2)
-						(Format @temp3 (temp2 helpStr?))
-						(Print @temp3 #dispose)
-						(SetPort temp103)
-					)
-				)
-				(modelessDialog (modelessDialog dispose:))
-				(else (= temp1 0))
-			)
-			(newEvent dispose:)
-			(= newEvent 0)
-		)
-		(systemWindow eraseOnly: systemWindowEraseOnly)
-		(theGame setCursor: 999 1)
-		(if modelessDialog (modelessDialog dispose:))
-		(SetPort temp103)
-		(if (helpIconItem onMe: newEvent)
-			(if (IsObject newEvent) (newEvent dispose:))
-		else
-			(self dispatchEvent: newEvent)
 		)
 	)
 )

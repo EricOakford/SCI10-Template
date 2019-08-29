@@ -11,37 +11,6 @@
 (local
 	numCols
 )
-(procedure (FindIcon param1 param2 param3 &tmp temp0 newEvent temp2 temp3)
-	(= temp3
-		(+
-			(/ (- (param1 nsRight?) (param1 nsLeft?)) 2)
-			(param1 nsLeft?)
-		)
-	)
-	(= temp2 param2)
-	(return
-		(while (>= (Abs (- temp2 param3)) 4)
-			(if
-				(= temp0
-					(self
-						firstTrue:
-							#onMe
-							((= newEvent (Event new:)) x: temp3 y: temp2 yourself:)
-					)
-				)
-				(newEvent dispose:)
-				(return temp0)
-			)
-			(newEvent dispose:)
-			(if (< param2 param3)
-				(= temp2 (+ temp2 4))
-			else
-				(= temp2 (- temp2 4))
-			)
-		)
-	)
-)
-
 (class InvItem of IconItem
 	(properties
 		name "InvI"
@@ -53,9 +22,9 @@
 		nsRight 0
 		nsBottom 0
 		state $0000
-		cursor ARROW_CURSOR
+		cursor 999
 		type $4000
-		message verbUse
+		message 4
 		modifiers $0000
 		signal $0000
 		helpStr 0
@@ -83,12 +52,12 @@
 		(= temp1 (- nsLeft 2))
 		(= temp2 (+ nsBottom 1))
 		(= temp3 (+ nsRight 1))
-		(Graph GDrawLine temp0 temp1 temp0 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp0 temp3 temp2 temp3 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp3 temp2 temp1 temp4 -1 -1)
-		(Graph GDrawLine temp2 temp1 temp0 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp1 temp0 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp0 temp3 temp2 temp3 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp3 temp2 temp1 temp4 -1 -1)
+		(Graph grDRAW_LINE temp2 temp1 temp0 temp1 temp4 -1 -1)
 		(Graph
-			GShowBits
+			grUPDATE_BOX
 			(- nsTop 2)
 			(- nsLeft 2)
 			(+ nsBottom 2)
@@ -116,7 +85,7 @@
 	
 	(method (doVerb theVerb)
 		(switch theVerb
-			(2 (Printf 995 0 description))
+			(verbLook (Printf "%s" description))
 		)
 	)
 )
@@ -124,23 +93,6 @@
 (class Inventory of IconBar
 	(properties
 		name "Inv"
-		elements 0
-		size 0
-		height 0
-		underBits 0
-		oldMouseX 0
-		oldMouseY 0
-		curIcon 0
-		highlightedIcon 0
-		prevIcon 0
-		curInvIcon 0
-		useIconItem 0
-		helpIconItem 0
-		port 0
-		window 0
-		state $0400
-		activateHeight 0
-		y 0
 		normalHeading {Roger is carrying:}
 		heading 0
 		empty {nothing!}
@@ -204,7 +156,7 @@
 			(= inventoryFirst (inventory next: inventoryFirst))
 		)
 		(if (not temp0)
-			(Printf 995 1 normalHeading empty)
+			(Printf "%s %s" normalHeading empty)
 			(return)
 		)
 		(if (> (* (= temp16 (Sqrt temp0)) temp16) temp0)
@@ -312,7 +264,10 @@
 						(= temp18 (temp9 nsTop?))
 					)
 					(temp9 show:)
-					(if (== temp9 param2) (temp9 highlight:))
+					(if (== temp9 param2)
+						(theGame setCursor: 5 1)
+						(temp9 highlight:)
+					)
 				)
 				(= inventoryFirst (inventory next: inventoryFirst))
 			)
@@ -371,604 +326,152 @@
 		(= heading normalHeading)
 	)
 	
-	(method (doit &tmp temp0 temp1 temp2 [temp3 3] temp6 temp7 temp8)
-		(asm
-code_0836:
-			pushi    #type
-			pushi    0
-			pushi    #new
-			pushi    0
-			class    Event
-			send     4
-			sat      temp1
-			send     4
-			bnt      code_0851
-			pushi    #dispose
-			pushi    0
-			lat      temp1
-			send     4
-			jmp      code_0836
-code_0851:
-			pushi    #dispose
-			pushi    0
-			lat      temp1
-			send     4
-			ldi      0
-			sat      temp1
-code_085c:
-			pushi    #new
-			pushi    0
-			class    Event
-			send     4
-			sat      temp1
-			bnt      code_0c5e
-			pTos     state
-			ldi      32
-			and     
-			bnt      code_0c5e
-			ldi      0
-			sat      temp8
-			pushi    #localize
-			pushi    0
-			lat      temp1
-			send     4
-			pToa     curIcon
-			bnt      code_0906
-			pushi    #modifiers
-			pushi    0
-			lat      temp1
-			send     4
-			not     
-			bnt      code_0906
-			pTos     curIcon
-			pToa     selectIcon
-			ne?     
-			bnt      code_0906
-			pushi    #type
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      1
-			eq?     
-			bt       code_08db
-			pushi    #type
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      4
-			eq?     
-			bnt      code_08c5
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      13
-			eq?     
-			bnt      code_08c5
-			ldi      1
-			sat      temp8
-			bt       code_08db
-code_08c5:
-			pushi    #type
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      256
-			eq?     
-			bnt      code_0906
-			ldi      1
-			sat      temp8
-			bnt      code_0906
-code_08db:
-			pTos     curIcon
-			pToa     helpIconItem
-			ne?     
-			bt       code_08f1
-			pushi    #signal
-			pushi    0
-			pToa     helpIconItem
-			send     4
-			push    
-			ldi      16
-			and     
-			bnt      code_0906
-code_08f1:
-			pushi    #type
-			pushi    1
-			pushi    16384
-			pushi    40
-			pushi    1
-			pushi    #message
-			pushi    0
-			pToa     curIcon
-			send     4
-			push    
-			lat      temp1
-			send     12
-code_0906:
-			pushi    1
-			lst      temp1
-			callk    MapKeyToDir,  2
-			pushi    #type
-			pushi    0
-			lat      temp1
-			send     4
-			sat      temp2
-			push    
-			ldi      1
-			eq?     
-			bnt      code_0937
-			pushi    #modifiers
-			pushi    0
-			lat      temp1
-			send     4
-			bnt      code_0937
-			pushi    #advanceCurIcon
-			pushi    0
-			self     4
-			pushi    #claimed
-			pushi    1
-			pushi    1
-			lat      temp1
-			send     6
-			jmp      code_0c54
-code_0937:
-			lst      temp2
-			ldi      0
-			eq?     
-			bnt      code_0960
-			pushi    #firstTrue
-			pushi    2
-			pushi    196
-			lst      temp1
-			self     8
-			sat      temp0
-			bnt      code_0960
-			push    
-			pToa     highlightedIcon
-			ne?     
-			bnt      code_0960
-			pushi    #highlight
-			pushi    1
-			lst      temp0
-			self     6
-			jmp      code_0c54
-code_0960:
-			lst      temp2
-			ldi      1
-			eq?     
-			bt       code_0987
-			lst      temp2
-			ldi      4
-			eq?     
-			bnt      code_097e
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      13
-			eq?     
-			bt       code_0987
-code_097e:
-			lst      temp2
-			ldi      256
-			eq?     
-			bnt      code_0a18
-code_0987:
-			pushi    1
-			pTos     highlightedIcon
-			callk    IsObject,  2
-			bnt      code_0c54
-			pushi    168
-			pushi    #-info-
-			pTos     highlightedIcon
-			lst      temp2
-			ldi      1
-			eq?     
-			push    
-			self     8
-			bnt      code_0c54
-			pTos     highlightedIcon
-			pToa     okButton
-			eq?     
-			bnt      code_09af
-			jmp      code_0c5e
-			jmp      code_0c54
-code_09af:
-			pTos     highlightedIcon
-			pToa     helpIconItem
-			eq?     
-			bnt      code_0a00
-			pTos     state
-			ldi      2048
-			and     
-			bnt      code_09c9
-			pushi    #noClickHelp
-			pushi    0
-			self     4
-			jmp      code_0c54
-code_09c9:
-			pushi    #cursor
-			pushi    0
-			pToa     highlightedIcon
-			send     4
-			push    
-			ldi      65535
-			ne?     
-			bnt      code_09e7
-			pushi    #setCursor
-			pushi    1
-			pushi    #cursor
-			pushi    0
-			pToa     helpIconItem
-			send     4
-			push    
-			lag      theGame
-			send     6
-code_09e7:
-			pToa     helpIconItem
-			bnt      code_0c54
-			pushi    17
-			pushi    #superClass
-			pushi    #signal
-			pushi    0
-			send     4
-			push    
-			ldi      16
-			or      
-			push    
-			pToa     helpIconItem
-			send     6
-			jmp      code_0c54
-code_0a00:
-			pToa     highlightedIcon
-			aTop     curIcon
-			pushi    #setCursor
-			pushi    2
-			pushi    #cursor
-			pushi    0
-			pToa     curIcon
-			send     4
-			push    
-			pushi    1
-			lag      theGame
-			send     8
-			jmp      code_0c54
-code_0a18:
-			lst      temp2
-			ldi      64
-			and     
-			bnt      code_0ad9
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			dup     
-			ldi      3
-			eq?     
-			bnt      code_0a38
-			pushi    #advance
-			pushi    0
-			self     4
-			jmp      code_0ad5
-code_0a38:
-			dup     
-			ldi      7
-			eq?     
-			bnt      code_0a48
-			pushi    #retreat
-			pushi    0
-			self     4
-			jmp      code_0ad5
-code_0a48:
-			dup     
-			ldi      1
-			eq?     
-			bnt      code_0a80
-			pToa     highlightedIcon
-			bnt      code_0a77
-			pushi    3
-			push    
-			pushi    #nsTop
-			pushi    0
-			send     4
-			push    
-			ldi      1
-			sub     
-			push    
-			pushi    0
-			call     FindIcon,  6
-			sat      temp0
-			bnt      code_0a77
-			pushi    #highlight
-			pushi    2
-			lst      temp0
-			pushi    1
-			self     8
-			jmp      code_0ad5
-code_0a77:
-			pushi    #retreat
-			pushi    0
-			self     4
-			jmp      code_0ad5
-code_0a80:
-			dup     
-			ldi      5
-			eq?     
-			bnt      code_0ac0
-			pToa     highlightedIcon
-			bnt      code_0ab7
-			pushi    3
-			push    
-			pushi    #nsBottom
-			pushi    0
-			send     4
-			push    
-			ldi      1
-			add     
-			push    
-			pushi    #bottom
-			pushi    0
-			pToa     window
-			send     4
-			push    
-			call     FindIcon,  6
-			sat      temp0
-			bnt      code_0ab7
-			pushi    #highlight
-			pushi    2
-			lst      temp0
-			pushi    1
-			self     8
-			jmp      code_0ad5
-code_0ab7:
-			pushi    #advance
-			pushi    0
-			self     4
-			jmp      code_0ad5
-code_0ac0:
-			dup     
-			ldi      0
-			eq?     
-			bnt      code_0ad5
-			lst      temp2
-			ldi      4
-			and     
-			bnt      code_0ad5
-			pushi    #advanceCurIcon
-			pushi    0
-			self     4
-code_0ad5:
-			toss    
-			jmp      code_0c54
-code_0ad9:
-			lst      temp2
-			ldi      4
-			eq?     
-			bnt      code_0b0b
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			dup     
-			ldi      9
-			eq?     
-			bnt      code_0af9
-			pushi    #advance
-			pushi    0
-			self     4
-			jmp      code_0b07
-code_0af9:
-			dup     
-			ldi      3840
-			eq?     
-			bnt      code_0b07
-			pushi    #retreat
-			pushi    0
-			self     4
-code_0b07:
-			toss    
-			jmp      code_0c54
-code_0b0b:
-			lst      temp2
-			ldi      16384
-			eq?     
-			bnt      code_0c54
-			pushi    #firstTrue
-			pushi    2
-			pushi    196
-			lst      temp1
-			self     8
-			sat      temp0
-			bnt      code_0c54
-			pushi    0
-			callk    GetPort,  0
-			sat      temp7
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			ldi      6
-			eq?     
-			bnt      code_0b96
-			lat      temp0
-			bnt      code_0b75
-			pushi    #helpStr
-			pushi    0
-			send     4
-			bnt      code_0b75
-			pushi    #eraseOnly
-			pushi    0
-			lag      systemWindow
-			send     4
-			sat      temp6
-			pushi    #eraseOnly
-			pushi    1
-			pushi    1
-			lag      systemWindow
-			send     6
-			pushi    3
-			pushi    995
-			pushi    0
-			pushi    #helpStr
-			pushi    0
-			lat      temp0
-			send     4
-			push    
-			calle    Printf,  6
-			pushi    #eraseOnly
-			pushi    1
-			lst      temp6
-			lag      systemWindow
-			send     6
-code_0b75:
-			pushi    17
-			pushi    #superClass
-			pushi    #signal
-			pushi    0
-			pToa     helpIconItem
-			send     4
-			push    
-			ldi      65519
-			and     
-			push    
-			pToa     helpIconItem
-			send     6
-			pushi    #setCursor
-			pushi    1
-			pushi    999
-			lag      theGame
-			send     6
-			jmp      code_0c4e
-code_0b96:
-			lst      temp0
-			pToa     okButton
-			eq?     
-			bnt      code_0ba4
-			jmp      code_0c5e
-			jmp      code_0c4e
-code_0ba4:
-			pushi    #isKindOf
-			pushi    1
-			class    InvItem
-			push    
-			lat      temp0
-			send     6
-			not     
-			bnt      code_0bd9
-			pushi    #select
-			pushi    2
-			lst      temp0
-			lat      temp8
-			not     
-			push    
-			self     8
-			bnt      code_0c4e
-			lat      temp0
-			aTop     curIcon
-			pushi    #setCursor
-			pushi    2
-			pushi    #cursor
-			pushi    0
-			pToa     curIcon
-			send     4
-			push    
-			pushi    1
-			lag      theGame
-			send     8
-			jmp      code_0c4e
-code_0bd9:
-			pToa     curIcon
-			bnt      code_0c4e
-			pushi    #respondsTo
-			pushi    1
-			pushi    340
-			lag      systemWindow
-			send     6
-			bnt      code_0bfe
-			pushi    #eraseOnly
-			pushi    0
-			lag      systemWindow
-			send     4
-			sat      temp6
-			pushi    #eraseOnly
-			pushi    1
-			pushi    1
-			lag      systemWindow
-			send     6
-code_0bfe:
-			pushi    #isKindOf
-			pushi    1
-			class    InvItem
-			push    
-			pToa     curIcon
-			send     6
-			bnt      code_0c27
-			pushi    #doVerb
-			pushi    2
-			pushi    #message
-			pushi    0
-			pToa     curIcon
-			send     4
-			push    
-			pushi    #indexOf
-			pushi    1
-			pTos     curIcon
-			self     6
-			push    
-			lat      temp0
-			send     8
-			jmp      code_0c37
-code_0c27:
-			pushi    #doVerb
-			pushi    1
-			pushi    #message
-			pushi    0
-			lat      temp1
-			send     4
-			push    
-			lat      temp0
-			send     6
-code_0c37:
-			pushi    #respondsTo
-			pushi    1
-			pushi    340
-			lag      systemWindow
-			send     6
-			bnt      code_0c4e
-			pushi    #eraseOnly
-			pushi    1
-			lst      temp6
-			lag      systemWindow
-			send     6
-code_0c4e:
-			pushi    1
-			lst      temp7
-			callk    SetPort,  2
-code_0c54:
-			pushi    #dispose
-			pushi    0
-			lat      temp1
-			send     4
-			jmp      code_085c
-code_0c5e:
-			pushi    #dispose
-			pushi    0
-			lat      temp1
-			send     4
-			pushi    #hide
-			pushi    0
-			self     4
-			ret     
+	(method (doit &tmp theCurIcon newEvent newEventType [temp3 3] systemWindowEraseOnly temp7 temp8)
+		(while ((= newEvent (Event new:)) type?)
+			(newEvent dispose:)
 		)
+		(newEvent dispose:)
+		(= newEvent 0)
+		(while
+		(and (= newEvent (Event new:)) (& state $0020))
+			(= temp8 0)
+			(newEvent localize:)
+			(if
+				(and
+					curIcon
+					(not (newEvent modifiers?))
+					(!= curIcon selectIcon)
+					(or
+						(== (newEvent type?) 1)
+						(and
+							(== (newEvent type?) 4)
+							(== (newEvent message?) 13)
+							(= temp8 1)
+						)
+						(and (== (newEvent type?) 256) (= temp8 1))
+					)
+					(or
+						(!= curIcon helpIconItem)
+						(& (helpIconItem signal?) $0010)
+					)
+				)
+				(newEvent type: 16384 message: (curIcon message?))
+			)
+			(MapKeyToDir newEvent)
+			(cond 
+				(
+					(and
+						(== (= newEventType (newEvent type?)) 1)
+						(newEvent modifiers?)
+					)
+					(self advanceCurIcon:)
+					(newEvent claimed: 1)
+				)
+				(
+					(and
+						(== newEventType 0)
+						(= theCurIcon (self firstTrue: #onMe newEvent))
+						(!= theCurIcon highlightedIcon)
+					)
+					(self highlight: theCurIcon)
+				)
+				(
+					(or
+						(== newEventType 1)
+						(and (== newEventType 4) (== (newEvent message?) 13))
+						(== newEventType 256)
+					)
+					(if
+						(and
+							(IsObject highlightedIcon)
+							(self select: highlightedIcon (== newEventType 1))
+						)
+						(if (== highlightedIcon okButton) (break))
+						(if (== highlightedIcon helpIconItem)
+							(if (& state $0800)
+								(self noClickHelp:)
+							else
+								(if (!= (highlightedIcon cursor?) -1)
+									(theGame setCursor: (helpIconItem cursor?))
+								)
+								(if helpIconItem
+									(helpIconItem signal: (| (helpIconItem signal?) $0010))
+								)
+							)
+						else
+							(= curIcon highlightedIcon)
+							(theGame setCursor: (curIcon cursor?) 1)
+						)
+					)
+				)
+				((& newEventType $0040)
+					(switch (newEvent message?)
+						(3 (self advance:))
+						(7 (self retreat:))
+						(1 (self retreat:))
+						(5 (self advance:))
+						(0
+							(if (& newEventType $0004) (self advanceCurIcon:))
+						)
+					)
+				)
+				((== newEventType 4)
+					(switch (newEvent message?)
+						(9 (self advance:))
+						(3840 (self retreat:))
+					)
+				)
+				(
+					(and
+						(== newEventType 16384)
+						(= theCurIcon (self firstTrue: #onMe newEvent))
+					)
+					(if (== (newEvent message?) verbHelp)
+						(if (and theCurIcon (theCurIcon helpStr?))
+							(if (systemWindow respondsTo: #eraseOnly)
+								(= systemWindowEraseOnly (systemWindow eraseOnly?))
+								(systemWindow eraseOnly: 1)
+								(Printf "%s" (theCurIcon helpStr?))
+								(systemWindow eraseOnly: systemWindowEraseOnly)
+							else
+								(Printf "%s" (theCurIcon helpStr?))
+							)
+						)
+						(helpIconItem signal: (& (helpIconItem signal?) $ffef))
+						(theGame setCursor: ARROW_CURSOR)
+					else
+						(if (== theCurIcon okButton) (break))
+						(cond 
+							((not (theCurIcon isKindOf: InvItem))
+								(if (self select: theCurIcon (not temp8))
+									(= curIcon theCurIcon)
+									(theGame setCursor: (curIcon cursor?) 1)
+								)
+							)
+							(curIcon
+								(if (systemWindow respondsTo: #eraseOnly)
+									(= systemWindowEraseOnly (systemWindow eraseOnly?))
+									(systemWindow eraseOnly: 1)
+								)
+								(if (curIcon isKindOf: InvItem)
+									(theCurIcon
+										doVerb: (curIcon message?) (self indexOf: curIcon)
+									)
+								else
+									(theCurIcon doVerb: (newEvent message?))
+								)
+								(if (systemWindow respondsTo: #eraseOnly)
+									(systemWindow eraseOnly: systemWindowEraseOnly)
+								)
+							)
+						)
+					)
+				)
+			)
+			(newEvent dispose:)
+		)
+		(newEvent dispose:)
+		(self hide:)
 	)
 	
 	(method (showSelf param1)
@@ -1014,9 +517,9 @@ code_0c5e:
 					)
 				curInvIcon: curIcon
 			)
-		)
-		(if ((theIconBar curIcon?) cursor?)
-			(theGame setCursor: ((theIconBar curIcon?) cursor?) 1)
+			(if (curIcon cursor?)
+				(theGame setCursor: (curIcon cursor?) 1)
+			)
 		)
 	)
 	
@@ -1028,7 +531,7 @@ code_0c5e:
 		(repeat
 			(= temp0
 				(self
-					at: (if (<= temp3 size) temp3 else (mod temp3 size))
+					at: (if (<= temp3 size) temp3 else (mod temp3 (- size 1)))
 				)
 			)
 			(if (not (IsObject temp0))
@@ -1037,7 +540,17 @@ code_0c5e:
 			(if (not (& (temp0 signal?) $0004)) (break))
 			(++ temp3)
 		)
-		(self highlight: temp0 1)
+		(theGame
+			setCursor:
+				theCursor
+				1
+				(+
+					(temp0 nsLeft?)
+					(/ (- (temp0 nsRight?) (temp0 nsLeft?)) 2)
+				)
+				(- (temp0 nsBottom?) 3)
+		)
+		(self highlight: temp0)
 	)
 	
 	(method (retreat param1 &tmp temp0 temp1 temp2 temp3)
@@ -1053,7 +566,17 @@ code_0c5e:
 			(if (not (& (temp0 signal?) $0004)) (break))
 			(-- temp3)
 		)
-		(self highlight: temp0 1)
+		(theGame
+			setCursor:
+				theCursor
+				1
+				(+
+					(temp0 nsLeft?)
+					(/ (- (temp0 nsRight?) (temp0 nsLeft?)) 2)
+				)
+				(- (temp0 nsBottom?) 3)
+		)
+		(self highlight: temp0)
 	)
 	
 	(method (advanceCurIcon &tmp theCurIcon)

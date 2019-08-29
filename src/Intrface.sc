@@ -1,12 +1,12 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# 255)
-(include sci.sh)
+(include game.sh)
 (use Main)
 (use System)
 
 (public
 	Print 0
-	PrintIcon 1
+	ShowView 1
 	GetInput 2
 	GetNumber 3
 	Printf 4
@@ -47,7 +47,7 @@
 				(== (StrAt @temp21 (+ 1 temp1022)) 74)
 			)
 			(theGame printLang: 1 subtitleLang: 81)
-			(kernel_123 @temp21 @temp21 {#J})
+			(StrSplit @temp21 @temp21 {#J})
 			(theGame
 				printLang: theGamePrintLang
 				subtitleLang: theGameSubtitleLang
@@ -135,7 +135,7 @@
 				(= temp7 [param1 (++ temp5)])
 			)
 			(#draw
-				(Animate (cast elements?) FALSE)
+				(Animate (cast elements?) 0)
 			)
 			(#edit
 				(++ temp5)
@@ -309,7 +309,7 @@
 	(return temp4)
 )
 
-(procedure (PrintIcon param1 param2 param3 param4)
+(procedure (ShowView param1 param2 param3 param4)
 	(Print param1 #icon param2 param3 param4 &rest)
 )
 
@@ -328,7 +328,7 @@
 
 (procedure (GetNumber param1 param2 &tmp [temp0 40])
 	(= temp0 0)
-	(if (> argc 1) (Format @temp0 255 0 param2))
+	(if (> argc 1) (Format @temp0 "%d" param2))
 	(return
 		(if (GetInput @temp0 5 param1)
 			(ReadNumber @temp0)
@@ -370,12 +370,12 @@
 	)
 	
 	(method (draw)
-		(= state TRUE)
-		(DrawMenuBar TRUE)
+		(= state 1)
+		(DrawMenuBar 1)
 	)
 	
 	(method (hide)
-		(DrawMenuBar FALSE)
+		(DrawMenuBar 0)
 	)
 	
 	(method (handleEvent pEvent &tmp temp0 temp1)

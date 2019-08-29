@@ -3,15 +3,15 @@
 (include game.sh)
 (use Intrface)
 (use Window)
-(use ColorInit)
 (use PMouse)
 (use SlideIcon)
 (use BordWind)
 (use Feature)
+(use LoadMany)
 (use IconBar)
-(use GameEgo)
 (use BordWind)
 (use RandCyc)
+(use PAvoid)
 (use StopWalk)
 (use DCIcon)
 (use Motion)
@@ -33,7 +33,6 @@
 	Btst 6
 	Bset 7
 	Bclr 8
-	EgoHeadMove 9
 	SolvePuzzle 10
 	AimToward 11
 	VerbFail 12
@@ -145,7 +144,7 @@
 	global98
 	lastSysGlobal
 	theMusic
-	dongle = TRUE	;EO: Don't mess with this, or you'll get Error 11 shortly after startup!
+	dongle = 1234	;EO: Don't mess with this, or you'll get Error 11 shortly after startup!
 	globalSound
 	soundFx
 	deathMusic = sDeath
@@ -167,29 +166,19 @@
 	myHighlightColor
 	debugging
 )
-(procedure (NormalEgo theView theLoop)
-	(if (> argc 0)
-		(if (!= theView -1) (ego view: theView))
-		(if (and (> argc 1) (!= theLoop -1))
-			(ego loop: theLoop)
-		)
-	)
+(procedure (NormalEgo)
 	(ego
-		normal: 1
-		moveHead: 1
 		setLoop: -1
-		setLoop: stopGroop
 		setPri: -1
 		setMotion: 0
-		setCycle: Walk
+		setCycle: StopWalk
 		setStep: 3 2
-		illegalBits: 0
+		setAvoider: PAvoider
 		ignoreActors: 0
 		moveSpeed: (theGame egoMoveSpeed?)
 		cycleSpeed: (theGame egoMoveSpeed?)
 	)
 )
-
 
 (procedure (HandsOff &tmp oldIcon)
 	(User canControl: FALSE canInput: FALSE)
@@ -266,10 +255,6 @@
 	(return oldState)
 )
 
-(procedure (EgoHeadMove)
-	(egoHead init: ego view: (ego view?) cycleSpeed: 24)
-)
-
 (procedure (SolvePuzzle flag points)
 	(if (not (Btst flag))
 		(theGame changeScore: points)
@@ -308,7 +293,7 @@
 	)
 	((= newList (List new:)) add: redX)
 	(Animate (newList elements?) 1)
-	(Animate (cast elements?) 0)
+	(Animate (cast elements?) FALSE)
 	(= temp5 (GetTime))
 	(while (< (Abs (- temp5 (GetTime))) 40)
 		(breakif
@@ -323,20 +308,20 @@
 	(theGame setCursor: temp3)
 )
 
-(procedure (Say param1 param2 param3 &tmp [temp0 500])
+(procedure (Say param1 param2 param3 &tmp [str 500])
 	(if (u< param2 1000)
-		(GetFarText param2 param3 @temp0)
+		(GetFarText param2 param3 @str)
 	else
-		(StrCpy @temp0 param2)
+		(StrCpy @str param2)
 	)
 	(babbleIcon
 		view: param1
 		cycleSpeed: (* (+ howFast 1) 4)
 	)
 	(if (u< param2 1000)
-		(Print @temp0 &rest 82 babbleIcon 0 0)
+		(Print @str &rest #icon babbleIcon 0 0)
 	else
-		(Print @temp0 param3 &rest 82 babbleIcon 0 0)
+		(Print @str param3 &rest #icon babbleIcon 0 0)
 	)
 )
 
@@ -383,65 +368,13 @@
 	)
 )
 
-
-(instance egoBody of Body
-	(properties
-		name "ego"
-		description {you}
-		sightAngle 180
-		lookStr {It's you!}
-		view vEgo
-	)
-	
-	(method (doVerb theVerb theItem)
-		(switch theVerb
-			(verbTalk
-				(Print "You talk to yourself but are stumped for a reply.")
-			)
-			(verbDo
-				(Print "Hey! Keep your hands off yourself! This is a family game.")
-			)
-			(verbTaste
-				(Print "I'll bet you wish you could!")
-			)
-			(verbSmell
-				(Print "Ahhh!  The aroma of several adventure games emanates from your person.")
-			)
-			(verbUse
-				(switch theItem
-					(iCoin
-						(Print "You pay yourself some money.")
-					)
-					(iBomb
-						(EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea...")
-					)
-				)
-			)
-			(else
-				(super doVerb: theVerb)
-			)
-		)
-	)
-)
-
-(instance egoHead of Head
-	(properties
-		description {your head.}
-		lookStr {There's nothing going on in your stupid little head.}
-	)
-	
-	(method (doVerb theVerb theItem)
-		(ego doVerb: theVerb theItem)
-	)
-)
-
 (instance music of Sound
 	(properties
 		number 1
 	)
 )
 
-(instance longSong2 of Sound
+(instance SFX of Sound
 	(properties
 		number 1
 	)
@@ -458,8 +391,16 @@
 (instance statusCode of Code
 	(properties)
 	
-	(method (doit strg)
-		(Format strg "___Template Game__________________Score: %d of %d" score possibleScore)
+	(method (doit roomNum &tmp [strg 50])
+		(if
+			;add rooms where the status line is not shown
+			(not (OneOf roomNum 
+					rTitle SPEED_TEST
+				 )
+			)	
+		(Format @strg "___Template Game__________________Score: %d of %d" score possibleScore)
+		(DrawStatus @strg 23 0)
+		)
 	)
 )
 
@@ -511,42 +452,23 @@
 		((= mouseDownHandler gameMouseDownHandler) add:)
 		((= directionHandler gameDirectionHandler) add:)
 		(= pMouse PseudoMouse)
-		(self egoMoveSpeed: 2 setCursor: theCursor TRUE 304 172)
-		(= ego egoBody)
-		(ego
-			head: egoHead
-			moveSpeed: (self egoMoveSpeed?)
-			cycleSpeed: (self egoMoveSpeed?)
-		)
-		;Moved the icon bar, inventory, and control panel into their own scripts.
-		((ScriptID GAME_ICONBAR 0) init:)
-		((ScriptID GAME_INV 0) init:)
-		((ScriptID GAME_CONTROLS 0) init:)	
-		((= theMusic music) owner: self priority: 15 init:)
-		((= soundFx longSong2) owner: self init:)
-		(StatusLine code: statusCode disable:) ;hide the status code at startup
+		(self egoMoveSpeed: 5 setCursor: theCursor TRUE 304 172)
+		(= ego (ScriptID GAME_EGO 0))
+		((= theMusic music) owner: self flags: mNOPAUSE init:)
+		((= soundFx SFX) owner: self flags: mNOPAUSE init:)
 		((ScriptID GAME_INIT 0) init:)
 	)
 	
-	(method (doit)
-		(super doit:)
-	)
-	
-	(method (replay)
-;		(ShowStatus -1)
-		(Palette PALIntensity 0 255 100)
-		(super replay:)
-	)
-	
-	(method (newRoom)
-		(super newRoom: &rest)
-	)
-	
 	(method (startRoom roomNum)
+		(if debugging
+			((ScriptID DEBUG 0) init:)
+		)		
 		(if pMouse (pMouse stop:))
+		(statusCode doit: roomNum)
 		((ScriptID DISPOSE_CODE) doit: roomNum)
-		;EO: Commenting this out until I can figure out how to not trigger this when
-		;changing rooms.
+		;EO: despite what the message will say, the memory is NOT fragmented.
+		;Disabling the message until I can find a way to prevent it from
+		;appearing when changing rooms.
 ;;;		(if
 ;;;			(and
 ;;;				(!= (- (MemoryInfo FreeHeap) 2) (MemoryInfo LargestPtr))
@@ -558,41 +480,11 @@
 ;;;			(SetDebug)
 ;;;		)
 		(super startRoom: roomNum)
-		(if (cast contains: ego)
-			(if (not (ego looper?)) (ego setLoop: stopGroop))
-			(EgoHeadMove)
-		)
 		(redX init: hide: setPri: 15 posn: 1000 -1000)
 	)
 
 	
 	(method (handleEvent event)
-		(if debugging
-			(if
-				(and
-					(== (event type?) mouseDown)
-					(& (event modifiers?) shiftDown)
-				)
-				(if (not (User canInput:))
-					(event claimed: TRUE)
-				else
-					(cast eachElementDo: #handleEvent event)
-					(if (event claimed?) (return))
-				)
-			)
-			(super handleEvent: event)
-			(if (event claimed?) (return))
-			(switch (event type?)
-				(keyDown
-					((ScriptID DEBUG) handleEvent: event)
-				)
-				(mouseDown
-					((ScriptID DEBUG) handleEvent: event)
-				)
-			)
-		else
-			(super handleEvent: event)
-		)
 		(super handleEvent: event)
 		(if (event claimed?) (return TRUE))
 		(return
@@ -601,19 +493,19 @@
 					(switch (event message?)
 						(TAB
 							(if (not (& ((theIconBar at: ICON_INVENTORY) signal?) DISABLED))
-								(inventory showSelf: ego)
+								(inventory showSelf:)
 							)
 						)
 						(SHIFTTAB
 							(if (not (& ((theIconBar at: ICON_INVENTORY) signal?) DISABLED))
-								(inventory showSelf: ego)
+								(inventory showSelf:)
 							)
 						)
-						(KEY_CONTROL
+						(`^q	;KEY_CONTROL
 							(theGame quitGame:)
 							(event claimed: TRUE)
 						)
-						(KEY_F2
+						(`#2	;KEY_F2
 							(cond 
 								((theGame masterVolume:) (theGame masterVolume: 0))
 								((> musicChannels 1) (theGame masterVolume: 15))
@@ -621,15 +513,15 @@
 							)
 							(event claimed: TRUE)
 						)
-						(KEY_F5
+						(`#5	;KEY_F5
 							(theGame save:)
 							(event claimed: TRUE)
 						)
-						(KEY_F7
+						(`#7	;KEY_F7
 							(theGame restore:)
 							(event claimed: TRUE)
 						)
-						(KEY_F9
+						(`#9	;KEY_F9
 							(theGame restart:)
 							(event claimed: TRUE)
 						)
@@ -672,7 +564,7 @@
 
 (instance redX of View
 	(properties
-		view 942
+		view vRedX
 	)
 )
 

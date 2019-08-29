@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 952)
-(include sci.sh)
+(script# LOGGER)
+(include game.sh)
 (use Main)
 (use Intrface)
 (use PolyPath)

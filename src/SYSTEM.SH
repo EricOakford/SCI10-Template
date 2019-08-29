@@ -83,7 +83,7 @@
 (define 	RANDCYC		941)
 (define 	PRINTD	940)
 (define 	OSC	 		939)
-(define 	RANGEOSC		938)		; was PCYCLE
+(define 	PCYCLE		938)
 (define 	ICONBAR		937)
 (define 	BORDWIND		936)
 (define 	SCALER		935)
@@ -195,10 +195,11 @@
 (define	PIXELDISSOLVE 	9)
 (define	FADEOUT			10)		;Defaults to PLAIN in 16 color
 
-(define	SCROLLRIGHT		11)		;Relative order of these four is important
-(define	SCROLLLEFT		12)		;	in order for ShowPic to work correctly
-(define	SCROLLUP			13)
-(define	SCROLLDOWN		14)
+;SCI0.1 and SCI1.0 scrolling styles
+(define	SCROLLRIGHT		40)		;Relative order of these four is important
+(define	SCROLLLEFT		41)		;	in order for ShowPic to work correctly
+(define	SCROLLUP			42)
+(define	SCROLLDOWN		43)
 
 (define	PLAIN				100) 		;Draw quickly with no special effects
 
@@ -724,7 +725,7 @@
 
 ;SCI10 verb defines
 ;(added by EO)
-(enum
+(enum 1
 	verbWalk
 	verbLook
 	verbDo

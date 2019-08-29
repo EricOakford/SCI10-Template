@@ -2,10 +2,10 @@
 (script# SPEED_TEST)
 (include game.sh)
 (use Main)
-(use Intrface)
 (use Motion)
 (use Game)
 (use Actor)
+(use Intrface)
 (use System)
 
 (public
@@ -29,6 +29,9 @@
 	)
 	
 	(method (init)
+		(= local2 (FileIO 0 {version} 1))
+		(FileIO 5 version 6 local2)
+		(FileIO 1 local2)
 		(super init:)
 		(sounds eachElementDo: #stop)
 		(while (u> (GetTime) -1024)
@@ -54,18 +57,11 @@
 		(if
 		(and (u< local0 (GetTime)) (not (self script?)))
 			(if (< local1 local3)
-			;EO: this is based on the decompiled NRS timer fix for PQ3
-				(= howFast 3)
-				(theGame detailLevel: howFast)
+				(= howFast 0)
+				(theGame detailLevel: 1)
 			else
-				(= howFast 3)
+				(= howFast 2)
 			)
-			;EO: below is the original unaltered code
-			;	(= howFast 0)
-			;	(theGame detailLevel: 1)
-			;else
-			;	(= howFast 2)
-			;)
 			(self setScript: speedScript)
 		)
 	)
@@ -81,7 +77,7 @@
 	(method (changeState newState &tmp [inputRoom 10] nextRoom)
 		(switch (= state newState)
 			(0
-				(Palette 4 0 255 100)
+				(Palette PALIntensity 0 255 100)
 				(fred setMotion: 0)
 				(= cycles 1)
 			)
@@ -107,4 +103,3 @@
 		)
 	)
 )
-

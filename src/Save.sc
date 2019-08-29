@@ -4,7 +4,6 @@
 (use Main)
 (use File)
 (use Intrface)
-(use Language)
 
 (public
 	GetDirectory 0
@@ -207,7 +206,6 @@
 
 	
 	(method (init theComment names nums)
-		(proc932_3)
 		(= gGameParseLang (theGame parseLang?))
 		(theGame parseLang: ENGLISH)
       ; give ourself the system window as our window
@@ -976,7 +974,6 @@
 ;;;	)
 	
 	(method (dispose)
-		(proc932_4)
 		(theGame parseLang: gGameParseLang)
 		(super dispose: &rest)
 	)

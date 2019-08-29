@@ -10,24 +10,6 @@
 
 (class PicView of Feature
 	(properties
-		x 0
-		y 0
-		z 0
-		heading 0
-		noun 0
-		nsTop 0
-		nsLeft 0
-		nsBottom 0
-		nsRight 0
-		description 0
-		sightAngle 26505
-		actions 0
-		onMeCheck $6789
-		approachX 0
-		approachY 0
-		approachDist 0
-		_approachVerbs 26505
-		lookStr 0
 		view 0
 		loop 0
 		cel 0
@@ -69,7 +51,7 @@
 						)
 					)
 					(not
-						(kernel_125
+						(IsItSkip
 							view
 							loop
 							cel
@@ -86,24 +68,6 @@
 
 (class View of Feature
 	(properties
-		x 0
-		y 0
-		z 0
-		heading 0
-		noun 0
-		nsTop 0
-		nsLeft 0
-		nsBottom 0
-		nsRight 0
-		description 0
-		sightAngle 26505
-		actions 0
-		onMeCheck $6789
-		approachX 0
-		approachY 0
-		approachDist 0
-		_approachVerbs 26505
-		lookStr 0
 		yStep 2
 		view 0
 		loop 0
@@ -169,7 +133,7 @@
 						)
 					)
 					(not
-						(kernel_125
+						(IsItSkip
 							view
 							loop
 							cel
@@ -319,40 +283,7 @@
 
 (class Prop of View
 	(properties
-		x 0
-		y 0
-		z 0
-		heading 0
-		noun 0
-		nsTop 0
-		nsLeft 0
-		nsBottom 0
-		nsRight 0
-		description 0
-		sightAngle 26505
-		actions 0
-		onMeCheck $6789
-		approachX 0
-		approachY 0
-		approachDist 0
-		_approachVerbs 26505
-		lookStr 0
-		yStep 2
-		view 0
-		loop 0
-		cel 0
-		priority 0
-		underBits 0
 		signal $0000
-		lsTop 0
-		lsLeft 0
-		lsBottom 0
-		lsRight 0
-		brTop 0
-		brLeft 0
-		brBottom 0
-		brRight 0
-		palette 0
 		cycleSpeed 6
 		script 0
 		cycler 0
@@ -432,45 +363,6 @@
 
 (class Actor of Prop
 	(properties
-		x 0
-		y 0
-		z 0
-		heading 0
-		noun 0
-		nsTop 0
-		nsLeft 0
-		nsBottom 0
-		nsRight 0
-		description 0
-		sightAngle 26505
-		actions 0
-		onMeCheck $6789
-		approachX 0
-		approachY 0
-		approachDist 0
-		_approachVerbs 26505
-		lookStr 0
-		yStep 2
-		view 0
-		loop 0
-		cel 0
-		priority 0
-		underBits 0
-		signal $0000
-		lsTop 0
-		lsLeft 0
-		lsBottom 0
-		lsRight 0
-		brTop 0
-		brLeft 0
-		brBottom 0
-		brRight 0
-		palette 0
-		cycleSpeed 6
-		script 0
-		cycler 0
-		timer 0
-		detailLevel 0
 		illegalBits $8000
 		xLast 0
 		yLast 0
@@ -717,7 +609,7 @@
 		)
 		(= temp0
 			(cond 
-				((CanBeHere self (cast elements?)))
+				((CantBeHere self (cast elements?)))
 				(
 					(and
 						(not (& signal ignoreHorizon))

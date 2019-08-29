@@ -1,159 +1,210 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
+;
+;	GAMEEGO.SC
+;
+;	The custom Ego subclasses are here. They consist of the body and head
+;	(to allow Ego to look around when he's standing still).
+;
+;
+
 (script# GAME_EGO)
 (include game.sh)
 (use Main)
-(use Grooper)
+(use Intrface)
 (use User)
 (use Actor)
 (use System)
 
-
 (public
-	Body 0
-)
-
-(local
-	[theCel 24] = [6 0 4 5 1 7 4 2 5 7 3 6 0 4 2 2 5 1 3 6 0 1 7 3]
-	local24 =  3
-	[theXOffset 75] = [0 -1 0 0 0 0 0 0 0 -1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0 0 0 -1 0 0 0 0 0 1 0 0 0 0 0 0 0 1]
-	[theYOffset 75] = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1 0 0 0 0 0 1 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 4 0 0 1 1 0 0 0 0 0 0 0 0 -1 0 0 0 0 -1]
-)
-(class Body of Ego
-	(properties
-		head 0
-		normal 1
-		moveHead 1
-	)
-	
-	(method (doit &tmp bodyLoop temp1)
-		(super doit:)
-		(cond 
-			((self isStopped:)
-				(if
-					(and
-						(!=
-							(= bodyLoop (self loop?))
-							(= temp1 (- (NumLoops self) 1))
-						)
-						(cast contains: self)
-						(IsObject (self cycler?))
-						(not ((self cycler?) isKindOf: GradualCycler))
-						(self normal?)
-					)
-					(self loop: temp1 cel: bodyLoop)
-				)
-			)
-			(
-				(and
-					(== (self loop?) (- (NumLoops self) 1))
-					(not (& signal noTurn))
-				)
-				(self loop: (self cel?))
-			)
-		)
-	)
-	
-	(method (dispose)
-		(if head (head dispose:))
-		(super dispose:)
-	)
-	
-	(method (stopUpd)
-		(if head (head stopUpd:))
-		(super stopUpd:)
-	)
-	
-	(method (hide)
-		(if head (head hide:))
-		(super hide:)
-	)
+	egoBody 0
 )
 
 (class Head of Prop
 	(properties
 		client 0
-		cnt 0
-		offSet 0
-		xOffset 0
-		yOffset 0
-		rand 0
+		cycleCnt 0
+		moveHead 1
+		headCel {15372406}
 	)
 	
-	(method (init param1)
+	(method (init param1 &tmp temp0)
+		;EO: this bit of code was taken from PQ3, as Mixed-Up Fairy Tales' 
+		;Head init: did not decompile correctly, causing graphical glitches!
 		(self
 			view: (param1 view?)
 			client: param1
 			ignoreActors: 1
 		)
 		(= loop (- (NumLoops self) 2))
+		;On the plus side, ego's head now displays properly, and DOESN'T move around 
+		;way too fast. This is good, as I don't want to modify the system scripts any
+		;more than necessary.
+;;;		(= view (param1 view?))
+;;;		(self
+;;;			client: param1
+;;;			ignoreActors: 1
+;;;			posn:
+;;;				(param1 species?)
+;;;				(param1 y?)
+;;;				(CelHigh view (param1 loop?) (param1 cel?))
+;;;		)
+;;;		(= temp0 (== (client loop?) 5))
+;;;		(if (& (param1 signal?) fixPriOn)
+;;;			(self setPri: (param1 priority?))
+;;;		)
 		(param1 head: self)
 		(super init:)
-		(self hide: signal: (| (self signal?) $0010))
+		(if (or (not temp0) (not (param1 normal?)))
+			(self hide:)
+		)
+		(if moveHead (self cue: look:))
 	)
 	
-	(method (doit)
+	(method (doit &tmp temp0 clientNormal)
+		(= clientNormal (client normal?))
+		(= temp0 (== (client loop?) 5))
 		(cond 
+			((or (not clientNormal) (not temp0)) (self hide:))
+			((and (& signal $0080) temp0) (self show:))
 			(
-				(and
-					(client normal?)
-					(not (& (client signal?) $0008))
-					(client isStopped:)
-					(== (client loop?) (- (NumLoops client) 1))
-				)
-				(if (and (& signal $0004) (not (& signal $0002)))
-					(if (& (client signal?) $0004)
-						(return)
-					else
-						(self startUpd:)
-					)
-				)
-				(self showSelf:)
+			(and (not (& signal $0080)) (not (client isStopped:))) (self hide:))
+		)
+		(if moveHead
+			(self setPri: (client priority?) look:)
+			(if (!= (self view?) (client view?))
+				(self view: (client view?) loop: 4)
 			)
-			((not (& signal $0008)) (self hide:))
+			(= x (client x?))
+			(= y (client y?))
+			(= z
+				(CelHigh (client view?) (client loop?) (client cel?))
+			)
 		)
 		(super doit:)
 	)
 	
-	(method (showSelf &tmp temp0 temp1)
-		(= temp1 0)
-		(if (& signal $0008)
-			(= cel (client cel?))
-			(= rand 0)
-			(= offSet (+ (* (client cel?) 3) 1))
-			(= cnt cycleSpeed)
+	(method (dispose)
+		(if script (script caller: 0))
+		(super dispose:)
+	)
+	
+	(method (doVerb theVerb)
+		(client doVerb: theVerb)
+	)
+	
+	(method (cue &tmp temp0)
+		(if (and (not (curRoom script?)) moveHead)
+			(client look: (- (Random 0 2) 1))
 		)
+		(self setScript: (HeadScript new:) self)
+	)
+	
+	(method (look &tmp clientLoop clientLookingDir)
 		(if
-			(and
-				(< (-- cnt) 1)
-				(client moveHead?)
-				(!= (NumLoops self) 6)
+			(==
+				(= clientLoop (client loop?))
+				(- (NumLoops client) 1)
 			)
-			(= cnt cycleSpeed)
-			(= cel
-				[theCel (+ offSet (= rand (- (Random 0 2) 1)))]
-			)
-		)
-		(= temp0 0)
-		(while (< temp0 (* 25 local24))
-			(if (== (client view?) [theXOffset temp0])
-				(= temp1 1)
-				(break)
-			)
-			(= temp0 (+ temp0 25))
-		)
-		(if temp1
-			(= xOffset [theXOffset (+ 1 temp0 offSet rand)])
-			(= yOffset [theYOffset (+ 1 temp0 offSet rand)])
+			(= clientLoop (client cel?))
+			(= clientLookingDir (client lookingDir?))
 		else
-			(= xOffset (= yOffset 0))
+			(= clientLookingDir 0)
 		)
-		(self view: (client view?) priority: (client priority?))
-		(self
-			loop: (- (NumLoops self) 2)
-			x: (+ (client x?) xOffset)
-			y: (client y?)
-			z: (+ (CelHigh view (client loop?) (client cel?)) yOffset)
-			show:
+		(= cel
+			(+
+				(& (StrAt headCel clientLoop) $000f)
+				clientLookingDir
+			)
+		)
+	)
+)
+
+(instance HeadScript of Script
+	(properties)
+	
+	(method (changeState newState)
+		(switch (= state newState)
+			(0 (= ticks (Random 60 150)))
+			(1 (self dispose:))
+		)
+	)
+)
+
+(class Body of Ego
+	(properties
+		head 0
+		caller 0
+		lookingDir 1
+		normal 1
+	)
+	
+	(method (init)
+		(super init:)
+		(if (not head) ((= head (Head new:)) init: self))
+	)
+	
+	(method (dispose)
+		(= head 0)
+		(super dispose:)
+	)
+	
+	(method (cue)
+		(if head (head setCel: 0 setCycle: 0))
+	)
+	
+	(method (look theLookingDir)
+		(= lookingDir theLookingDir)
+	)
+)
+
+
+(instance egoBody of Body
+	(properties
+		name "ego"
+		description {you}
+		sightAngle 180
+		lookStr {It's you!}
+		view vEgo
+	)
+	
+	(method (init)
+		(super init: &rest)
+	)
+	
+	(method (doit)
+		(super doit:)
+		(if (<= x 10) (= edgeHit 4))
+		(if (>= x 310) (= edgeHit 2))
+		(if (>= y 166) (= edgeHit 3))
+	)
+	
+	(method (doVerb theVerb theItem)
+		(switch theVerb
+			(verbTalk
+				(Print "You talk to yourself but are stumped for a reply.")
+			)
+			(verbDo
+				(Print "Hey! Keep your hands off yourself! This is a family game.")
+			)
+			(verbTaste
+				(Print "I'll bet you wish you could!")
+			)
+			(verbSmell
+				(Print "Ahhh!  The aroma of several adventure games emanates from your person.")
+			)
+			(verbUse
+				(switch theItem
+					(iCoin
+						(Print "You pay yourself some money.")
+					)
+					(iBomb
+						(EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea...")
+					)
+				)
+			)
+			(else
+				(super doVerb: theVerb)
+			)
 		)
 	)
 )

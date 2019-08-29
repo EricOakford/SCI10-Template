@@ -13,8 +13,7 @@
 (local
 	[nameString 200]
 	[local200 100]
-	walkString =  { verbWalk___}
-	[verbString 7] = [{ verbLook___} { verbDo_____} { verbUse____} { verbTalk___} { verbHelp___} { gameVerbs__} {}]
+	[verbString 8] = [{ verbWalk___} { verbLook___} { verbDo_____} { verbUse____} { verbTalk___} { verbHelp___} { gameVerbs__} {}]
 	toScreen =  1
 	drawNSRect =  1
 	inited
@@ -130,7 +129,7 @@
 	(param1
 		description: (GetInput @local200 40 {description?})
 		sightAngle: (= sightAngle (GetNumber {sight angle?} sightAngle))
-		_approachVerbs: (aprchD init: walkString)
+		_approachVerbs: (aprchD init: verbString)
 	)
 )
 

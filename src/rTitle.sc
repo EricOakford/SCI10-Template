@@ -1,6 +1,6 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# rTitle)
-(include system.sh) (include sci2.sh) (include game.sh)
+(include game.sh)
 (use Main)
 (use Game)
 (use Sound)
@@ -27,40 +27,33 @@
 	(method (init)
 		(super init: &rest)
 		(theMusic number: sOpening play:)
-		(keyDownHandler addToFront: self)
-		(mouseDownHandler addToFront: self)
 		(theGame setCursor: waitCursor TRUE)
 		(Display
 			"Intro/Opening screen"
-			dsCOORD 90 80
-			dsCOLOR clWHITE
-			dsBACKGROUND clTRANSPARENT
+			p_at 90 80
+			p_color 15
+			p_back -1
 		)
 	)
 	(method (handleEvent event)
 		(if
 			(and
 				(event type?)
-				(!= (event message?) KEY_F2)
+				(!= (event message?) `#2)
 				(== curRoomNum newRoomNum)
 			)
 			(event claimed: TRUE)
 			(Sound pause: TRUE)
-			(theIconBar enable:)
 			(theGame setCursor: normalCursor TRUE 160 100)
 			(switch
 				(PrintD
 					{Would you like to skip\nthe introduction or\nwatch the whole thing?} 67 100 60
-					106
-					#button {Skip it} skipIt
-					106
-					#button {Watch it} watchIt
-					106
-					#button {Restore a Game} restoreGame
+					#new #button {Skip it} skipIt
+					#new #button {Watch it} watchIt
+					#new #button {Restore a Game} restoreGame
 				)
 				(skipIt
-					(theIconBar enable:)
-					(self newRoom: rTestRoom)
+					(curRoom newRoom: rTestRoom)
 					(theMusic dispose:)
 				)
 				(watchIt (Sound pause: FALSE)

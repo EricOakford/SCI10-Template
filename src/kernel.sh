@@ -365,3 +365,27 @@
 ;;;	AvoidPath			kernel	119
 ;;;	Sort					kernel	120
 ;;;	ATan					kernel	121
+;;;	Lock					kernel	122
+;;;	ColorRemap			kernel	123
+		(enum
+			RemapOff			; no parameters
+			RemapByPct		; remapColor %intensity [depthOfField]
+			RemapByRange	; remapColor start end increment [depthOfField]
+			RemapToGray		; remapColor %gray [depthOfField]
+			RemapToPctGray	; remapColor %intensity %gray [depthOfField]
+		)
+;;;	Message				kernel	124
+		(enum	
+			MsgGet
+			MsgNext
+			MsgSize
+			MsgGetRefNoun
+			MsgGetRefVerb
+			MsgGetRefCase
+			MsgPush
+			MsgPop
+			MsgGetKey
+		)
+
+;;;	IsItSkip				kernel	125
+;;;	MergePoly			kernel	126

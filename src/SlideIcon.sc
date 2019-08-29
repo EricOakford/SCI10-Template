@@ -64,7 +64,7 @@
 		(= sTop (self valueToPosn:))
 		(DrawCel sliderView sliderLoop sliderCel sLeft sTop -1)
 		(Graph
-			GShowBits
+			grUPDATE_BOX
 			(- nsTop 1)
 			(- nsLeft 1)
 			(+ 2 nsBottom)
@@ -154,7 +154,7 @@
 			(DrawCel view loop cel nsLeft nsTop -1)
 			(DrawCel sliderView sliderLoop sliderCel sLeft sTop -1)
 			(Graph
-				GShowBits
+				grUPDATE_BOX
 				(- nsTop 1)
 				(- nsLeft 1)
 				(+ 2 nsBottom)

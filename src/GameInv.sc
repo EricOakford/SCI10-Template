@@ -57,8 +57,6 @@
 			okButton: ok
 		)
 		(Coin owner: ego)
-		(Bomb owner: ego)
-
 	)
 )
 

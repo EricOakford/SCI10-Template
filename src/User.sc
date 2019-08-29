@@ -10,7 +10,7 @@
 
 (local
 	[inputLine 23]
-	userAngle
+	inputLen
 )
 (instance uEvt of Event
 	(properties)
@@ -34,7 +34,7 @@
 	
 	(method (init param1 param2)
 		(= inputLineAddr (if argc param1 else @inputLine))
-		(= userAngle (if (== argc 2) param2 else 45))
+		(= inputLen (if (== argc 2) param2 else 45))
 		(= curEvent uEvt)
 	)
 	
