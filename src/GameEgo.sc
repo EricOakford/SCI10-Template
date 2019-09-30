@@ -83,11 +83,6 @@
 		(super doit:)
 	)
 	
-	(method (dispose)
-		(if script (script caller: 0))
-		(super dispose:)
-	)
-	
 	(method (doVerb theVerb)
 		(client doVerb: theVerb)
 	)
@@ -125,7 +120,9 @@
 	(method (changeState newState)
 		(switch (= state newState)
 			(0 (= ticks (Random 60 150)))
-			(1 (self dispose:))
+			(1
+			;	(self dispose:)	;Don't dispose this; it'll fragment the heap
+			)
 		)
 	)
 )
@@ -143,11 +140,6 @@
 		(if (not head) ((= head (Head new:)) init: self))
 	)
 	
-	(method (dispose)
-		(= head 0)
-		(super dispose:)
-	)
-	
 	(method (cue)
 		(if head (head setCel: 0 setCycle: 0))
 	)
@@ -157,6 +149,14 @@
 	)
 )
 
+(instance egoHead of Head
+	(properties
+		view vEgo
+		loop 4
+		name {your head}
+		lookStr {There's nothing going on in your stupid little head.}
+	)
+)
 
 (instance egoBody of Body
 	(properties
@@ -168,9 +168,11 @@
 	)
 	
 	(method (init)
-		(super init: &rest)
+		(super init:)
+		(= head egoHead)
+		(= theEgoHead egoHead)
 	)
-	
+
 	(method (doit)
 		(super doit:)
 		(if (<= x 10) (= edgeHit 4))

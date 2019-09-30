@@ -13,6 +13,9 @@
 (use RandCyc)
 (use PAvoid)
 (use StopWalk)
+(use PolyPath)
+(use Polygon)
+(use Osc)
 (use DCIcon)
 (use Motion)
 (use Grooper)
@@ -165,6 +168,7 @@
 	myEGABordColor2
 	myHighlightColor
 	debugging
+	theEgoHead
 )
 (procedure (NormalEgo)
 	(ego
@@ -423,15 +427,15 @@
 	)
 )
 
-(instance gameKeyDownHandler of EventHandler
+(instance kDHandler of EventHandler
 	(properties)
 )
 
-(instance gameMouseDownHandler of EventHandler
+(instance mDHandler of EventHandler
 	(properties)
 )
 
-(instance gameDirectionHandler of EventHandler
+(instance dirHandler of EventHandler
 	(properties)
 )
 
@@ -443,17 +447,31 @@
 	)
 	
 	(method (init &tmp temp0)
-		(= theStopGroop stopGroop)
-		(super init:)
+		;load some important modules
+		BorderWindow
+		DText
+		DButton
+		StopWalk
+		Polygon
+		PolyPath
+		(ScriptID GAME_EGO)
+		IconBar
+		Inventory
+		(ScriptID SIGHT)
+		RandCycle
+		Oscillate
+		(super init: &rest)
+		
 		(StrCpy @sysLogPath {})
-		(= doVerbCode gameDoVerbCode)
-		(= ftrInitializer gameFtrInit)
-		((= keyDownHandler gameKeyDownHandler) add:)
-		((= mouseDownHandler gameMouseDownHandler) add:)
-		((= directionHandler gameDirectionHandler) add:)
+		(= theStopGroop stopGroop)
+		(= doVerbCode DoVerbCode)
+		(= ftrInitializer FtrInit)
+		((= keyDownHandler kDHandler) add:)
+		((= mouseDownHandler mDHandler) add:)
+		((= directionHandler dirHandler) add:)
 		(= pMouse PseudoMouse)
-		(self egoMoveSpeed: 5 setCursor: theCursor TRUE 304 172)
 		(= ego (ScriptID GAME_EGO 0))
+		(self egoMoveSpeed: 5 setSpeed: 0 setCursor: theCursor TRUE 304 172)
 		((= theMusic music) owner: self flags: mNOPAUSE init:)
 		((= soundFx SFX) owner: self flags: mNOPAUSE init:)
 		((ScriptID GAME_INIT 0) init:)
@@ -557,7 +575,9 @@
 	)
 	
 	(method (pragmaFail)
-		(if (User canInput:) (VerbFail)
+		(if
+			(User canInput:)
+			(VerbFail)
 		)
 	)
 )
@@ -569,30 +589,34 @@
 )
 
 
-(instance gameDoVerbCode of Code
+(instance DoVerbCode of Code
 	(properties)
 	
-	(method (doit param1 param2 &tmp temp0)
+	(method (doit theVerb param2 &tmp temp0)
 		(= temp0 (param2 description?))
-		(switch param1
+		(switch theVerb
 			(verbLook
 				(if (param2 facingMe: ego)
 					(if (param2 lookStr?)
 						(Print (param2 lookStr?))
+					else
+						(VerbFail)
 					)
 				)
 			)
+			(else  (VerbFail))
 		)
 	)
 )
 
-(instance gameFtrInit of Code
+
+(instance FtrInit of Code
 	(properties)
 	
 	(method (doit param1)
-		(if (== (param1 sightAngle?) 26505)
+		(if (== (param1 sightAngle?) ftrDefault)
 			(param1 sightAngle: 90)
 		)
-		(if (== (param1 actions?) 26505) (param1 actions: 0))
+		(if (== (param1 actions?) ftrDefault) (param1 actions: 0))
 	)
 )
