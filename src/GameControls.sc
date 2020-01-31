@@ -11,7 +11,7 @@
 (use Main)
 (use BordWind)
 (use GameWindow)
-(use SlideIcon)
+(use GControl)
 (use IconBar)
 (use Window)
 (use System)
@@ -25,7 +25,8 @@
 	(properties)
 	
 	(method (init)
-		(GameControls
+		(= gameControls GameControls)
+		(gameControls
 			window: gcWin
 			add:
 				iconOk

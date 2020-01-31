@@ -33,7 +33,7 @@
 (define	JUMP			991)
 (define	SAVE			990)
 (define	MUSIC			989)
-(define	EXTRA 			988)
+(define	EGO 			988)		; was EXTRA
 (define	GAUGE			987)
 (define	ORBIT			986)
 (define	FLAGS			985)		; was AVOIDER
@@ -83,13 +83,13 @@
 (define 	RANDCYC		941)
 (define 	PRINTD	940)
 (define 	OSC	 		939)
-(define 	PCYCLE		938)
+(define 	RANGEOSC		938)		; was PCYCLE
 (define 	ICONBAR		937)
 (define 	BORDWIND		936)
 (define 	SCALER		935)
 (define 	SLIDEICON	934)
 (define 	PMOUSE		933)
-(define 	LANGUAGE	932)
+(define 	LANGUAGE		932)
 (define 	CDACTOR		931)
 (define 	PCHASE		930)
 (define 	SYNC			929)
@@ -195,11 +195,10 @@
 (define	PIXELDISSOLVE 	9)
 (define	FADEOUT			10)		;Defaults to PLAIN in 16 color
 
-;SCI0.1 and SCI1.0 scrolling styles
-(define	SCROLLRIGHT		40)		;Relative order of these four is important
-(define	SCROLLLEFT		41)		;	in order for ShowPic to work correctly
-(define	SCROLLUP			42)
-(define	SCROLLDOWN		43)
+(define	SCROLLRIGHT		11)		;Relative order of these four is important
+(define	SCROLLLEFT		12)		;	in order for ShowPic to work correctly
+(define	SCROLLUP			13)
+(define	SCROLLDOWN		14)
 
 (define	PLAIN				100) 		;Draw quickly with no special effects
 
@@ -441,6 +440,7 @@
 (define	keyUp			$0008)
 (define	direction	$0040)
 (define	speechEvent	$0080)
+(define saidEvent	$0080) ;EO: added for backwards compatibility
 (define	joyDown		$0100)
 (define	joyUp			$0200)
 (define	walkEvent	$1000)
@@ -573,8 +573,10 @@
 (define	forceUpdOn		$0040)
 (define	actorHidden		$0080)
 (define	staticView		$0100)
+(define	anExtra			$0200)	;can be added to pic if animation speed bad ;EO: Added from SCI0
 (define	blocked			$0400)	;tried to move, but couldn't
 (define	fixedLoop		$0800)	;loop is fixed
+(define	fixedCel		$1000)	;cel fixed ;EO: Added from SCI0
 (define	skipCheck		$1000)	;onMe will check skip
 (define	ignrHrz			$2000)	;can ignore horizon
 (define	ignrAct			$4000)	;can ignore other actors
@@ -725,7 +727,8 @@
 
 ;SCI10 verb defines
 ;(added by EO)
-(enum 1
+(enum
+	verbNone
 	verbWalk
 	verbLook
 	verbDo
@@ -734,6 +737,7 @@
 	verbHelp
 	gameVerbs	;define these in GAME.SH
 )
+
 
 ;ษออออออออออออออออออออออออออป
 ;บ                          บ

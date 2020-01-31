@@ -1,5 +1,5 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 981)
+(script# WINDOW)
 (include game.sh)
 (use System)
 
@@ -14,7 +14,7 @@
 		back 15
 		priority 15
 		window 0
-		type $0000
+		type 0
 		title 0
 		brTop 0
 		brLeft 0
@@ -46,20 +46,6 @@
 
 (class Window of SysWindow
 	(properties
-		top 0
-		left 0
-		bottom 0
-		right 0
-		color 0
-		back 15
-		priority -1
-		window 0
-		type $0000
-		title 0
-		brTop 0
-		brLeft 0
-		brBottom 190
-		brRight 320
 		underBits 0
 	)
 	
@@ -89,32 +75,32 @@
 	)
 	
 	(method (handleEvent)
-		(return 0)
+		(return FALSE)
 	)
 	
-	(method (setMapSet &tmp temp0)
-		(= temp0 0)
-		(if (!= -1 color) (= temp0 (| temp0 $0001)))
-		(if (!= -1 priority) (= temp0 (| temp0 $0002)))
-		(return temp0)
+	(method (setMapSet &tmp mapSet)
+		(= mapSet 0)
+		(if (!= -1 color) (= mapSet (| mapSet VMAP)))
+		(if (!= -1 priority) (= mapSet (| mapSet PMAP)))
+		(return mapSet)
 	)
 	
-	(method (move param1 param2)
-		(= left (+ left param1))
-		(= right (+ right param2))
-		(= right (+ right param1))
-		(= bottom (+ bottom param2))
+	(method (move h v)
+		(= left (+ left h))
+		(= right (+ right v))
+		(= right (+ right h))
+		(= bottom (+ bottom v))
 	)
 	
-	(method (moveTo param1 param2)
-		(self move: (- param1 left) (- param2 top))
+	(method (moveTo h v)
+		(self move: (- h left) (- v top))
 	)
 	
-	(method (draw theColor thePriority)
-		(if (>= argc 1) (= color theColor))
-		(if (>= argc 2) (= priority thePriority))
+	(method (draw v p)
+		(if (>= argc 1) (= color v))
+		(if (>= argc 2) (= priority p))
 		(Graph
-			grFILL_BOX
+			GFillRect
 			top
 			left
 			bottom
@@ -128,7 +114,7 @@
 	(method (save)
 		(= underBits
 			(Graph
-				grSAVE_BOX
+				GSaveBits
 				top
 				left
 				bottom
@@ -139,19 +125,19 @@
 	)
 	
 	(method (restore)
-		(if underBits (Graph grRESTORE_BOX underBits))
+		(if underBits (Graph GRestoreBits underBits))
 	)
 	
-	(method (inset param1 param2)
-		(= top (+ top param2))
-		(= left (+ left param1))
-		(= bottom (- bottom param2))
-		(= right (- right param1))
+	(method (inset h v)
+		(= top (+ top v))
+		(= left (+ left h))
+		(= bottom (- bottom v))
+		(= right (- right h))
 	)
 	
 	(method (show)
 		(Graph
-			grUPDATE_BOX
+			GShowBits
 			top
 			left
 			bottom

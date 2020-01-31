@@ -3,14 +3,22 @@
 ; * SCI Script Compiler Header
 ; * By Brian Provinciano
 (include keys.sh)
-
+;
+;NOTE: It is recommended to use the defines in SYSTEM.SH and KERNEL.SH now,
+;as they are much more accurate.
+;This file will be kept here for compatibility reasons.
+;
+;
+;Studio key code = Sierra key code tranlation examples
+;KEY_C = `c
+;KEY_ALT_C = `@c
+;KEY_F2 = `#2
+;KEY_PAUSE = `^s
 ;
 ; * General
 (define TRUE 1)
 (define FALSE 0)
-;(define ENABLED 1)
-;(define DISABLED 0) ;NOTE: Conflicts with an iconbar define
-;(define NULL 0) ;NOTE: Already defined in system.sh
+;(define NULL 0)	;already defined in system.sh
 ; Rects
 (define rtTOP 0)
 (define rtLEFT 1)
@@ -47,6 +55,16 @@
 (define rsFONT $0087)
 (define rsCURSOR $0088)
 (define rsPATCH $0089)
+(define rsBITMAP $008a)
+(define rsPALETTE $008b)
+(define rsCDAUDIO $008c)
+(define rsAUDIO $008d)
+(define rsSYNC $008e)
+(define rsMESSAGE $008f)
+(define rsAUDIOMAP $0090)
+(define rsHEAP $0091)
+(define rsAUDIO36 $0092)
+(define rsSYNC36 $0093)
 ;
 ; * SCREENS
 (define VISUAL 1)
@@ -83,16 +101,15 @@
 (define dpOPEN_TOP 5)                    ; open from top
 (define dpOPEN_EDGECENTER 6)             ; open from edges to center
 (define dpOPEN_CENTEREDGE 7)             ; open from center to edges
-(define dpOPEN_CHECKBOARD 8)             ; open random checkboard
-(define dpCLOSEREOPEN_HCENTER 9)         ; horizontally close to center, reopen from center
-(define dpCLOSEREOPEN_VCENTER 10)        ; vertically close to center, reopen from center
-(define dpCLOSEREOPEN_RIGHT 11)          ; close to right, reopen from right
-(define dpCLOSEREOPEN_LEFT 12)           ; close to left, reopen from left
-(define dpCLOSEREOPEN_BOTTOM 13)         ; close to bottom, reopen from bottom
-(define dpCLOSEREOPEN_TOP 14)            ; close to top, reopen from top
-(define dpCLOSEREOPEN_EDGECENTER 15)     ; close from center to edges, reopen from edges to center
-(define dpCLOSEREOPEN_CENTEREDGE 16)     ; close from edges to center, reopen from center to edges
-(define dpCLOSEREOPEN_CHECKBOARD 17)     ; close random checkboard, reopen
+(define dpOPEN_CHECKBOARD 8)             ; open random checkboard ; horizontally close to center, reopen from center ; vertically close to center, reopen from center ; close to right, reopen from right ; close to left, reopen from left ; close to bottom, reopen from bottom ; close to top, reopen from top ; close from center to edges, reopen from edges to center ; close from edges to center, reopen from center to edges ; close random checkboard, reopen
+(define dpOPEN_PIXELATION 9)
+(define dpOPEN_FADEPALETTE 10)
+(define dpOPEN_SCROLL_RIGHT 11)
+(define dpOPEN_SCROLL_LEFT 12)
+(define dpOPEN_SCROLL_UP 13)
+(define dpOPEN_SCROLL_DOWN 14)
+(define dpOPEN_NO_TRANSITION 100)
+(define dpANIMATION_BLACKOUT $8000)
 (define dpCLEAR 1)                       ; Clear the screen before drawing
 (define dpNO_CLEAR 0)                    ; Don't clear the screen before drawing
 ;
@@ -156,37 +173,121 @@
 ; * File I/O
 ; In the SCI_0 template game, fOPENFAIL and fOPENCREATE have the wrong numbers.
 ; Let's keep that incorrect behavior here so as not to break old games.
+; open or fail: Try to open file, abort if not possible ; Should actually be 1
+; open or create: Try to open file, create it if it doesn't exist ; Should actually be 0
 ; open or fail: Try to open file, abort if not possible
-(define fOPENFAIL 0)                     ; Should actually be 1
+(define fOPENFAIL 1)
 ; open or create: Try to open file, create it if it doesn't exist
-(define fOPENCREATE 1)                   ; Should actually be 0
-; open or fail: Try to open file, abort if not possible
-; open or create: Try to open file, create it if it doesn't exist
+(define fOPENCREATE 0)
 ; create: Create the file, destroying any content it might have had
 (define fCREATE 2)
 ;
 ; * DoSound
-(define sndINIT 0)
-(define sndPLAY 1)
-(define sndNOP 2)
-(define sndDISPOSE 3)
-(define sndSET_SOUND 4)
-(define sndSTOP 5)
-(define sndPAUSE 6)
-(define sndRESUME 7)
-(define sndVOLUME 8)
-(define sndUPDATE 9)
-(define sndFADE 10)
-(define sndCHECK_DRIVER 11)
-(define sndSTOP_ALL 12)
 ; These are values used in script, not returned in GetEvent:
+(define evVERB $4000)
+(define evMOVE $1000)
+(define evHELP $2000)
+(define evHELPVERB $6000)
+(define sndMASTER_VOLUME 0)
+(define sndSET_SOUND 1)
+(define sndRESTORE 2)
+(define sndGET_POLYPHONY 3)
+(define sndGET_AUDIO_CAPABILITY 4)
+(define sndSUSPEND 5)
+(define sndINIT 6)
+(define sndDISPOSE 7)
+(define sndPLAY 8)
+(define sndSTOP 9)
+(define sndPAUSE 10)
+(define sndFADE 11)
+(define sndSET_HOLD 12)
+(define sndDUMMY 13)
+(define sndSET_VOLUME 14)
+(define sndSET_PRIORITY 15)
+(define sndSET_LOOP 16)
+(define sndUPDATE_CUES 17)
+(define sndSEND_MIDI 18)
+(define sndGLOBAL_REVERB 19)
+(define sndUPDATE 20)
+(define audWPLAY 1)
+(define audPLAY 2)
+(define audSTOP 3)
+(define audPAUSE 4)
+(define audRESUME 5)
+(define audPOSITION 6)
+(define audRATE 7)
+(define audVOLUME 8)
+(define audLANGUAGE 9)
+(define audCD 10)
+(define syncSTART 0)
+(define syncNEXT 1)
+(define syncSTOP 2)
+(define fiOPEN 0)
+(define fiCLOSE 1)
+(define fiREAD 2)
+(define fiWRITE 3)
+(define fiUNLINK 4)
+(define fiREAD_STRING 5)
+(define fiWRITE_STRING 6)
+(define fiSEEK 7)
+(define fiFIND_FIRST 8)
+(define fiFIND_NEXT 9)
+(define fiEXISTS 10)
+(define fiRENAME 11)
+(define palSET_FROM_RESOURCE 1)
+(define palSET_FLAG 2)
+(define palUNSET_FLAG 3)
+(define palSET_INTENSITY 4)
+(define palFIND_COLOR 5)
+(define palANIMATE 6)
+(define palSAVE 7)
+(define palRESTORE 8)
+(define pvINIT 0)
+(define pvREVERSE 1)
+(define pvGET_CURRENT_STEP 2)
+(define pvUNINIT 3)
+(define pvCHANGE_TARGET 4)
+(define pvCHANGE_TICKS 5)
+(define pvPAUSE_RESUME 6)
+(define msgGET 0)
+(define msgNEXT 1)
+(define msgSIZE 2)
+(define msgREF_NOUN 3)
+(define msgREF_VERB 4)
+(define msgREF_COND 5)
+(define msgPUSH 6)
+(define msgPOP 7)
+(define msgLAST_MESSAGE 8)
+(define memALLOC_CRIT 1)
+(define memALLOC_NONCRIT 2)
+(define memFREE 3)
+(define memCOPY 4)
+(define memPEEK 5)
+(define memPOKE 6)
 ; Polygon types
+;NOTE: These are defined in system.sh
+;;;(define PTotalAccess 0)
+;;;(define PNearestAccess 1)
+;;;(define PBarredAccess 2)
+;;;(define PContainedAccess 3)
 ; setOnMeCheck flags
+(define omcDISABLE $6789)
+(define omcCOLORS 1)
+(define omcPOLYGON 2)
 ; icon signal
+(define icDISABLED $0004)
+(define icVISIBLE $0020)
 ; Unkonwn:
 ; $0040, $0010, $0002, $0080(inv icons have this)
 ; control state
-; scale signal ; SCI_1_1
+(define csENABLED $0001)
+(define csEXIT $0002)
+(define csFILTER $0004)
+(define csSELECTED $0008)
+; scale signal
+(define ssScalable $0001)
+(define ssAutoScale $0002)
+(define ssNotStepScale $0004) ; SCI_1_1
 ; Sound statuses
 (define ssSTOPPED 0)
 (define ssINITIALIZED 1)
@@ -221,15 +322,16 @@
 (define ocSPECIAL 4)
 ;
 ; * Directions
-(define CENTER 0)
-(define UP 1)
-(define UPRIGHT 2)
-(define RIGHT 3)
-(define DOWNRIGHT 4)
-(define DOWN 5)
-(define DOWNLEFT 6)
-(define LEFT 7)
-(define UPLEFT 8)
+;NOTE: These are already defined in system.sh
+;;;(define CENTER 0)
+;;;(define UP 1)
+;;;(define UPRIGHT 2)
+;;;(define RIGHT 3)
+;;;(define DOWNRIGHT 4)
+;;;(define DOWN 5)
+;;;(define DOWNLEFT 6)
+;;;(define LEFT 7)
+;;;(define UPLEFT 8)
 ; Cycle Directions
 (define cdFORWARD 1)
 (define cdNONE 0)
@@ -291,7 +393,7 @@
 
 ;
 ; * signal property on features
-;NOTE: Some of these are already defined in system.sh
+;NOTE: Some of these are defined in system.sh
 ;(define notUpd $0001)
 ;(define fixPriOn $0010)
 (define isExtra $0200)

@@ -4,7 +4,7 @@
 (use Intrface)
 (use Window)
 (use PMouse)
-(use SlideIcon)
+(use GControl)
 (use BordWind)
 (use Feature)
 (use LoadMany)

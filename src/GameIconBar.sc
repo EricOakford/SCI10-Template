@@ -12,7 +12,6 @@
 (use Main)
 (use IconBar)
 (use Invent)
-(use SlideIcon)
 (use System)
 
 (public
@@ -176,7 +175,7 @@
 	(method (select)
 		(if (super select:)
 			(theIconBar hide:)
-			(GameControls show:)
+			(gameControls show:)
 		)
 	)
 )

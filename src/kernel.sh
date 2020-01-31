@@ -389,3 +389,27 @@
 
 ;;;	IsItSkip				kernel	125
 ;;;	MergePoly			kernel	126
+;;;	ResCheck				kernel	127
+;;;	AssertPalette		kernel	128
+;;;
+;;;	TextColors	 		kernel	129
+;;;	TextFonts	 		kernel	130
+;;;
+;;;	Record		 		kernel	131
+;;;	PlayBack		 		kernel	132
+;;;
+;;;	ShowMovie			kernel	133
+;;;	SetVideoMode		kernel	134
+;;;
+;;;	SetQuitStr			kernel	135
+;;;	; takes near string as only parameter
+;;;
+;;;	DbugStr				kernel	136
+;;;	; Parameters:
+;;;	;	near string - display to other monitor
+;;;	;	1				- set display to first text page
+;;;	;	2				- set display to second text page
+;;;	;	0				- clear current text page
+;;;)
+;;;
+;;;

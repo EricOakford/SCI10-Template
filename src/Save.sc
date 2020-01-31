@@ -994,8 +994,8 @@
 (instance GetReplaceName of Dialog
 	(properties)
 	
-	(method (doit theComment &tmp ret theGameParseLang)
-		(= theGameParseLang (theGame parseLang?))
+	(method (doit theComment &tmp ret oldLang)
+		(= oldLang (theGame parseLang?))
 		(theGame parseLang: ENGLISH)
 		(= window systemWindow)
 		(text1 setSize: moveTo: MARGIN MARGIN)
@@ -1031,7 +1031,7 @@
 			(NeedDescription)
 			(= ret 0)
 		)
-		(theGame parseLang: theGameParseLang)
+		(theGame parseLang: oldLang)
 		(return (if (== ret newName) else (== ret button1)))
 	)
 )
