@@ -56,7 +56,8 @@
 					(curRoom newRoom: rTestRoom)
 					(theMusic dispose:)
 				)
-				(watchIt (Sound pause: FALSE)
+				(watchIt
+					(Sound pause: FALSE)
 				)
 				(restoreGame
 					(Sound pause: FALSE)

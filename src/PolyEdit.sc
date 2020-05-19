@@ -156,21 +156,21 @@
 		(super dispose:)
 	)
 	
-	(method (handleEvent pEvent &tmp theArray temp1)
-		(if (!= (pEvent type?) evMOUSEBUTTON) (return 0))
-		(if (>= (pEvent y?) 10) (return 0))
+	(method (handleEvent event &tmp theArray temp1)
+		(if (!= (event type?) mouseDown) (return 0))
+		(if (>= (event y?) 10) (return 0))
 		(= theArray array)
 		(= temp1 0)
 		(while (Memory 5 theArray)
 			(if
-			(and (< (pEvent x?) (Memory 5 (+ theArray 4))) temp1)
-				(pEvent type: 4 message: (Memory 5 (+ theArray 2)))
+			(and (< (event x?) (Memory 5 (+ theArray 4))) temp1)
+				(event type: 4 message: (Memory 5 (+ theArray 2)))
 				(return 0)
 			)
 			(++ temp1)
 			(= theArray (+ theArray 6))
 		)
-		(return (pEvent claimed: 1))
+		(return (event claimed: 1))
 	)
 )
 
@@ -899,9 +899,9 @@ code_0623:
 	)
 	
 	(method (init)
-		(DrawPic (curRoom curPic?) 100 dpCLEAR currentPalette)
+		(DrawPic (curRoom curPic?) PLAIN TRUE currentPalette)
 		(if (!= overlays -1)
-			(DrawPic overlays 100 dpNO_CLEAR currentPalette)
+			(DrawPic overlays PLAIN FALSE currentPalette)
 		)
 		(addToPics doit:)
 		(cast eachElementDo: #stopUpd)
@@ -961,13 +961,13 @@ code_0623:
 		(theCurPolygon dispose:)
 	)
 	
-	(method (handleEvent pEvent &tmp pEventModifiers theX theY [temp3 20])
+	(method (handleEvent event &tmp evtMod theX theY [temp3 20])
 		(= theX x)
 		(= theY y)
-		(= x (pEvent x?))
-		(= y (pEvent y?))
-		(switch (pEvent type?)
-			(evNULL
+		(= x (event x?))
+		(= y (event y?))
+		(switch (event type?)
+			(nullEvt
 				(if curPolygon
 					(if
 						(and
@@ -987,11 +987,11 @@ code_0623:
 					)
 				)
 			)
-			(evMOUSEBUTTON
-				(= pEventModifiers (pEvent modifiers?))
+			(mouseDown
+				(= evtMod (event modifiers?))
 				(= isMouseDown 1)
 				(cond 
-					((& pEventModifiers emCTRL)
+					((& evtMod ctrlDown)
 						(if (== state 0)
 							(self finishAdding:)
 							(= isMouseDown 0)
@@ -999,27 +999,27 @@ code_0623:
 							(self insertPt:)
 						)
 					)
-					((& pEventModifiers emSHIFT) (if (!= state 0) (self deletePt:)) (= isMouseDown 0))
+					((& evtMod shiftDown) (if (!= state 0) (self deletePt:)) (= isMouseDown 0))
 					((== state 0) (self addPt:))
 					(else (self selectPt:))
 				)
 			)
-			(evMOUSERELEASE
+			(mouseUp
 				(= isMouseDown 0)
 				(if (OneOf state 2 3) (self changeState: 1))
 			)
-			(evKEYBOARD
-				(switch (pEvent message?)
+			(keyDown
+				(switch (event message?)
 					(KEY_QUESTION
-						(pEvent message: 104)
+						(event message: 104)
 					)
 					(KEY_PAUSE
-						(pEvent message: 120)
+						(event message: 120)
 					)
-					(KEY_F2 (pEvent message: 12032))
-					(KEY_F4 (pEvent message: 11776))
+					(KEY_F2 (event message: 12032))
+					(KEY_F4 (event message: 11776))
 				)
-				(switch (pEvent message?)
+				(switch (event message?)
 					(KEY_TAB
 						(if (and (== state 1) curPolygon)
 							(self advanceRetreat: 68 121)

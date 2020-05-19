@@ -22,7 +22,6 @@
 )
 
 (instance gcCode of Code
-	(properties)
 	
 	(method (init)
 		(= gameControls GameControls)
@@ -43,28 +42,27 @@
 			helpIconItem: iconHelp
 			curIcon: iconRestore
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myVGABordColor myEGABordColor)
+			eachElementDo: #lowlightColor (EGAOrVGA myRgtBordColor myInsideColor)
 		)
 	)
 )
 
 (instance gcWin of BorderWindow
-	(properties)
 	
 	(method (init)
 		(gcWin
 			color: myTextColor
-			back: (EGAOrVGA myVGABackColor myEGABackColor)
-			topBordColor: myEGABordColor2
-			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
-			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
+			back: (EGAOrVGA myBackColor myBotBordColor)
+			topBordColor: myTopBordColor
+			lftBordColor: (EGAOrVGA myLftBordColor myTopBordColor)
+			rgtBordColor: (EGAOrVGA myRgtBordColor myInsideColor)
+			botBordColor: (EGAOrVGA myBotBordColor myInsideColor)
 		)
 	)
 	
-	(method (open &tmp temp0 temp1 temp2 temp3 temp4 temp5
-			temp6 temp7 temp8 temp9 temp10 temp11 temp12
-			[temp13 15] [temp28 4]
+	(method (open &tmp theBevelWid t l b r theColor
+			theMaps bottomColor topColor leftColor rightColor thePri i
+			[scoreBuf 15] [scoreRect 4]
 			)
 			
 		(self
@@ -106,95 +104,43 @@
 		(DrawCel 947 0 3 101 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
 		(DrawCel 947 0 2 146 (- 37 (+ (CelHigh 947 0 4) 3)) 15)
 		(Graph GShowBits 12 1 15 (+ 151 (CelWide 947 0 1)) 1)
-		(= temp4 (+ (= temp1 (+ 46 (CelHigh 947 0 1))) 13))
-		(= temp3
+		(= r (+ (= t (+ 46 (CelHigh 947 0 1))) 13))
+		(= b
 			(+
-				(= temp2 (+ 10 (CelWide 947 1 1)))
+				(= l (+ 10 (CelWide 947 1 1)))
 				(-
 					(+ 151 (CelWide 947 0 1))
 					(+ 10 (CelWide 947 1 1) 6)
 				)
 			)
 		)
-		(= temp11 15)
-		(= temp5 0)
-		(= temp7 (EGAOrVGA myEGABackColor myEGABackColor))
-		(= temp10 (EGAOrVGA myVGABordColor myEGABackColor))
-		(= temp9 (EGAOrVGA myVGABordColor2 myEGABordColor2))
-		(= temp8 myEGABordColor2)
-		(= temp0 3)
-		(= temp6 3)
-		(Graph
-			GFillRect
-			temp1
-			temp2
-			(+ temp4 1)
-			(+ temp3 1)
-			temp6
-			temp5
-			temp11
+		(= thePri 15)
+		(= theColor 0)
+		(= bottomColor (EGAOrVGA myBotBordColor myBotBordColor))
+		(= rightColor (EGAOrVGA myRgtBordColor myBotBordColor))
+		(= leftColor (EGAOrVGA myLftBordColor myTopBordColor))
+		(= topColor myTopBordColor)
+		(= theBevelWid 3)
+		(= theMaps 3)
+		(Graph GFillRect t l (+ r 1) (+ b 1) theMaps theColor thePri)
+		(= t (- t theBevelWid))
+		(= l (- l theBevelWid))
+		(= b (+ b theBevelWid))
+		(= r (+ r theBevelWid))
+		(Graph GFillRect t l (+ t theBevelWid) b theMaps bottomColor thePri)
+		(Graph GFillRect (- r theBevelWid) l r b theMaps topColor thePri)
+		(= i 0)
+		(while (< i theBevelWid)
+			(Graph GDrawLine (+ t i) (+ l i) (- r (+ i 1)) (+ l i) rightColor thePri -1)
+			(Graph GDrawLine (+ t i) (- b (+ i 1)) (- r (+ i 1)) (- b (+ i 1)) leftColor thePri -1)
+			(++ i)
 		)
-		(= temp1 (- temp1 temp0))
-		(= temp2 (- temp2 temp0))
-		(= temp3 (+ temp3 temp0))
-		(= temp4 (+ temp4 temp0))
-		(Graph
-			GFillRect
-			temp1
-			temp2
-			(+ temp1 temp0)
-			temp3
-			temp6
-			temp7
-			temp11
-		)
-		(Graph
-			GFillRect
-			(- temp4 temp0)
-			temp2
-			temp4
-			temp3
-			temp6
-			temp8
-			temp11
-		)
-		(= temp12 0)
-		(while (< temp12 temp0)
-			(Graph
-				GDrawLine
-				(+ temp1 temp12)
-				(+ temp2 temp12)
-				(- temp4 (+ temp12 1))
-				(+ temp2 temp12)
-				temp10
-				temp11
-				-1
-			)
-			(Graph
-				GDrawLine
-				(+ temp1 temp12)
-				(- temp3 (+ temp12 1))
-				(- temp4 (+ temp12 1))
-				(- temp3 (+ temp12 1))
-				temp9
-				temp11
-				-1
-			)
-			(++ temp12)
-		)
-		(Graph
-			GShowBits
-			temp1
-			temp2
-			(+ temp4 1)
-			(+ temp3 1)
-			1
-		)
-		(Format @temp13 "Score: %d of %d" score possibleScore)
-		(TextSize @temp28 @temp13 999 0)
-		(Display @temp13
+		(Graph GShowBits t l (+ r 1) (+ b 1) 1)
+		(Format @scoreBuf "Score: %d of %d" score possibleScore)
+		(TextSize @scoreRect @scoreBuf 999 0)
+		(Display @scoreBuf
 			p_font 999
-			p_color (EGAOrVGA myVGABackColor myEGABordColor2)
+			p_color (EGAOrVGA myBackColor myTopBordColor)
 			p_at
 			(+ 10
 				(CelWide 947 1 1)
@@ -204,7 +150,7 @@
 							(+ 151 (CelWide 947 0 1))
 							(+ 10 (CelWide 947 1 1) 6)
 						)
-						[temp28 3]
+						[scoreRect 3]
 					)
 					2
 				)
@@ -221,7 +167,7 @@
 		cel 1
 		nsLeft 67
 		nsTop 37
-		signal $0280
+		signal (| FIXED_POSN RELSEND)
 		helpStr {The graphics detail level.}
 		sliderView 947
 		yStep 2
@@ -236,7 +182,7 @@
 		cel 1
 		nsLeft 107
 		nsTop 37
-		signal $0080
+		signal FIXED_POSN
 		helpStr {Overall sound volume.}
 		sliderView 947
 		yStep 2
@@ -251,7 +197,7 @@
 		cel 1
 		nsLeft 147
 		nsTop 37
-		signal $0280
+		signal (| FIXED_POSN RELSEND)
 		helpStr {The speed at which the player character moves.}
 		sliderView 947
 		yStep 2
@@ -267,7 +213,7 @@
 		nsLeft 8
 		nsTop 6
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Allows you to save your game.}
 	)
 )
@@ -280,7 +226,7 @@
 		nsLeft 8
 		nsTop 26
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Allows you to restore a previously saved game.}
 	)
 )
@@ -293,7 +239,7 @@
 		nsLeft 8
 		nsTop 46
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Allows you to restart the game.}
 	)
 )
@@ -306,7 +252,7 @@
 		nsLeft 8
 		nsTop 66
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Allows you to quit the game.}
 	)
 )
@@ -319,7 +265,7 @@
 		nsLeft 34
 		nsTop 106
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Information about the game.}
 	)
 )
@@ -332,8 +278,8 @@
 		nsLeft 8
 		nsTop 106
 		cursor 29
-		message 6
-		signal $0183
+		message verbHelp
+		signal (| VICON FIXED_POSN RELVERIFY IMMEDIATE)
 	)
 )
 
@@ -345,7 +291,7 @@
 		nsLeft 8
 		nsTop 86
 		message 7
-		signal $01c3
+		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr {Returns you to the game.}
 	)
 )

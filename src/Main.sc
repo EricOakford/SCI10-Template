@@ -31,17 +31,18 @@
 	NormalEgo 1
 	HandsOff 2
 	HandsOn 3
-	IsHeapFree 4
+	HaveMem 4
 	IsObjectOnControl 5
 	Btst 6
 	Bset 7
 	Bclr 8
 	SolvePuzzle 10
-	AimToward 11
-	VerbFail 12
-	Say 13
-	EGAOrVGA 14
-	EgoDead 15
+	Face 11
+	Speak 12
+	EGAOrVGA 13
+	EgoDead 14
+	cls 15
+	DoDisplay 16
 )
 
 (local
@@ -66,7 +67,7 @@
 	aniInterval
 	theCursor
 	normalCursor =  ARROW_CURSOR
-	waitCursor =  20
+	waitCursor =  HAND_CURSOR
 	userFont =  USERFONT
 	smallFont =  4
 	lastEvent
@@ -135,40 +136,40 @@
 	howFast
 	gameTime
 	;globals 89-99 are unused
-	global89
-	global90
-	global91
-	global92
-	global93
-	global94
-	global95
-	global96
-	global97
-	global98
+		global89
+		global90
+		global91
+		global92
+		global93
+		global94
+		global95
+		global96
+		global97
+		global98
 	lastSysGlobal
+	
 	theMusic
 	dongle = 1234	;EO: Don't mess with this, or you'll get Error 11 shortly after startup!
 	globalSound
 	soundFx
 	deathMusic = sDeath
-	colorCount
-	musicChannels
+	numColors
+	numVoices
 	startingRoom
 	pMouseX
 	pMouseY
-	gEgoHead
+	theEgoHead
 	theStopGroop
 	[gameFlags 10]
 	myTextColor
-	myEGABordColor
-	myEGABackColor
-	myVGABordColor
-	myVGABackColor
-	myVGABordColor2
-	myEGABordColor2
+	myInsideColor
+	myBotBordColor
+	myRgtBordColor
+	myBackColor
+	myLftBordColor
+	myTopBordColor
 	myHighlightColor
 	debugging
-	theEgoHead
 )
 (procedure (NormalEgo)
 	(ego
@@ -188,7 +189,16 @@
 	(User canControl: FALSE canInput: FALSE)
 	(ego setMotion: 0)
 	(= oldIcon (theIconBar curIcon?))
-	(theIconBar disable: ICON_WALK ICON_LOOK ICON_DO ICON_TALK ICON_ITEM ICON_INVENTORY ICON_SMELL ICON_TASTE)
+	(theIconBar disable:
+		ICON_WALK
+		ICON_LOOK
+		ICON_DO
+		ICON_TALK
+		ICON_ITEM
+		ICON_INVENTORY
+		ICON_SMELL
+		ICON_TASTE
+	)
 	(theIconBar curIcon: oldIcon)
 	(if (not (HaveMouse))
 		(= pMouseX ((User curEvent?) x?))
@@ -202,7 +212,16 @@
 
 (procedure (HandsOn)
 	(User canControl: TRUE canInput: TRUE)
-	(theIconBar enable:ICON_WALK ICON_LOOK ICON_DO ICON_TALK ICON_ITEM ICON_INVENTORY ICON_SMELL ICON_TASTE)
+	(theIconBar enable:
+		ICON_WALK
+		ICON_LOOK
+		ICON_DO
+		ICON_TALK
+		ICON_ITEM
+		ICON_INVENTORY
+		ICON_SMELL
+		ICON_TASTE
+	)
 	(if (not (theIconBar curInvIcon?))
 		(theIconBar disable: (theIconBar useIconItem?))
 	)
@@ -215,13 +234,13 @@
 	)
 )
 
-(procedure (IsHeapFree memSize)
-	(return (u> (MemoryInfo LargestPtr) memSize))
+(procedure (HaveMem howMuch)
+	(return (u> (MemoryInfo LargestPtr) howMuch))
 )
 
-(procedure (IsObjectOnControl obj param2)
+(procedure (IsObjectOnControl theObj theControl)
 	(return
-		(if (& (obj onControl: TRUE) param2)
+		(if (& (theObj onControl: origin) theControl)
 			(return TRUE)
 			else FALSE
 		)
@@ -267,65 +286,39 @@
 	)
 )
 
-(procedure (AimToward param1 param2 param3 param4 &tmp temp0 temp1 temp2 temp3)
-	(= temp3 0)
-	(if (IsObject param2)
-		(= temp1 (param2 x?))
-		(= temp2 (param2 y?))
-		(if (== argc 3) (= temp3 param3))
+(procedure (Face actor1 actor2 both whoToCue &tmp ang1to2 theX theY obj)
+	(= obj 0)
+	(if (IsObject actor2)
+		(= theX (actor2 x?))
+		(= theY (actor2 y?))
+		(if (== argc 3) (= obj both))
 	else
-		(= temp1 param2)
-		(= temp2 param3)
-		(if (== argc 4) (= temp3 param4))
+		(= theX actor2)
+		(= theY both)
+		(if (== argc 4) (= obj whoToCue))
 	)
-	(= temp0
-		(GetAngle (param1 x?) (param1 y?) temp1 temp2)
+	(= ang1to2
+		(GetAngle (actor1 x?) (actor1 y?) theX theY)
 	)
-	(param1
-		setHeading: temp0 (if (IsObject temp3) temp3 else 0)
+	(actor1
+		setHeading: ang1to2 (if (IsObject obj) obj else 0)
 	)
 )
 
-(procedure (VerbFail &tmp newList [temp1 2] temp3 userCurEvent temp5 [temp6 5])
-	(= temp3 (theGame setCursor: 69 1))
-	(= userCurEvent (User curEvent?))
-	(redX
-		x: (userCurEvent x?)
-		y: (+ 300 (userCurEvent y?))
-		z: 300
-		show:
-	)
-	((= newList (List new:)) add: redX)
-	(Animate (newList elements?) 1)
-	(Animate (cast elements?) FALSE)
-	(= temp5 (GetTime))
-	(while (< (Abs (- temp5 (GetTime))) 40)
-		(breakif
-			(OneOf ((= userCurEvent (Event new:)) type?) 4 1)
-		)
-		(userCurEvent dispose:)
-	)
-	(if (IsObject userCurEvent) (userCurEvent dispose:))
-	(redX hide: posn: 1000 -1000)
-	(Animate (newList elements?) 1)
-	(newList delete: redX dispose:)
-	(theGame setCursor: temp3)
-)
-
-(procedure (Say param1 param2 param3 &tmp [str 500])
-	(if (u< param2 1000)
-		(GetFarText param2 param3 @str)
+(procedure (Speak theView theString moreStuff &tmp [str 500])
+	(if (u< theString 1000)
+		(GetFarText theString moreStuff @str)
 	else
-		(StrCpy @str param2)
+		(StrCpy @str theString)
 	)
 	(babbleIcon
-		view: param1
+		view: theView
 		cycleSpeed: (* (+ howFast 1) 4)
 	)
-	(if (u< param2 1000)
+	(if (u< theString 1000)
 		(Print @str &rest #icon babbleIcon 0 0)
 	else
-		(Print @str param3 &rest #icon babbleIcon 0 0)
+		(Print @str moreStuff &rest #icon babbleIcon 0 0)
 	)
 )
 
@@ -337,28 +330,30 @@
 	(return (if (Btst fIsVGA) vga else ega))
 )
 
-(procedure (EgoDead &tmp printRet)
-	;This procedure handles when Ego dies. It closely matches that of SQ1VGA.
-	;To use it: "(EgoDead {death message})".
-	;You can add an icon in the same way as a normal Print message.
-	(HandsOff)
-	(Wait 100)
-	(= normalCursor ARROW_CURSOR)
+(procedure (EgoDead theView theLoop theCel &tmp deadView deadLoop deadCel [str 300])
+	(sounds eachElementDo: #stop)
+	(if argc
+		(= deadView theView)
+		(= deadLoop theLoop)
+		(= deadCel theCel)
+		(Format @str &rest)
+	else
+		(= deadView 944)
+		(= deadLoop 0)
+		(= deadCel 0)
+		(Format @str "It's all over for now. Please try again.")
+	)
+	(music number: 900 vol: 127 loop: 1 flags: mNOPAUSE play:)
 	(theGame setCursor: normalCursor TRUE)
-
-	(sounds eachElementDo: #stop)	; Stop any other music
-	(theMusic number: deathMusic play:)
 	(repeat
-		(= printRet
-			(Print
-				&rest
-				#width 250
-				#button	{Restore} 1
+		(switch
+			(Print @str
+				#mode teJustCenter
+				#button {Restore} 1
 				#button {Restart} 2
-				#button {__Quit__} 3
+				#button {____Quit____} 3
+				#icon deadView deadLoop deadCel
 			)
-		)
-		(switch printRet
 			(1
 				(theGame restore:)
 			)
@@ -366,8 +361,97 @@
 				(theGame restart:)
 			)
 			(3
-				(= quit TRUE) (break)
+				(= quit TRUE)
+				(break)
 			)
+		)
+	)
+)
+
+
+(procedure (cls)
+	(if modelessDialog
+		(modelessDialog dispose:)
+	)
+)
+
+(procedure (DoDisplay theString &tmp
+		theMode theForeFont theBackFont theWidth theX theY theForeColor theBackColor ret)
+	(return
+		(if (== argc 1)
+			(Display "" p_restore [theString 0])
+		else
+			(= theX
+				(= theY -1)
+			)
+			(= theMode teJustLeft)
+			(= theForeFont 68)
+			(= theBackFont 69)
+			(= theWidth -1)
+			(= theForeColor myTopBordColor)
+			(= theBackColor 0)
+			(= ret 1)
+			(while (< ret argc)
+				(switch [theString ret]
+					(#mode
+						(= theMode
+							[theString (++ ret)]
+						)
+					)
+					(#font
+						(= theBackFont
+							(+
+								(= theForeFont
+									[theString (++ ret)]
+								)
+								1
+							)
+						)
+					)
+					(#width
+						(= theWidth
+							[theString (++ ret)]
+						)
+					)
+					(#at
+						(= theX
+							[theString (++ ret)]
+						)
+						(= theY
+							[theString (++ ret)]
+						)
+					)
+					(#color
+						(= theForeColor [theString (++ ret)])
+					)
+					(#back
+						(= theBackColor
+							[theString (++ ret)]
+						)
+					)
+				)
+				(++ ret)
+			)
+			(= ret
+				(Display
+					[theString 0]
+					p_at theX theY
+					p_color theBackColor
+					p_width theWidth
+					p_mode theMode
+					p_font theBackFont
+					p_save
+				)
+			)
+			(Display
+				[theString 0]
+				p_at theX theY
+				p_color theForeColor
+				p_width theWidth
+				p_mode theMode
+				p_font theForeFont
+			)
+			(return ret)
 		)
 	)
 )
@@ -393,23 +477,21 @@
 )
 
 (instance statusCode of Code
-	(properties)
 	
-	(method (doit roomNum &tmp [strg 50])
+	(method (doit roomNum &tmp [str 50])
 		(if
 			;add rooms where the status line is not shown
 			(not (OneOf roomNum 
-					rTitle SPEED_TEST
+					rTitle SPEED
 				 )
 			)	
-		(Format @strg "___Template Game__________________Score: %d of %d" score possibleScore)
-		(DrawStatus @strg 23 0)
+		(Format @str "___Template Game__________________Score: %d of %d" score possibleScore)
+		(DrawStatus @str 23 0)
 		)
 	)
 )
 
 (instance stopGroop of GradualLooper
-	(properties)
 	
 	(method (doit)
 		(if (== (ego loop?) (- (NumLoops ego) 1))
@@ -420,24 +502,17 @@
 )
 
 (instance babbleIcon of DCIcon
-	(properties)
 	
 	(method (init)
 		((= cycler (RandCycle new:)) init: self 20)
 	)
 )
 
-(instance kDHandler of EventHandler
-	(properties)
-)
+(instance keyH of EventHandler)		;get keyDown events
 
-(instance mDHandler of EventHandler
-	(properties)
-)
+(instance dirH of EventHandler)		;get direction events
 
-(instance dirHandler of EventHandler
-	(properties)
-)
+(instance mouseH of EventHandler)	;get mouseDown events
 
 (instance SCI10 of Game
 	(properties
@@ -446,7 +521,7 @@
 		printLang ENGLISH
 	)
 	
-	(method (init &tmp temp0)
+	(method (init)
 		;load some important modules
 		BorderWindow
 		DText
@@ -466,45 +541,47 @@
 		(= theStopGroop stopGroop)
 		(= doVerbCode DoVerbCode)
 		(= ftrInitializer FtrInit)
-		((= keyDownHandler kDHandler) add:)
-		((= mouseDownHandler mDHandler) add:)
-		((= directionHandler dirHandler) add:)
+		((= keyDownHandler keyH) add:)
+		((= mouseDownHandler mouseH) add:)
+		((= directionHandler dirH) add:)
 		(= pMouse PseudoMouse)
 		(= ego (ScriptID GAME_EGO 0))
-		(self egoMoveSpeed: 5 setSpeed: 0 setCursor: theCursor TRUE 304 172)
-		((= theMusic music) owner: self flags: mNOPAUSE init:)
-		((= soundFx SFX) owner: self flags: mNOPAUSE init:)
+		(self
+			egoMoveSpeed: 5
+			setSpeed: 0
+			setCursor: theCursor TRUE 304 172
+		)
+		((= theMusic music)
+			owner: self
+			flags: mNOPAUSE
+			init:
+		)
+		((= soundFx SFX)
+			owner: self
+			flags: mNOPAUSE
+			init:
+		)
 		((ScriptID GAME_INIT 0) init:)
 	)
 	
 	(method (startRoom roomNum)
 		(if debugging
 			((ScriptID DEBUG 0) init:)
-		)		
-		(if pMouse (pMouse stop:))
+		)
+		(if pMouse
+			(pMouse stop:)
+		)
 		(statusCode doit: roomNum)
 		((ScriptID DISPOSE_CODE) doit: roomNum)
-		;EO: despite what the message will say, the memory is NOT fragmented.
-		;Disabling the message until I can find a way to prevent it from
-		;appearing when changing rooms.
-;;;		(if
-;;;			(and
-;;;				(!= (- (MemoryInfo FreeHeap) 2) (MemoryInfo LargestPtr))
-;;;				(Print "Memory fragmented." 
-;;;					#button {Who cares} FALSE
-;;;					#button {Debug} TRUE
-;;;				)
-;;;			)
-;;;			(SetDebug)
-;;;		)
 		(super startRoom: roomNum)
-		(redX init: hide: setPri: 15 posn: 1000 -1000)
 	)
 
 	
 	(method (handleEvent event)
 		(super handleEvent: event)
-		(if (event claimed?) (return TRUE))
+		(if (event claimed?)
+			(return TRUE)
+		)
 		(return
 			(switch (event type?)
 				(keyDown
@@ -525,9 +602,15 @@
 						)
 						(`#2	;KEY_F2
 							(cond 
-								((theGame masterVolume:) (theGame masterVolume: 0))
-								((> musicChannels 1) (theGame masterVolume: 15))
-								(else (theGame masterVolume: 1))
+								((theGame masterVolume:)
+									(theGame masterVolume: 0)
+								)
+								((> numVoices 1)
+									(theGame masterVolume: 15)
+								)
+								(else
+									(theGame masterVolume: 1)
+								)
 							)
 							(event claimed: TRUE)
 						)
@@ -553,7 +636,9 @@
 			(return (not (User canControl:)))
 		)
 		(if argc
-			(if (< (= egoMoveSpeed newSpeed) 0) (= egoMoveSpeed 0))
+			(if (< (= egoMoveSpeed newSpeed) 0)
+				(= egoMoveSpeed 0)
+			)
 			(if (> egoMoveSpeed 15) (= egoMoveSpeed 15))
 			(ego cycleSpeed: newSpeed moveSpeed: newSpeed)
 		)
@@ -561,12 +646,11 @@
 	)
 		
 	(method (quitGame)
-		(super
-			quitGame:
-				(Print "Do you really want to stop playing?"
-					#button {Quit} TRUE
-					#button {Don't Quit} FALSE
-				)
+		(super quitGame:
+			(Print "Do you really want to stop playing?"
+				#button {Quit} TRUE
+				#button {Don't Quit} FALSE
+			)
 		)
 	)
 	
@@ -574,49 +658,117 @@
 		((ScriptID GAME_ABOUT 0) doit:)
 	)
 	
-	(method (pragmaFail)
-		(if
-			(User canInput:)
-			(VerbFail)
+	(method (pragmaFail &tmp theVerb theObj)
+		(if (User canInput:)
+			(= theVerb ((User curEvent?) message?))
+			(if (theIconBar curInvIcon?)
+				(= theObj
+					((theIconBar curInvIcon?) description?)
+				)
+			else
+				(= theObj
+					(theDefaultFeature description?)
+				)
+			)
+			(cls)
+			(switch theVerb
+				(verbLook
+					(Print "It's not much to look at.")
+				)
+				(verbTalk
+					(Print "To whom were you trying to speak?")
+				)
+				(verbDo
+					(Print "There's nothing to do there.")
+				)
+				(verbUse
+					(switch theObj
+						(((inventory at: iCoin) description?)
+							(Print "Don't go throwing money like you're made of it!")
+						)
+						(else
+							(Print "Nothing happens.")
+						)
+					)
+				)
+				(verbSmell
+					(Print "Funny... no smell.")
+				)
+				(verbTaste
+					(Print "Funny... no taste.")
+				)
+			)
 		)
 	)
 )
 
-(instance redX of View
-	(properties
-		view vRedX
-	)
-)
-
-
 (instance DoVerbCode of Code
-	(properties)
 	
-	(method (doit theVerb param2 &tmp temp0)
-		(= temp0 (param2 description?))
-		(switch theVerb
-			(verbLook
-				(if (param2 facingMe: ego)
-					(if (param2 lookStr?)
-						(Print (param2 lookStr?))
+	(method (doit theVerb theObj theItem &tmp objDesc itemDesc)
+		(= objDesc
+			(theObj description?)
+		)
+		(if (inventory at: theItem)
+			(= itemDesc
+				((inventory at: theItem) description?)
+			)
+		else
+			(= itemDesc
+				(theDefaultFeature description?)
+			)
+		)
+		(cls)
+		(if (theObj facingMe: ego)
+			(switch theVerb
+				(verbLook
+					(if (theObj lookStr?)
+						(Print (theObj lookStr?))
 					else
-						(VerbFail)
+						(Printf "Why, look! It's %s." objDesc)
 					)
 				)
+				(verbDo
+					(Printf "That feels exactly like %s." objDesc)
+				)
+				(verbTalk
+					(Printf "Don't bother trying to talk to %s." objDesc)
+				)
+				(verbUse
+					(switch theItem 
+						(iCoin
+							(Print "Your money's no good there.")
+						)
+						(else
+							(Printf "It seems %s just doesn't work with %s." itemDesc objDesc)
+						)
+					)
+				)
+				(verbSmell
+					(Printf "To you, %s has no distinct smell." objDesc)
+				)
+				(verbTaste
+					(Printf "The taste of %s is exactly as you would expect." objDesc)
+				)
 			)
-			(else  (VerbFail))
 		)
 	)
 )
 
 
 (instance FtrInit of Code
-	(properties)
 	
-	(method (doit param1)
-		(if (== (param1 sightAngle?) ftrDefault)
-			(param1 sightAngle: 90)
+	(method (doit obj)
+		(if (== (obj sightAngle?) ftrDefault)
+			(obj sightAngle: 90)
 		)
-		(if (== (param1 actions?) ftrDefault) (param1 actions: 0))
+		(if (== (obj actions?) ftrDefault)
+			(obj actions: 0)
+		)
+	)
+)
+
+(instance theDefaultFeature of Feature
+	(properties
+		description {that thing (whatever it is)}
 	)
 )

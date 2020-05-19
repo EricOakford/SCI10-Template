@@ -35,7 +35,6 @@
 		lInvOK
 		lInvSelect
 	)	
-(define vRedX 942)
 (define vControlIcons 947)
 	(enum
 		lSliderText

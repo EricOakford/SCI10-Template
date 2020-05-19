@@ -1,5 +1,5 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# SPEED_TEST)
+(script# SPEED)
 (include game.sh)
 (use Main)
 (use Motion)
@@ -13,28 +13,27 @@
 )
 
 (local
-	local0
-	local1
-	local2
-	local3
+	doneTime
+	machineSpeed
+	versionFile
+	fastSpeed
 )
-(instance fred of Actor
-	(properties)
-)
+
+(instance fred of Actor)
 
 (instance speedTest of Room
 	(properties
 		picture pSpeedTest
-		style $0064
+		style PLAIN
 	)
 	
 	(method (init)
-		(= local2 (FileIO 0 {version} 1))
-		(FileIO 5 version 6 local2)
-		(FileIO 1 local2)
+		(= versionFile (FileIO fileOpen {version} 1))
+		(FileIO fileFGets version 6 versionFile)
+		(FileIO fileClose versionFile)
 		(super init:)
 		(sounds eachElementDo: #stop)
-		(while (u> (GetTime) -1024)
+		(while (u> (GetTime) $fc00)
 		)
 		(fred
 			view: 99
@@ -47,16 +46,17 @@
 			init:
 		)
 		(= speed 0)
-		(= local1 0)
-		(= local3 90)
+		(= machineSpeed 0)
+		(= fastSpeed 90)
 	)
 	
 	(method (doit)
 		(super doit:)
-		(if (== (++ local1) 1) (= local0 (+ 60 (GetTime))))
-		(if
-		(and (u< local0 (GetTime)) (not (self script?)))
-			(if (< local1 local3)
+		(if (== (++ machineSpeed) 1)
+			(= doneTime (+ 60 (GetTime)))
+		)
+		(if (and (u< doneTime (GetTime)) (not (self script?)))
+			(if (< machineSpeed fastSpeed)
 				(= howFast 0)
 				(theGame detailLevel: 1)
 			else
@@ -72,7 +72,6 @@
 )
 
 (instance speedScript of Script
-	(properties)
 	
 	(method (changeState newState &tmp [inputRoom 10] nextRoom)
 		(switch (= state newState)
@@ -81,7 +80,10 @@
 				(fred setMotion: 0)
 				(= cycles 1)
 			)
-			(1 (= speed 2) (= cycles 1))
+			(1
+				(= speed 2)
+				(= cycles 1)
+			)
 			(2
 				(if debugging
 					(repeat
@@ -91,15 +93,20 @@
 								#edit @inputRoom 5
 							)
 						)
-						(if inputRoom (= nextRoom (ReadNumber @inputRoom)))
-						(if (> nextRoom 0) (break))
+						(if inputRoom
+							(= nextRoom (ReadNumber @inputRoom))
+						)
+						(if (> nextRoom 0)
+							(break)
+						)
 					)
 					(theIconBar enable:)
 					(HandsOn)
 				else
 					(= nextRoom rTitle)
 				)
-				(curRoom newRoom: nextRoom))
+				(curRoom newRoom: nextRoom)
+			)
 		)
 	)
 )

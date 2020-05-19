@@ -20,19 +20,18 @@
 	singleStepOn
 	invDButton
 )
-(procedure (SingleStepMode &tmp newEvent)
+(procedure (SingleStepMode &tmp evt)
 	(while
-	(!= ((= newEvent (Event new:)) message?) 6144)
-		(if (== (newEvent message?) 8704)
+	(!= ((= evt (Event new:)) message?) $1800)
+		(if (== (evt message?) $2200)
 			(theGame doit:)
 		else
-			(newEvent dispose:)
+			(evt dispose:)
 		)
 	)
 )
 
 (instance debugHandler of Feature
-	(properties)
 	
 	(method (init)
 		(super init:)
@@ -48,7 +47,7 @@
 	)
 	
 	
-	(method (handleEvent event &tmp temp0 temp1 [temp2 2] castFirst [str 80] nextRoom temp86)
+	(method (handleEvent event &tmp obj i [str 80] nextRoom)
 		(switch (event type?)
 			(keyDown
 				(event claimed: TRUE)
@@ -84,46 +83,45 @@
 					(`@a
 						(Printf "Cursor X: %d Y: %d" (event x?) (event y?))
 					)
-					(`@b (PolygonEditor doit:))
+					(`@b
+						(PolygonEditor doit:)
+					)
 					(`@s
-						(= castFirst (cast first:))
-						(while castFirst
-							(= temp1 (NodeValue castFirst))
+						(= i (cast first:))
+						(while i
+							(= obj (NodeValue i))
 							(Print
 								(Format
 									@str "view: %d
-(x,y):%d,%d
-STOPUPD=%d
-IGNRACT=%d
-ILLBITS=$%x"
-									(temp1 view?)
-									(temp1 x?)
-									(temp1 y?)
-									(/ (& (temp1 signal?) $0004) 4)
-									(/ (& (temp1 signal?) ignrAct) 16384)
+										(x,y):%d,%d
+										STOPUPD=%d
+										IGNRACT=%d
+										ILLBITS=$%x"
+									(obj view?)
+									(obj x?)
+									(obj y?)
+									(/ (& (obj signal?) notUpd) notUpd)
+									(/ (& (obj signal?) ignrAct) ignrAct)
 									(if
 										(or
-											(== (temp1 superClass?) Actor)
-											(== (temp1 superClass?) Ego)
+											(== (obj superClass?) Actor)
+											(== (obj superClass?) Ego)
 										)
-										(temp1 illegalBits?)
+										(obj illegalBits?)
 									else
 										-1
 									)
 								)
-								#window
-								SysWindow
-								#title
-								(temp1 name?)
-								#icon
-								(temp1 view?)
-								(temp1 loop?)
-								(temp1 cel?)
+								#window SysWindow
+								#title (obj name?)
+								#icon (obj view?) (obj loop?) (obj cel?)
 							)
-							(= castFirst (cast next: castFirst))
+							(= i (cast next: i))
 						)
 					)
-					(`@m (theGame showMem:))
+					(`@m
+						(theGame showMem:)
+					)
 					(`@e
 						(Format
 							@str "ego\nx:%d y:%d\nloop:%d\ncel:%d"
@@ -134,11 +132,19 @@ ILLBITS=$%x"
 						)
 						(Print @str #icon (ego view?) 0 0)
 					)
-					(`@v (Show VMAP))
-					(`@p (Show PMAP))
-					(`@c (Show CMAP))
+					(`@v
+						(Show VMAP)
+					)
+					(`@p
+						(Show PMAP)
+					)
+					(`@c
+						(Show CMAP)
+					)
 					(`@k
-						(if singleStepOn (theGame doit:))
+						(if singleStepOn
+							(theGame doit:)
+						)
 					)
 					(`@i
 						(dInvD doit:)
@@ -153,28 +159,34 @@ ILLBITS=$%x"
 					)
 					(`@o
 						(if singleStepOn
-							(= singleStepOn 0)
+							(= singleStepOn FALSE)
 							(Print "Single-step mode is off")
 						else
-							(= singleStepOn 1)
+							(= singleStepOn TRUE)
 							(Print "Single-step mode is on")
 							(SingleStepMode)
 						)
 					)
 					(`@f
-						(= castFirst 0)
-						(= castFirst (GetNumber {Flag Number:}))
-						(if (Btst castFirst)
+						(= i 0)
+						(= i (GetNumber {Flag Number:}))
+						(if (Btst i)
 							(Print "clearing flag")
-							(Bclr castFirst)
+							(Bclr i)
 						else
 							(Print "setting flag")
-							(Bset castFirst)
+							(Bset i)
 						)
 					)
-					(`@w (CreateObject doit:))
-					(`@x (= quit TRUE))
-					(else  (event claimed: FALSE))
+					(`@w
+						(CreateObject doit:)
+					)
+					(`@x
+						(= quit TRUE)
+					)
+					(else
+						(event claimed: FALSE)
+					)
 				)
 			)
 		)
@@ -184,13 +196,13 @@ ILLBITS=$%x"
 (instance dInvD of Dialog
 	(properties)
 	
-	(method (init &tmp temp0 temp1 temp2 ret newDText inventoryFirst temp6)
+	(method (init &tmp temp0 temp1 temp2 i newDText inventoryFirst temp6)
 		(= temp2 (= temp0 (= temp1 4)))
-		(= ret 0)
+		(= i 0)
 		(= inventoryFirst (inventory first:))
 		(while inventoryFirst
 			(= temp6 (NodeValue inventoryFirst))
-			(++ ret)
+			(++ i)
 			(if (temp6 isKindOf: InvItem)
 				(self
 					add:
@@ -232,12 +244,12 @@ ILLBITS=$%x"
 			moveTo: (- nsRight (+ 4 (invDButton nsRight?))) nsBottom
 		)
 		(self add: invDButton setSize: center:)
-		(return ret)
+		(return i)
 	)
 	
 	(method (doit &tmp theNewDButton)
 		(self init:)
-		(self open: 4 15)
+		(self open: MARGIN 15)
 		(= theNewDButton invDButton)
 		(repeat
 			(if
@@ -253,31 +265,33 @@ ILLBITS=$%x"
 		(self dispose:)
 	)
 	
-	(method (handleEvent event &tmp eventMessage eventType)
-		(= eventMessage (event message?))
-		(switch (= eventType (event type?))
+	(method (handleEvent event &tmp eMsg eType)
+		(= eMsg (event message?))
+		(switch (= eType (event type?))
 			(keyDown
-				(switch eventMessage
-					(UPARROW (= eventMessage 3840))
+				(switch eMsg
+					(UPARROW
+						(= eMsg SHIFTTAB)
+					)
 					(DOWNARROW
-						(= eventMessage 9)
+						(= eMsg TAB)
 					)
 				)
 			)
 			(direction
-				(switch eventMessage
+				(switch eMsg
 					(dirN
-						(= eventMessage 3840)
-						(= eventType keyDown)
+						(= eMsg SHIFTTAB)
+						(= eType keyDown)
 					)
 					(dirS
-						(= eventMessage 9)
-						(= eventType keyDown)
+						(= eMsg TAB)
+						(= eType keyDown)
 					)
 				)
 			)
 		)
-		(event type: eventType message: eventMessage)
+		(event type: eType message: eMsg)
 		(super handleEvent: event)
 	)
 )

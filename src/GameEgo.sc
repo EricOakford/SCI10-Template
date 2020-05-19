@@ -27,47 +27,54 @@
 		headCel {15372406}
 	)
 	
-	(method (init param1 &tmp temp0)
+	(method (init obj &tmp temp0)
 		;EO: this bit of code was taken from PQ3, as Mixed-Up Fairy Tales' 
 		;Head init: did not decompile correctly, causing graphical glitches!
 		(self
-			view: (param1 view?)
-			client: param1
-			ignoreActors: 1
+			view: (obj view?)
+			client: obj
+			ignoreActors: TRUE
 		)
 		(= loop (- (NumLoops self) 2))
 		;On the plus side, ego's head now displays properly, and DOESN'T move around 
 		;way too fast. This is good, as I don't want to modify the system scripts any
 		;more than necessary.
-;;;		(= view (param1 view?))
+;;;		(= view (obj view?))
 ;;;		(self
-;;;			client: param1
+;;;			client: obj
 ;;;			ignoreActors: 1
 ;;;			posn:
-;;;				(param1 species?)
-;;;				(param1 y?)
-;;;				(CelHigh view (param1 loop?) (param1 cel?))
+;;;				(obj species?)
+;;;				(obj y?)
+;;;				(CelHigh view (obj loop?) (obj cel?))
 ;;;		)
 ;;;		(= temp0 (== (client loop?) 5))
-;;;		(if (& (param1 signal?) fixPriOn)
-;;;			(self setPri: (param1 priority?))
+;;;		(if (& (obj signal?) fixPriOn)
+;;;			(self setPri: (obj priority?))
 ;;;		)
-		(param1 head: self)
+		(obj head: self)
 		(super init:)
-		(if (or (not temp0) (not (param1 normal?)))
+		(if (or (not temp0) (not (obj normal?)))
 			(self hide:)
 		)
-		(if moveHead (self cue: look:))
+		(if moveHead
+			(self cue: look:)
+		)
 	)
 	
 	(method (doit &tmp temp0 clientNormal)
 		(= clientNormal (client normal?))
 		(= temp0 (== (client loop?) 5))
 		(cond 
-			((or (not clientNormal) (not temp0)) (self hide:))
-			((and (& signal $0080) temp0) (self show:))
-			(
-			(and (not (& signal $0080)) (not (client isStopped:))) (self hide:))
+			((or (not clientNormal) (not temp0))
+				(self hide:)
+			)
+			((and (& signal actorHidden) temp0)
+				(self show:)
+			)
+			((and (not (& signal actorHidden)) (not (client isStopped:)))
+				(self hide:)
+			)
 		)
 		(if moveHead
 			(self setPri: (client priority?) look:)
@@ -119,9 +126,11 @@
 	
 	(method (changeState newState)
 		(switch (= state newState)
-			(0 (= ticks (Random 60 150)))
+			(0
+				(= ticks (Random 60 150))
+			)
 			(1
-			;	(self dispose:)	;Don't dispose this; it'll fragment the heap
+				(self dispose:)
 			)
 		)
 	)
@@ -137,15 +146,19 @@
 	
 	(method (init)
 		(super init:)
-		(if (not head) ((= head (Head new:)) init: self))
+		(if (not head)
+			((= head (Head new:)) init: self)
+		)
 	)
 	
 	(method (cue)
-		(if head (head setCel: 0 setCycle: 0))
+		(if head
+			(head setCel: 0 setCycle: 0)
+		)
 	)
 	
-	(method (look theLookingDir)
-		(= lookingDir theLookingDir)
+	(method (look dir)
+		(= lookingDir dir)
 	)
 )
 
@@ -175,9 +188,15 @@
 
 	(method (doit)
 		(super doit:)
-		(if (<= x 10) (= edgeHit 4))
-		(if (>= x 310) (= edgeHit 2))
-		(if (>= y 166) (= edgeHit 3))
+		(if (<= x 10)
+			(= edgeHit WEST)
+		)
+		(if (>= x 310)
+			(= edgeHit EAST)
+		)
+		(if (>= y 166)
+			(= edgeHit SOUTH)
+		)
 	)
 	
 	(method (doVerb theVerb theItem)
@@ -201,6 +220,9 @@
 					)
 					(iBomb
 						(EgoDead "Maybe messing with the unstable ordinance wasn't such a hot idea...")
+					)
+					(else
+						(Print "That doesn't do anything for you.")
 					)
 				)
 			)

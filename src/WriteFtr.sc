@@ -52,7 +52,7 @@
 	)
 	(if drawNSRect
 		(Graph
-			grDRAW_LINE
+			GDrawLine
 			newEventY
 			newEventX
 			newEventY
@@ -61,7 +61,7 @@
 			15
 		)
 		(Graph
-			grDRAW_LINE
+			GDrawLine
 			newEventY_2
 			newEventX
 			newEventY_2
@@ -70,7 +70,7 @@
 			15
 		)
 		(Graph
-			grDRAW_LINE
+			GDrawLine
 			newEventY
 			newEventX
 			newEventY_2
@@ -79,7 +79,7 @@
 			15
 		)
 		(Graph
-			grDRAW_LINE
+			GDrawLine
 			newEventY
 			newEventX_2
 			newEventY_2
@@ -88,7 +88,7 @@
 			15
 		)
 		(Graph
-			grUPDATE_BOX
+			GShowBits
 			newEventY
 			newEventX
 			(+ newEventY_2 1)
@@ -395,17 +395,17 @@
 		y 7
 	)
 	
-	(method (handleEvent pEvent)
-		(super handleEvent: pEvent &rest)
+	(method (handleEvent event)
+		(super handleEvent: event &rest)
 		(if
 			(or
 				(and
-					(== (pEvent type?) evMOUSEBUTTON)
-					(pEvent claimed?)
+					(== (event type?) mouseDown)
+					(event claimed?)
 				)
 				(and
-					(== (pEvent type?) evKEYBOARD)
-					(== (pEvent message?) KEY_SPACE)
+					(== (event type?) keyDown)
+					(== (event message?) SPACEBAR)
 				)
 			)
 			(if (== (StrAt cursor 0) 62)
@@ -414,9 +414,9 @@
 				(StrAt cursor 0 62)
 			)
 			(self draw:)
-			(pEvent claimed: 1)
+			(event claimed: 1)
 		)
-		(pEvent claimed?)
+		(event claimed?)
 	)
 )
 

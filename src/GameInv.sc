@@ -35,10 +35,9 @@
 )
 
 (instance invCode of Code
-	(properties)
 	
 	(method (init)
-		(Inventory
+		(inventory
 			init:
 			add:
 				Coin
@@ -49,7 +48,7 @@
 				invHelp
 				ok
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myEGABordColor myEGABackColor)
+			eachElementDo: #lowlightColor (EGAOrVGA myInsideColor myBotBordColor)
 			eachElementDo: #init
 			window: invWin
 			helpIconItem: invHelp
@@ -61,21 +60,20 @@
 )
 
 (instance invWin of InsetWindow
-	(properties)
 	
 	(method (init)
 		(invWin
 			color: myTextColor
-			back: (EGAOrVGA myEGABackColor myEGABordColor)
-			topBordColor: (EGAOrVGA myVGABackColor myEGABordColor2)
-			lftBordColor: (EGAOrVGA myVGABordColor myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myEGABordColor myEGABackColor)
-			botBordColor: (EGAOrVGA myTextColor myEGABackColor)
-			insideColor: (EGAOrVGA myEGABordColor myEGABackColor)
+			back: (EGAOrVGA myBotBordColor myInsideColor)
+			topBordColor: (EGAOrVGA myBackColor myTopBordColor)
+			lftBordColor: (EGAOrVGA myRgtBordColor myTopBordColor)
+			rgtBordColor: (EGAOrVGA myInsideColor myBotBordColor)
+			botBordColor: (EGAOrVGA myTextColor myBotBordColor)
+			insideColor: (EGAOrVGA myInsideColor myBotBordColor)
 			topBordColor2: myTextColor
 			lftBordColor2: myTextColor
-			botBordColor2: (EGAOrVGA myVGABackColor myEGABordColor2)
-			rgtBordColor2: (EGAOrVGA myVGABordColor2 myEGABordColor2)
+			botBordColor2: (EGAOrVGA myBackColor myTopBordColor)
+			rgtBordColor2: (EGAOrVGA myLftBordColor myTopBordColor)
 			botBordHgt: 25
 		)
 	)
@@ -88,14 +86,14 @@
 		cel 0
 		nsLeft 40
 		cursor ARROW_CURSOR
-		signal $0043
+		signal (| forceUpdOn updOn)
 		helpStr {Select this Icon to close this window.}
 	)
 	
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
+			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
 		)
 		(super init:)
 	)
@@ -114,7 +112,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
+			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
 		)
 		(super init:)
 	)
@@ -133,7 +131,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
+			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
 		)
 		(super init:)
 	)
@@ -151,7 +149,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
+			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
 		)
 		(super init:)
 	)
@@ -169,7 +167,7 @@
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myVGABackColor myEGABackColor)
+			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
 		)
 		(super init:)
 	)

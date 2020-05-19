@@ -19,16 +19,15 @@
 )
 
 (class GameWindow kindof BorderWindow
-	(properties)
 	
 	(method (init)
 		(self
 			color: myTextColor
-			back: (EGAOrVGA myVGABackColor myEGABackColor)
-			topBordColor: myEGABordColor2
-			lftBordColor: (EGAOrVGA myVGABordColor2 myEGABordColor2)
-			rgtBordColor: (EGAOrVGA myVGABordColor myEGABordColor)
-			botBordColor: (EGAOrVGA myEGABackColor myEGABordColor)
+			back: (EGAOrVGA myBackColor myBotBordColor)
+			topBordColor: myTopBordColor
+			lftBordColor: (EGAOrVGA myLftBordColor myTopBordColor)
+			rgtBordColor: (EGAOrVGA myRgtBordColor myInsideColor)
+			botBordColor: (EGAOrVGA myBotBordColor myInsideColor)
 		)
 	)
 	
