@@ -1010,71 +1010,71 @@ code_0623:
 			)
 			(keyDown
 				(switch (event message?)
-					(KEY_QUESTION
+					(`?
 						(event message: 104)
 					)
-					(KEY_PAUSE
+					(`^s
 						(event message: 120)
 					)
-					(KEY_F2 (event message: 12032))
-					(KEY_F4 (event message: 11776))
+					(`#2 (event message: 12032))
+					(`#4 (event message: 11776))
 				)
 				(switch (event message?)
-					(KEY_TAB
+					(TAB
 						(if (and (== state 1) curPolygon)
 							(self advanceRetreat: 68 121)
 						)
 					)
-					(KEY_SHIFTTAB
+					(SHIFTTAB
 						(if (and (== state 1) curPolygon)
 							(self advanceRetreat: 124 123)
 						)
 					)
-					(KEY_SPACE
+					(SPACEBAR
 						(if (and (== state 1) curPolygon)
 							(curPolygon advance:)
 						)
 					)
-					(JOY_UPLEFT
+					(dirNW
 						(if (and (== state 1) curPolygon)
 							(curPolygon retreat:)
 						)
 					)
-					(KEY_c
+					(`c
 						(if (== state 1)
 							(self changeState: 0)
 							(= curPolygon 0)
 						)
 					)
-					(KEY_t
+					(`t
 						(if (and curPolygon (== state 1))
 							(curPolygon getAccessType:)
 						)
 					)
-					(KEY_d
+					(`d
 						(cond 
 							((== state 1) (if curPolygon (self deletePt:)))
 							((== state 0) (self finishAdding:))
 						)
 					)
-					(KEY_h
+					(`h
 						(switch state
 							(0 (localproc_1926 943 3 30 1))
 							(1 (localproc_1926 943 4))
 						)
 					)
-					(KEY_u (self undo:))
-					(KEY_m (self showMap: -1))
-					(KEY_ALT_v (self showMap: 1))
-					(KEY_ALT_c (self showMap: 4))
-					(KEY_a
+					(`u (self undo:))
+					(`m (self showMap: -1))
+					(`@v (self showMap: 1))
+					(`@c (self showMap: 4))
+					(`a
 						(localproc_1926 943 5 30 1)
 					)
-					(KEY_r
+					(`r
 						(if (== state 1) (self draw:))
 					)
-					(KEY_x (return (self exit:)))
-					(KEY_ESCAPE
+					(`x (return (self exit:)))
+					(ESC
 						(if (== state 0) (self finishAdding:))
 					)
 				)
