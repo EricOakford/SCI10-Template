@@ -94,35 +94,34 @@
 		(client doVerb: theVerb)
 	)
 	
-	(method (cue &tmp temp0)
+	(method (cue)
 		(if (and (not (curRoom script?)) moveHead)
 			(client look: (- (Random 0 2) 1))
 		)
 		(self setScript: (HeadScript new:) self)
 	)
 	
-	(method (look &tmp clientLoop clientLookingDir)
+	(method (look &tmp clientLoop dir)
 		(if
 			(==
 				(= clientLoop (client loop?))
 				(- (NumLoops client) 1)
 			)
 			(= clientLoop (client cel?))
-			(= clientLookingDir (client lookingDir?))
+			(= dir (client lookingDir?))
 		else
-			(= clientLookingDir 0)
+			(= dir 0)
 		)
 		(= cel
 			(+
 				(& (StrAt headCel clientLoop) $000f)
-				clientLookingDir
+				dir
 			)
 		)
 	)
 )
 
 (instance HeadScript of Script
-	(properties)
 	
 	(method (changeState newState)
 		(switch (= state newState)

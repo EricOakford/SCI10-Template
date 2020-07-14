@@ -8,8 +8,8 @@
 	proc932_0 0
 	proc932_1 1
 	proc932_2 2
-	proc932_3 3
-	proc932_4 4
+	SaveSubLang 3
+	RestoreSubLang 4
 	proc932_5 5
 	proc932_6 6
 	proc932_7 7
@@ -45,7 +45,7 @@
 	)
 )
 
-(procedure (proc932_3 &tmp theGameSubtitleLang)
+(procedure (SaveSubLang &tmp theGameSubtitleLang)
 	(if
 		(and
 			(not theGGameSubtitleLang)
@@ -57,7 +57,7 @@
 	(return theGameSubtitleLang)
 )
 
-(procedure (proc932_4 &tmp theTheGGameSubtitleLang)
+(procedure (RestoreSubLang &tmp theTheGGameSubtitleLang)
 	(if
 		(and
 			(= theTheGGameSubtitleLang theGGameSubtitleLang)

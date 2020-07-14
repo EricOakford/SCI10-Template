@@ -159,7 +159,7 @@
 	pMouseX
 	pMouseY
 	theEgoHead
-	theStopGroop
+	egoLooper
 	[gameFlags 10]
 	myTextColor
 	myInsideColor
@@ -174,12 +174,13 @@
 (procedure (NormalEgo)
 	(ego
 		setLoop: -1
+		looper: egoLooper
 		setPri: -1
 		setMotion: 0
 		setCycle: StopWalk
 		setStep: 3 2
 		setAvoider: PAvoider
-		ignoreActors: 0
+		ignoreActors: FALSE
 		moveSpeed: (theGame egoMoveSpeed?)
 		cycleSpeed: (theGame egoMoveSpeed?)
 	)
@@ -327,7 +328,9 @@
 	(if (> vga 255) (= vga 255))		;if color is more than 255, make it equal 255 
 	(if (< ega 0) (= ega 0))			;if color is less than zero, make it equal zero
 	(if (> ega 15) (= ega 15))			;if color is more than 15, make it equal 15
-	(return (if (Btst fIsVGA) vga else ega))
+	(return
+		(if (Btst fIsVGA) vga else ega)
+	)
 )
 
 (procedure (EgoDead theView theLoop theCel &tmp deadView deadLoop deadCel [str 300])
@@ -538,7 +541,7 @@
 		(super init: &rest)
 		
 		(StrCpy @sysLogPath {})
-		(= theStopGroop stopGroop)
+		(= egoLooper stopGroop)
 		(= doVerbCode DoVerbCode)
 		(= ftrInitializer FtrInit)
 		((= keyDownHandler keyH) add:)
@@ -596,11 +599,11 @@
 								(inventory showSelf:)
 							)
 						)
-						(`^q	;KEY_CONTROL
+						(`^q
 							(theGame quitGame:)
 							(event claimed: TRUE)
 						)
-						(`#2	;KEY_F2
+						(`#2
 							(cond 
 								((theGame masterVolume:)
 									(theGame masterVolume: 0)
