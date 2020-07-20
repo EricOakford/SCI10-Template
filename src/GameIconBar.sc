@@ -41,6 +41,7 @@
 			useIconItem: iconUse
 			helpIconItem: iconHelp
 			disable:
+			state: (| OPENIFONME NOCLICKHELP)
 		)
 	)
 )

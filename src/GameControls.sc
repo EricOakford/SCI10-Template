@@ -43,6 +43,7 @@
 			curIcon: iconRestore
 			eachElementDo: #highlightColor 0
 			eachElementDo: #lowlightColor (EGAOrVGA myRgtBordColor myInsideColor)
+			state: NOCLICKHELP
 		)
 	)
 )

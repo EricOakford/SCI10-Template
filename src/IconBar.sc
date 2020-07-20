@@ -167,6 +167,7 @@
 	(method (doit &tmp event)
 		(while
 		(and (= event (Event new:)) (& state IB_ACTIVE))
+			(Wait 1)
 			(if (== (event type?) joyDown)
 				(event
 					type: keyDown
@@ -202,8 +203,8 @@
 			(
 				(or
 					(and
-						(& state OPENIFONME)
 						(not (= eType (event type?)))
+						(& state OPENIFONME)
 						(<= -10 (event y?))
 						(<= (event y?) height)
 						(<= 0 (event x?))
@@ -400,23 +401,23 @@
 		(if (& state IB_ACTIVE)
 			(sounds pause: FALSE)
 			(= state (& state (~ IB_ACTIVE)))
-		)
-		(= node (FirstNode elements))
-		(while node
-			(= nextNode (NextNode node))
-			(if (not (IsObject (= obj (NodeValue node))))
-				(return)
+			(= node (FirstNode elements))
+			(while node
+				(= nextNode (NextNode node))
+				(if (not (IsObject (= obj (NodeValue node))))
+					(return)
+				)
+				((= obj (NodeValue node))
+					signal: (& (obj signal?) (~ IB_ACTIVE))
+				)
+				(= node nextNode)
+			(Graph GRestoreBits underBits)
+			(Graph GShowBits y 0 (+ y height) SCRNWIDE VMAP)
+			(Graph GReAnimate y 0 (+ y height) SCRNWIDE)
+			(SetPort port)
+			(= height activateHeight)
 			)
-			((= obj (NodeValue node))
-				signal: (& (obj signal?) (~ IB_ACTIVE))
-			)
-			(= node nextNode)
 		)
-		(Graph GRestoreBits underBits)
-		(Graph GShowBits y 0 (+ y height) SCRNWIDE VMAP)
-		(Graph GReAnimate y 0 (+ y height) SCRNWIDE)
-		(SetPort port)
-		(= height activateHeight)
 	)
 	
 	(method (advance &tmp theIcon i)
@@ -452,7 +453,7 @@
 		(= i 1)
 		(while (<= i size)
 			(= theIcon
-				(self at: (- (self indexOf: highlightedIcon) i))
+				(self at: (mod (- (self indexOf: highlightedIcon) i) size))
 			)
 			(if (not (IsObject theIcon))
 				(= theIcon (NodeValue (self last:)))
@@ -553,7 +554,7 @@
 						(
 							(not
 								(if
-								(and (<= -10 evtY) (<= evtY height) (<= 0 evtX))
+								(and (<= 0 evtY) (<= evtY height) (<= 0 evtX))
 									(<= evtX SCRNWIDE)
 								)
 							)
@@ -589,7 +590,11 @@
 							(if (thisIcon cursor?)
 								(theGame setCursor: (thisIcon cursor?))
 							)
-							(helpIconItem signal: (| (helpIconItem signal?) TRANSLATOR))
+							(if (& state NOCLICKHELP)
+								(self noClickHelp:)
+							else
+								(helpIconItem signal: (| (helpIconItem signal?) TRANSLATOR))
+							)
 						else
 							(= evtClaimed (& (thisIcon signal?) HIDEBAR))
 						)
@@ -684,5 +689,34 @@
 		else
 			(= state (& state (~ DISABLED)))
 		)
+	)
+
+	(method (noClickHelp &tmp event lastIcon thisIcon [str 100] oldPort)
+		(= lastIcon (= thisIcon 0))
+		(= oldPort (GetPort))
+		(while (not ((= event (Event new:)) type?))
+			(if (not (self isMemberOf: IconBar))
+				(event localize:)
+			)
+			(cond 
+				((= thisIcon (self firstTrue: #onMe event))
+					(if (and (!= thisIcon lastIcon) (thisIcon helpStr?))
+						(= lastIcon thisIcon)
+						(Format @str (thisIcon helpStr?))
+						(Print @str #dispose)
+						(SetPort oldPort)
+					)
+				)
+				(modelessDialog (modelessDialog dispose:) (SetPort oldPort))
+				(else (= lastIcon 0))
+			)
+			(event dispose:)
+		)
+		(theGame setCursor: ARROW_CURSOR TRUE)
+		(if modelessDialog (modelessDialog dispose:))
+		(SetPort oldPort)
+		(if (not (helpIconItem onMe: event))
+			(self dispatchEvent: event)
+		)		
 	)
 )

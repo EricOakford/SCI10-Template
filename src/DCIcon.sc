@@ -1,7 +1,9 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
 (script# DCICON)
+(include game.sh)
 (use Intrface)
 (use Motion)
+
 
 (class DCIcon 	kindof DIcon
 	;;; Cycling Icons are a sub-class of DIcon.

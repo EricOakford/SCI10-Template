@@ -54,6 +54,7 @@
 			helpIconItem: invHelp
 			selectIcon: invSelect
 			okButton: ok
+			state: NOCLICKHELP
 		)
 		(Coin owner: ego)
 	)

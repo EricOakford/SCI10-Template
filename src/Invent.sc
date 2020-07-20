@@ -384,11 +384,15 @@
 						)
 						(if (== highlightedIcon okButton) (break))
 						(if (== highlightedIcon helpIconItem)
-							(if (!= (highlightedIcon cursor?) -1)
-								(theGame setCursor: (helpIconItem cursor?))
-							)
-							(if helpIconItem
-								(helpIconItem signal: (| (helpIconItem signal?) TRANSLATOR))
+							(if (& state NOCLICKHELP)
+								(self noClickHelp:)
+							else
+								(if (!= (highlightedIcon cursor?) -1)
+									(theGame setCursor: (helpIconItem cursor?))
+								)
+								(if helpIconItem
+									(helpIconItem signal: (| (helpIconItem signal?) TRANSLATOR))
+								)
 							)
 						else
 							(= curIcon highlightedIcon)
@@ -471,7 +475,7 @@
 		(if (and pMouse (pMouse respondsTo: #stop))
 			(pMouse stop:)
 		)
-		(if (theIconBar height?)
+		(if (theIconBar height:)
 			(theIconBar hide:)
 		)
 		(if (not window)

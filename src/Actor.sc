@@ -24,12 +24,6 @@
 		(super init: &rest)
 	)
 	
-	(method (dispose)
-		(if actions (actions dispose:) (= actions 0))
-		(features delete: self)
-		(DisposeClone self)
-	)
-	
 	(method (showSelf)
 		(Print name #icon view loop cel)
 	)
@@ -187,7 +181,7 @@
 				)
 				(features add: self)
 			else
-				(DisposeClone self)
+				(super dispose:)
 			)
 			(if (IsObject actions) (actions dispose:))
 			(= actions 0)

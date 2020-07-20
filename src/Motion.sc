@@ -16,7 +16,7 @@
 	
 	(method (init theObj)
 		(if argc (= client theObj))
-		(= cycleCnt (- (- gameTime (client cycleSpeed?)) 1))
+		(= cycleCnt gameTime)
 		(= completed FALSE)
 	)
 	
