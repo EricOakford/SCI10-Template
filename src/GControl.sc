@@ -193,6 +193,7 @@
 	)
 	
 	(method (show &tmp theX theY node nextNode obj)
+		(sounds pause:)
 		(if (and pMouse (pMouse respondsTo: #stop))
 			(pMouse stop:)
 		)
@@ -253,6 +254,7 @@
 	(method (hide)
 		(if window (window dispose:))
 		(if (& state IB_ACTIVE)
+			(sounds pause: FALSE)
 			(= state (& state (~ IB_ACTIVE)))
 		)
 	)

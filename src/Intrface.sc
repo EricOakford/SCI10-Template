@@ -53,7 +53,7 @@
 				(== (StrAt @buffer (+ 1 temp1022)) 74)
 			)
 			(theGame printLang: ENGLISH subtitleLang: JAPANESE)
-			(StrSplit @buffer @buffer {#J})	;EO: this should be StrSplit, but it is not in VOCAB.999
+			(StrSplit @buffer @buffer {#J})
 			(theGame
 				printLang: theGamePrintLang
 				subtitleLang: theGameSubtitleLang
@@ -738,7 +738,6 @@
 	)
 	
 	(method (doit def &tmp done event ret eatTheMice lastTick)
-		(= gameTime (+ tickOffset (GetTime)))		
 		(= done 0)
 		(= busy 1)
 		(self eachElementDo: #init)
@@ -759,7 +758,6 @@
 		)
 		(= ret 0)
 		(while (not ret)
-			(= gameTime (+ tickOffset (GetTime)))			
 			(self eachElementDo: #cycle)
 			(= event ((Event new:) localize:))
 			(if eatTheMice
@@ -784,7 +782,6 @@
 	)
 	
 	(method (dispose &tmp theCaller)
-		(self eachElementDo: #dispose release:)		
 		(if (== self modelessDialog)
 			(SetPort modelessPort)
 			(= modelessDialog 0)

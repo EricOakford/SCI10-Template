@@ -418,6 +418,8 @@
 				(if (>= argc 3) (= register reg))
 			)
 		)
+		;(self changeState: start)
+		;change from MUFT; prevents ego's head from moving too fast
 		(= state (- start 1))
 		(self cue:)
 	)

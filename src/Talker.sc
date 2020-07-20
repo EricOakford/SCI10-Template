@@ -1,342 +1,317 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 928)
-(include sci.sh)
+(script# TALKER)
+(include game.sh)
 (use Main)
 (use Intrface)
+(use Sync)
 (use RandCyc)
 (use Actor)
 (use System)
 
 
-(class RTRandCycle of RandCycle
-	(properties
-		client 0
-		caller 0
-		cycleDir 1
-		cycleCnt 0
-		completed 0
-		count -1
-	)
-	
-	(method (init param1 param2 theCaller)
-		(super init: param1)
-		(client cel: 0)
-		(= cycleCnt (GetTime))
-		(if (>= argc 2)
-			(= count (+ (GetTime) param2))
-			(if (>= argc 3) (= caller theCaller))
-		else
-			(= count -1)
-		)
-	)
-	
-	(method (doit &tmp temp0)
-		(if (> count (= temp0 (GetTime)))
-			(if (> (- temp0 cycleCnt) (client cycleSpeed?))
-				(client cel: (self nextCel:))
+(class RTRandCycle kindof RandCycle
+	(method (doit &tmp theTime)
+		(if (> count (= theTime (GetTime)))
+			(if (> (- theTime cycleCnt) (client cycleSpeed?)) 
+				(client cel:(self nextCel:))
 				(= cycleCnt (GetTime))
 			)
 		else
-			(client cel: 0)
+			(client cel:	0)
 			(self cycleDone:)
 		)
 	)
+
+	(method (init obj theTime whoCares)
+		(super init: obj)
+		(client cel:	0)
+		(= cycleCnt (GetTime))
+		(if (>= argc 2)			
+			(= count (+ (GetTime) theTime)) 
+			(if (>= argc 3)		
+				(= caller whoCares)
+			)
+		else 
+			(= count -1)
+		)
+	)
+
 )
 
-(class Talker of Prop
+(class Talker kindof Prop
 	(properties
-		bust 0
-		eyes 0
-		mouth 0
-		ticks 0
-		disposeWhenDone 1
-		caller 0
+		bust	NULL
+		eyes	NULL
+		mouth	NULL
+		ticks	NULL
+		disposeWhenDone TRUE
+		caller	NULL
 	)
-	
-	(method (init theBust theEyes theMouth param4 param5 param6 theDisposeWhenDone theCaller &tmp temp0)
+
+;;;	(methods 
+;;;		init 		  		;initialize, add to fastCast, show, and optionally say
+;;;		dispose			;delete from fastCast, and optionally cue caller and hide 
+;;;		say 				;startText or startAudio based on cDAudio	global
+;;;		startAudio 		;start talker sync'ing to audio
+;;;		startText 		;print message and move mouth and eyes
+;;;		cycle				;cycle mouth and eyes and redraw them
+;;;		show				;draw all components of talker on screen
+;;;		hide				;erase talker from screen
+;;;		doit				;a fastCast animation cycle
+;;;		handleEvent		;dispose if mouseDown or ENTER
+;;;	)
+
+	(method (init bustView prop syncedProp modNum charNum msgNum dWD whoCares
+			&tmp pnv  
+			)
 		(if argc
-			(= bust theBust)
+			(= bust bustView)
 			(if (>= argc 2)
-				(= eyes theEyes)
+				(= eyes prop)
 				(if (>= argc 3)
-					(= mouth theMouth)
+					(= mouth syncedProp)
 					(if (>= argc 7)
-						(= disposeWhenDone theDisposeWhenDone)
-						(if (>= argc 8) (= caller theCaller))
+						(= disposeWhenDone dWD)
+						(if (>= argc 8)
+							(= caller whoCares)
+						)
 					)
 				)
 			)
 		)
 		(self show:)
 		(if (>= argc 4)
-			(self say: param4 param5 param6 disposeWhenDone caller)
+			(self	say: modNum charNum msgNum disposeWhenDone caller)
 		)
 	)
-	
-	(method (doit)
-		(if (> (GetTime) ticks)
-			(self dispose: disposeWhenDone)
-			(return)
-		)
-		(if eyes (self cycle: eyes))
-		(if mouth (self cycle: mouth))
-	)
-	
-	(method (dispose param1 &tmp theCaller)
-		(fastCast delete: self release:)
-		(fastCast dispose:)
-		(= fastCast 0)
-		(if (or (not argc) param1)
-			(if (and mouth (mouth cycler?))
-				(if ((mouth cycler?) respondsTo: #cue)
-					((mouth cycler?) cue:)
-				)
-				(mouth setCycle: 0)
-			)
-			(cond 
-				(cDAudio (DoAudio 3))
-				(modelessDialog (modelessDialog dispose:))
-			)
-			(if eyes (eyes setCycle: 0))
-			(self hide:)
-		)
-		(if caller
-			(= theCaller caller)
-			(= caller 0)
-			(theCaller cue:)
-		)
-		(DisposeClone self)
-	)
-	
-	(method (handleEvent pEvent)
-		(if (super handleEvent: pEvent) (return))
-		(if
-			(or
-				(& (pEvent type?) evMOUSEBUTTON)
-				(& (pEvent type?) $4000)
-				(and
-					(& (pEvent type?) evKEYBOARD)
-					(== (pEvent message?) KEY_RETURN)
-				)
-			)
-			(pEvent claimed: 1)
-			(self dispose: disposeWhenDone)
-		)
-	)
-	
-	(method (hide)
-		(Graph grRESTORE_BOX underBits)
-		(= underBits 0)
-		(Graph grREDRAW_BOX nsTop nsLeft nsBottom nsRight)
-	)
-	
-	(method (show &tmp temp0)
-		(= nsRight
-			(+
-				nsLeft
+
+	(method (show &tmp pnv)
+		(= nsRight 	
+			(+ nsLeft 
 				(Max
 					(CelWide view loop cel)
 					(if (IsObject bust)
-						(+
-							(bust nsLeft?)
-							(CelWide (bust view?) (bust loop?) (bust cel?))
-						)
-					else
-						0
+						(+ bust nsLeft (CelWide (bust view?)(bust loop?)(bust cel?)))
 					)
 					(if (IsObject eyes)
-						(+
-							(eyes nsLeft?)
-							(CelWide (eyes view?) (eyes loop?) (eyes cel?))
-						)
-					else
-						0
+						(+ eyes nsLeft (CelWide (eyes view?)(eyes loop?)(eyes cel?)))
 					)
 					(if (IsObject mouth)
-						(+
-							(mouth nsLeft?)
-							(CelWide (mouth view?) (mouth loop?) (mouth cel?))
-						)
-					else
-						0
+						(+ mouth nsLeft (CelWide (mouth view?)(mouth loop?)(mouth cel?)))
 					)
 				)
 			)
 		)
-		(= nsBottom
-			(+
-				nsTop
+		(= nsBottom 
+			(+ nsTop 
 				(Max
 					(CelHigh view loop cel)
 					(if (IsObject bust)
-						(+
-							(bust nsTop?)
-							(CelHigh (bust view?) (bust loop?) (bust cel?))
-						)
-					else
-						0
+						(+ bust nsTop (CelHigh (bust view?)(bust loop?)(bust cel?)))
 					)
 					(if (IsObject eyes)
-						(+
-							(eyes nsTop?)
-							(CelHigh (eyes view?) (eyes loop?) (eyes cel?))
-						)
-					else
-						0
+						(+ eyes nsTop (CelHigh (eyes view?)(eyes loop?)(eyes cel?)))
 					)
 					(if (IsObject mouth)
-						(+
-							(mouth nsTop?)
-							(CelHigh (mouth view?) (mouth loop?) (mouth cel?))
-						)
-					else
-						0
+						(+ mouth nsTop (CelHigh (mouth view?)(mouth loop?)(mouth cel?)))
 					)
 				)
 			)
 		)
 		(if (not underBits)
-			(= underBits
-				(Graph grSAVE_BOX nsTop nsLeft nsBottom nsRight 1)
-			)
+			(= underBits (Graph GSaveBits nsTop nsLeft nsBottom nsRight VMAP))
 		)
-		(= temp0 (PicNotValid))
-		(PicNotValid 1)
+		(= pnv (PicNotValid))
+		(PicNotValid TRUE)
 		(if bust
-			(DrawCel
-				(bust view?)
-				(bust loop?)
-				(bust cel?)
-				(+ (bust nsLeft?) nsLeft)
-				(+ (bust nsTop?) nsTop)
+			(DrawCel	
+				(bust view?) (bust loop?) (bust cel?) 
+				(+ (bust nsLeft?) nsLeft) (+ (bust nsTop?) nsTop)
 				-1
 			)
 		)
 		(if eyes
-			(DrawCel
-				(eyes view?)
-				(eyes loop?)
-				(eyes cel?)
-				(+ (eyes nsLeft?) nsLeft)
-				(+ (eyes nsTop?) nsTop)
+			(DrawCel	
+				(eyes	view?) (eyes loop?) (eyes cel?)	
+				(+ (eyes nsLeft?) nsLeft) (+ (eyes nsTop?) nsTop)
 				-1
 			)
 		)
 		(if mouth
-			(DrawCel
-				(mouth view?)
-				(mouth loop?)
-				(mouth cel?)
-				(+ (mouth nsLeft?) nsLeft)
-				(+ (mouth nsTop?) nsTop)
+			(DrawCel	
+				(mouth view?) (mouth loop?) (mouth cel?)	
+				(+ (mouth nsLeft?) nsLeft) (+ (mouth nsTop?) nsTop)
 				-1
 			)
 		)
 		(DrawCel view loop cel nsLeft nsTop -1)
-		(Graph grUPDATE_BOX nsTop nsLeft nsBottom nsRight 1)
-		(PicNotValid temp0)
+		(Graph GShowBits nsTop nsLeft nsBottom nsRight VMAP)
+		(PicNotValid pnv)
 	)
-	
-	(method (say param1 param2 param3 theDisposeWhenDone theCaller)
+
+	(method (say modNum charNum msgNum dWD whoCares)
 		(if (>= argc 4)
-			(= disposeWhenDone theDisposeWhenDone)
-			(if (>= argc 5) (= caller theCaller))
-		)
+			(= disposeWhenDone dWD)
+			(if (>= argc 5)
+				(= caller whoCares)
+			)
+		)	
 		(if cDAudio
-			(self startAudio: param1 param2 param3)
+			(self startAudio: modNum charNum msgNum)
 		else
-			(self startText: param1 param2 param3)
-		)
+			(self startText: modNum charNum msgNum)
+		)	
+		;(fastCast add: self)
+		;EO: fastCast-related changes taken from MUFT
 		(if fastCast
 			(fastCast add: self)
 		else
 			(= fastCast (EventHandler new:))
 			(fastCast name: {fastCast} add: self)
-		)
+		)		
 		(= ticks (+ ticks 60 (GetTime)))
 	)
-	
-	(method (startAudio param1 &tmp temp0)
-		(asm
-			lap      param1
-			sat      temp0
-			pushi    2
-			pushi    1
-			push    
-			callk    DoAudio,  4
-			pToa     mouth
-			bnt      code_0452
-			pushi    #setCycle
-			pushi    2
-			class    40
-			push    
-			lst      temp0
-			pToa     mouth
-			send     8
-code_0452:
-			pushi    2
-			pushi    2
-			lst      temp0
-			callk    DoAudio,  4
-			aTop     ticks
-			pToa     eyes
-			bnt      code_046d
-			pushi    #setCycle
-			pushi    2
-			class    RTRandCycle
-			push    
-			pTos     ticks
-			pToa     eyes
-			send     8
-code_046d:
-			ret     
+
+	(method (startText modNum charNum msgNum &tmp [buffer 500])
+		;; Draw Talker face and text and leave it for a calculated
+		;; amount of time
+		;; TEST HOOK
+		(if modelessDialog 
+			(modelessDialog dispose:)
 		)
-	)
-	
-	(method (startText param1 param2 &tmp [temp0 500])
-		(Format @temp0 param1 param2)
-		(= ticks (* 5 (StrLen @temp0)))
+		(Format @buffer  modNum charNum)
+		(= ticks (* 5 (StrLen @buffer)))
 		(if mouth (mouth setCycle: RTRandCycle ticks))
-		(if eyes (eyes setCycle: RTRandCycle ticks))
-		(Print @temp0 #at x y #dispose)
+		(if eyes	 (eyes  setCycle: RTRandCycle ticks))
+		(Print @buffer #at x y #dispose)
 	)
-	
-	(method (cycle param1 &tmp temp0)
-		(if (and param1 (param1 cycler?))
-			(= temp0 (param1 cel?))
-			((param1 cycler?) doit:)
-			(if (!= temp0 (param1 cel?))
-				(DrawCel
-					(param1 view?)
-					(param1 loop?)
-					(param1 cel?)
-					(+ (param1 nsLeft?) nsLeft)
-					(+ (param1 nsTop?) nsTop)
+
+	(method (startAudio modNum charNum msgNum &tmp theAudio)
+		;; Draw Talker face and start audio 
+		;; TEST HOOK
+		(= theAudio modNum)
+	  	(DoAudio WPlay	theAudio)
+		(if mouth (mouth setCycle: MouthSync theAudio)) 
+	  	(= ticks (DoAudio Play theAudio))
+		(if eyes (eyes	setCycle: RTRandCycle ticks))
+;		(Display (Format @wrkStr "%d" theAudio)
+;			p_at:	(+ nsLeft 15) (+ nsTop 3)
+;			p_font:	999
+;			p_color:	1
+;		)
+	)
+
+	(method (cycle obj &tmp theCel)
+		;; call cycler doit and redraw obj if it has changed
+		(if (and obj (obj cycler?))
+			(= theCel 	(obj cel?))
+			((obj cycler?)		doit:)
+			(if (!= theCel (obj cel?))
+				(DrawCel	
+					(obj	view?)
+					(obj	loop?)
+					(obj	cel?)	
+					(+ (obj nsLeft?) nsLeft)
+					(+ (obj nsTop?) nsTop)
 					-1
 				)
-				(param1
-					nsRight:
-						(+
-							(param1 nsLeft?)
-							(CelWide (param1 view?) (param1 loop?) (param1 cel?))
+				(obj 
+					nsRight: 
+						(+ obj nsLeft 
+							(CelWide (obj view?) (obj loop?)  (obj cel?))
 						)
 				)
-				(param1
-					nsBottom:
-						(+
-							(param1 nsTop?)
-							(CelHigh (param1 view?) (param1 loop?) (param1 cel?))
+				(obj 
+					nsBottom: 
+						(+  obj nsTop
+							(CelHigh (obj view?) (obj loop?)  (obj cel?))
 						)
 				)
-				(Graph
-					grUPDATE_BOX
-					(+ (param1 nsTop?) nsTop)
-					(+ (param1 nsLeft?) nsLeft)
-					(+ (param1 nsBottom?) nsTop)
-					(+ (param1 nsRight?) nsLeft)
-					1
+		 		(Graph GShowBits 
+					(+ (obj nsTop?) 		nsTop)
+					(+ (obj nsLeft?) 	nsLeft)
+					(+ (obj nsBottom?) 	nsTop)
+					(+ (obj nsRight?) 	nsLeft)
+					VMAP
 				)
 			)
 		)
 	)
+
+	(method (doit)
+		(if (> (GetTime) ticks)
+			(self dispose:disposeWhenDone)
+			(return)
+		)
+		(if eyes		(self	cycle: eyes))
+		(if mouth 	(self cycle: mouth))
+	)
+
+	(method (handleEvent event)
+		(if (super handleEvent:event)
+			(return)
+		)
+		(if (or 
+				(& (event type?) mouseDown)
+				(& (event type?) userEvent)
+				(and
+					(& (event type?) keyDown)
+					(== (event message?) ENTER)
+				)
+			)
+			(event claimed: TRUE)
+			(self dispose: disposeWhenDone)
+		)
+	)
+
+	(method (hide)
+		(Graph 	GRestoreBits underBits)
+		(=	underBits 0)
+		(Graph 	GReAnimate nsTop nsLeft nsBottom nsRight)
+	)
+
+	(method (dispose dWD &tmp toCue)
+		;(fastCast delete: self)
+		;EO: fastCast-related changes taken from MUFT
+		(if (and (IsObject fastCast) (fastCast contains: self))
+			(fastCast delete: self)
+			(if (fastCast isEmpty:)
+				(fastCast dispose:)
+				(= fastCast 0)
+			)
+		)
+		
+		(if (or (not argc) dWD)
+			
+			;; this is here because MouthSync is a non-standard 
+			;; Cycler and thus needs special attention.
+			(if (and mouth (mouth cycler?)) 
+				(if ((mouth cycler?) respondsTo: #cue)
+					((mouth cycler?)  cue:)
+				)
+				(mouth setCycle:0)
+			)
+
+			(cond
+				(cDAudio
+					(DoAudio Stop)
+				)
+				(modelessDialog
+					(modelessDialog dispose:)
+				)
+			)
+			(if eyes	(eyes 	setCycle:0))
+			(self hide:)
+		)
+		(if caller
+			;; I know this looks stupid, but It gets rid of an
+			;; incidious little bug.
+			(= toCue caller)
+			(= caller 0)
+			(toCue cue:)
+		)
+		;; in lue of super dispose:
+		(DisposeClone self)
+	)
 )
+

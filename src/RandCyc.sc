@@ -1,96 +1,54 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-;;;;
-;;;;	RANDCYC.SC
-;;;;
-;;;;	(c) Sierra On-Line, Inc, 1990
-;;;;
-;;;;	Written:
-;;;;		Doug Oldfield
-;;;;		July 25, 1990
-;;;;
-;;;;	Updated:
-;;;;		Brian K. Hughes
-;;;;		July 24, 1992
-;;;;
-;;;;	Cycles cels randomly & constantly
-;;;;
-;;;;	Classes:
-;;;;	  RandCycle
-
-
 (script# RANDCYC)
 (include game.sh)
 (use Main)
 (use Motion)
 
 
-(class RandCycle kindof Cycle
+(class RandCycle of Cycle
 	(properties
-		count		-1
-		reset		FALSE		; should the cel be set to 0 at end?
+		count -1
 	)
-
-	(method (init obj theTime whoCares resetTo0)
+	
+	(method (init obj theTime whoCares)
 		(super init: obj)
-		(if (>= argc 4)
-			(= reset resetTo0)
-		)
-		(if reset
-			(client cel: 0)
-		)
-		(= cycleCnt (GetTime))
-		(if (>= argc 2)			
-         (if (!= theTime -1)
-   			(= count (+ (GetTime) theTime)) 
-         else
-            (= count -1)
-         )
-			(if (>= argc 3)		
-				(= caller whoCares)
-			)
-		else 
+		(if (>= argc 2)
+			(= count theTime)
+			(if (>= argc 3) (= caller whoCares))
+		else
 			(= count -1)
 		)
 	)
-
-	(method (doit &tmp theTime)
-		(if 
-         (or
-            (> count (= theTime (GetTime)))
-            (== count -1)
-         )
-			(if (> (- theTime cycleCnt) (client cycleSpeed?)) 
+	
+	(method (doit)
+		(if
+		(>= (Abs (- gameTime cycleCnt)) (client cycleSpeed?))
+			(if count
+				(if (> count 0) (-- count))
 				(client cel: (self nextCel:))
-				(= cycleCnt (GetTime))
+				(= cycleCnt gameTime)
+			else
+				(self cycleDone:)
 			)
-		else
-			(if reset
-				(client cel: 0)
-			)
-			(self cycleDone:)
 		)
 	)
-
+	
 	(method (nextCel &tmp newCel)
 		(return
 			(if (!= (NumCels client) 1)
-				(while (== (= newCel (Random 0 (client lastCel?))) (client cel?)))
+				(while (== (= newCel (Random 0 (client lastCel:))) (client cel?)))
 				newCel
+			else
+				0
 			)
 		)
 	)
-
+	
 	(method (cycleDone)
 		(= completed TRUE)
-		
-		;If we have a caller which needs cue:ing, set the flag for a delayed cue:.
-		;Otherwise, just cue: ourselves to complete the motion.
 		(if caller
 			(= doMotionCue TRUE)
-		else
-			(self motionCue:)
+		else (self motionCue:)
 		)
 	)
 )
-
-(class RTRandCycle kindof RandCycle)

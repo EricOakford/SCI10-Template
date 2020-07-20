@@ -1,18 +1,4 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-;;;;
-;;;;	PMOUSE.SC
-;;;;
-;;;;	(c) Sierra On-Line, Inc, 1992
-;;;;
-;;;;	Author: 	J. Mark Hood
-;;;;	Updated:	Brian K. Hughes
-;;;;
-;;;;	This class handles moving the cursor using the direction keys or joystick
-;;;;
-;;;;	Classes:
-;;;;		PseudoMouse
-
-
 (script# PMOUSE)
 (include game.sh)
 (use Main)
@@ -21,65 +7,56 @@
 
 (class PseudoMouse of Code
 	(properties
-		cursorInc	2
-		minInc		2
-		maxInc		20
-		prevDir		0
-		joyInc		5
+		cursorInc 2
+		minInc 2
+		maxInc 20
+		prevDir 0
+		joyInc 5
 	)
-
-;;;	(methods
-;;;		handleEvent
-;;;		doit
-;;;		start
-;;;		stop
-;;;	)
-
-	(method (handleEvent event &tmp eType eMsg eMod)
-		(= eType (event type?))
-		(= eMsg	(event message?))
-		(= eMod	(event modifiers?))
-
-		(if (& eType direction)
-			(= prevDir eMsg)
-
-			; Find out how far to move it
-			(= cursorInc 
-				(if (& eType keyDown)
-					(if (& eMod shiftDown)
-						minInc
-					else
-						maxInc
+	
+	(method (handleEvent event)
+		(if
+		(and (user canInput:) (& (event type?) direction))
+			(= prevDir
+				(if
+					(or
+						(not theIconBar)
+						(!= ((theIconBar curIcon?) message?) verbWalk)
 					)
+					(= prevDir (event message?))
+				else
+					(return)
+				)
+			)
+			(= cursorInc
+				(if (& (event type?) keyDown)
+					(if (& (event modifiers?) shiftDown) minInc else maxInc)
 				else
 					joyInc
 				)
 			)
-
-			(if (& eType keyDown)
-				; Move once 
-				(if prevDir
-					(self doit:)
-				else
-					(return (event claimed: FALSE))
+			(cond 
+				((& (event type?) keyDown)
+					(if prevDir
+						(self doit:)
+					else
+						(event claimed: FALSE)
+						(return)
+					)
 				)
-			else
-				; Caused by joystick - move until joystick is centered
-				(if prevDir
-					(self start:)
-				else
-					(self stop:)
-				)
+				(prevDir (self start:))
+				(else (self stop:))
 			)
-			(return (event claimed: TRUE))
+			(event claimed: TRUE)
+			(return)
 		)
-	)					  
+	)
 
 	(method (start dir)
 		(if argc (= prevDir dir))
 		(theDoits add: self)
 	)
-
+	
 	(method (stop)
 		(= prevDir 0)
 		(theDoits delete: self)
@@ -88,37 +65,36 @@
 	(method (doit &tmp theX theY)
 		(= theX (lastEvent x?))
 		(= theY (lastEvent y?))
-		(switch prevDir							 
+		(switch prevDir
 			(dirN
-				(-= theY cursorInc)
+				(= theY (- theY cursorInc))
 			)
 			(dirNE
-				(+= theX cursorInc)							 
-				(-= theY cursorInc)
+				(= theX (+ theX cursorInc))
+				(= theY (- theY cursorInc))
 			)
-			(dirE													 
-				(+= theX cursorInc)							 
+			(dirE
+				(= theX (+ theX cursorInc))
 			)
 			(dirSE
-				(+= theX cursorInc)							 
-				(+= theY cursorInc)							 
+				(= theX (+ theX cursorInc))
+				(= theY (+ theY cursorInc))
 			)
 			(dirS
-				(+= theY cursorInc)
+				(= theY (+ theY cursorInc))
 			)
 			(dirSW
-				(-= theX cursorInc)							 
-				(+= theY cursorInc)
+				(= theX (- theX cursorInc))
+				(= theY (+ theY cursorInc))
 			)
-			(dirW													 
-				(-= theX cursorInc)							 
-			)														 
-			(dirNW												 
-				(-= theX cursorInc)							 
-				(-= theY cursorInc)							 
+			(dirW
+				(= theX (- theX cursorInc))
+			)
+			(dirNW
+				(= theX (- theX cursorInc))
+				(= theY (- theY cursorInc))
 			)
 		)
 		(theGame setCursor: theCursor TRUE theX theY)
 	)
-
 )

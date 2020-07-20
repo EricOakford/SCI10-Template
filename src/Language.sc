@@ -90,10 +90,10 @@
 	(= theGamePrintLang (theGame printLang?))
 	(= theGameSubtitleLang (theGame subtitleLang?))
 	(theGame printLang: 1 subtitleLang: 0)
-	(StrSplit param1 @temp3 0)
+	(kernel_123 param1 @temp3 0)
 	(if (= temp2 0)
 		(theGame printLang: temp2)
-		(StrSplit param2 @temp3 0)
+		(kernel_123 param2 @temp3 0)
 	else
 		(StrCpy param2 {})
 	)
@@ -111,7 +111,7 @@
 (procedure (localproc_003c param1 &tmp theGamePrintLang theGameSubtitleLang)
 	(= theGameSubtitleLang (theGame subtitleLang?))
 	(theGame subtitleLang: 0)
-	(if param1 (Display &rest) else (Print &rest 121))
+	(if param1 (Display &rest) else (Print &rest 120))
 	(if theGameSubtitleLang
 		(= theGamePrintLang (theGame printLang?))
 		(theGame printLang: theGameSubtitleLang)

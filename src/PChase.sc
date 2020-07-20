@@ -1,5 +1,5 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 930)
+(script# PCHASE)
 (include game.sh)
 (use Main)
 (use PolyPath)
@@ -14,55 +14,67 @@
 		targetY 0
 	)
 	
-	(method (init theClient theWho theDistance theCaller theObstacles)
+	(method (init actor whom howClose whoCares theObst)
 		(cond 
-			((>= argc 5) (= obstacles theObstacles))
-			((not (IsObject obstacles)) (= obstacles (curRoom obstacles?)))
+			((>= argc 5)
+				(= obstacles theObst)
+			)
+			((not (IsObject obstacles))
+				(= obstacles (curRoom obstacles?))
+			)
 		)
 		(if (>= argc 1)
-			(= client theClient)
+			(= client actor)
 			(if (>= argc 2)
-				(= who theWho)
+				(= who whom)
 				(= targetX (who x?))
 				(= targetY (who y?))
 				(if (>= argc 3)
-					(= distance theDistance)
-					(if (>= argc 4) (= caller theCaller))
+					(= distance howClose)
+					(if (>= argc 4) (= caller whoCares))
 				)
 			)
 		)
-		(super init: client targetX targetY caller 1 obstacles)
+		(super init: client targetX targetY caller TRUE obstacles)
 	)
 	
-	(method (doit &tmp temp0)
+	(method (doit &tmp theDistance)
 		(cond 
 			(
 				(>
 					(GetDistance targetX targetY (who x?) (who y?))
 					distance
 				)
-				(if points (Memory 3 points))
+				(if points (Memory MDisposePtr points))
 				(= points 0)
 				(= value 2)
 				(self init: client who)
 			)
-			(
-			(<= (= temp0 (client distanceTo: who)) distance) (self moveDone:))
-			(else (super doit:))
+			((<= (= theDistance (client distanceTo: who)) distance)
+				(= completed TRUE)
+				(self moveDone:)
+			)
+			(else
+				(super doit:)
+			)
 		)
 	)
 	
-	(method (moveDone &tmp temp0)
+	(method (moveDone &tmp howClose)
 		(cond 
-			(
-			(<= (= temp0 (client distanceTo: who)) distance) (super moveDone:))
-			((== (WordAt points value) 30583)
-				(if points (Memory 3 points))
+			((<= (= howClose (client distanceTo: who)) distance)
+				(= completed TRUE)
+				(super moveDone:)
+			)
+			((== (WordAt points value) $7777)
+				(if points (Memory MDisposePtr points))
 				(= points 0)
 				(= value 2)
 				(self init: client who)
 			)
-			(else (self init:))
+			(else
+				(super init:)
+			)
 		)
 	)
 )
@@ -75,44 +87,41 @@
 		targetY 0
 	)
 	
-	(method (init theClient theWho theDistance param4 &tmp temp0)
-		(= temp0
-			(if (>= argc 4) param4 else (curRoom obstacles?))
+	(method (init actor whom howClose theObst &tmp obstList)
+		(= obstList
+			(if (>= argc 4) theObst else (curRoom obstacles?))
 		)
 		(if (>= argc 1)
-			(= client theClient)
+			(= client actor)
 			(if (>= argc 2)
-				(= who theWho)
+				(= who whom)
 				(= targetX (who x?))
 				(= targetY (who y?))
-				(if (>= argc 3) (= distance theDistance))
+				(if (>= argc 3) (= distance howClose))
 			)
 		)
-		(super init: client targetX targetY 0 1 temp0)
+		(super init: client targetX targetY 0 TRUE obstList)
 	)
 	
-	(method (doit &tmp temp0)
+	(method (doit &tmp theDistance)
 		(cond 
 			(
 				(>
 					(GetDistance targetX targetY (who x?) (who y?))
 					distance
 				)
-				(if points (Memory 3 points))
+				(if points (Memory MDisposePtr points))
 				(= points 0)
 				(= value 2)
 				(self init: client who)
-				0
 			)
-			(
-			(<= (= temp0 (client distanceTo: who)) distance)
+			((<= (= theDistance (client distanceTo: who)) distance)
 				(client
 					setHeading: (GetAngle (client x?) (client y?) (who x?) (who y?))
 				)
 				(= xLast (client x?))
 				(= yLast (client y?))
-				(= b-moveCnt gameTime)
-				0
+				(return)
 			)
 			(else (super doit:))
 		)

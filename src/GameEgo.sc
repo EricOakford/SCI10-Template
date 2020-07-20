@@ -11,6 +11,7 @@
 (include game.sh)
 (use Main)
 (use Intrface)
+(use Talker)
 (use User)
 (use Actor)
 (use System)
@@ -42,7 +43,7 @@
 ;;;		(= view (obj view?))
 ;;;		(self
 ;;;			client: obj
-;;;			ignoreActors: 1
+;;;			ignoreActors: TRUE
 ;;;			posn:
 ;;;				(obj species?)
 ;;;				(obj y?)

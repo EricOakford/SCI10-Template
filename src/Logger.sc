@@ -6,1135 +6,467 @@
 (use PolyPath)
 (use System)
 
-(public
-	sysLogger 0
-)
+;;;(procedure
+;;;	Log
+;;;)
+
+(public	sysLogger 0)
 
 (local
-	logHandle
-)
-(procedure (localproc_000e param1 param2 param3 &tmp [temp0 40] temp40 temp41)
-	(Format @temp0 952 0 param2)
-	(FileIO 6 logHandle @temp0)
-	(= temp0 0)
-	(switch param1
-		(1
-			(StrCpy @temp0 (if param3 else {}))
-		)
-		(2 (Format @temp0 952 1 param3))
-		(3 (Format @temp0 952 2 param3))
-		(4 (Format @temp0 952 3 param3))
-		(5
-			(if param3 (GetInput @temp0 66 param3))
-			(= temp41 (StrLen @temp0))
-		)
-		(6
-			(= temp40 (GetTime 2))
-			(Format
-				@temp0
-				952
-				4
-				(>> temp40 $000b)
-				(& (>> temp40 $0005) $003f)
-				(* (& temp40 $001f) 2)
-			)
-		)
-		(7
-			(= temp40 (GetTime 3))
-			(Format
-				@temp0
-				952
-				5
-				(& (>> temp40 $0005) $000f)
-				(& temp40 $001f)
-				(+ 80 (>> temp40 $0009))
-			)
-		)
-	)
-	(StrCat @temp0 {\0D\n})
-	(FileIO 6 logHandle @temp0)
-	(return temp41)
+	logHandle = 0
 )
 
-(instance sysLogger of Code
-	(properties)
-	
-	(method (doit &tmp temp0 temp1 temp2 temp3 temp4 temp5 temp6 temp7 [temp8 40] [temp48 30] [temp78 30] [temp108 30] [temp138 5] [temp143 40] [temp183 40] [temp223 40] [temp263 40] [temp303 40] [temp343 40])
-		(asm
-			lag      inputFont
-			sat      temp7
-			ldi      999
-			sag      inputFont
-			ldi      0
-			sat      temp343
-			sat      temp303
-			sat      temp263
-			sat      temp223
-			sat      temp183
-			sat      temp143
-			sat      temp108
-			sat      temp78
-			sat      temp8
-			pushi    0
-			pushi    1
-			lea      @sysLogPath
-			push    
-			callk    StrLen,  2
-			eq?     
-			sat      temp4
-			bnt      code_01b8
-code_0181:
-			pushi    0
-			pushi    1
-			lea      @temp78
-			push    
-			callk    StrLen,  2
-			lt?     
-			bnt      code_0192
-			pprev   
-			ldi      19
-			lt?     
-code_0192:
-			not     
-			bnt      code_01a9
-			pushi    3
-			lea      @temp78
-			push    
-			pushi    40
-			lofsa    {Enter drive letter, path and your name\n(no extension, max 40 characters)}
-			push    
-			calle    GetInput,  6
-			jmp      code_0181
-code_01a9:
-			pushi    3
-			lea      @sysLogPath
-			push    
-			lea      @temp78
-			push    
-			pushi    40
-			callk    StrCpy,  6
-code_01b8:
-			pushi    4
-			lea      @temp78
-			push    
-			pushi    952
-			pushi    6
-			lea      @sysLogPath
-			push    
-			callk    Format,  8
-			pushi    65535
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    1
-			callk    FileIO,  6
-			sal      logHandle
-			ne?     
-			bnt      code_0205
-			pushi    4
-			pushi    5
-			lea      @temp138
-			push    
-			pushi    80
-			lsl      logHandle
-			callk    FileIO,  8
-			pushi    4
-			pushi    5
-			lea      @temp48
-			push    
-			pushi    80
-			lsl      logHandle
-			callk    FileIO,  8
-			pushi    2
-			pushi    1
-			lsl      logHandle
-			callk    FileIO,  4
-			jmp      code_0215
-code_0205:
-			ldi      0
-			sat      temp138
-			pushi    2
-			lea      @temp48
-			push    
-			lofsa    {resource.cfg}
-			push    
-			callk    StrCpy,  4
-code_0215:
-			lat      temp4
-			bnt      code_0236
-			pushi    3
-			lea      @temp138
-			push    
-			pushi    5
-			lofsa    {Enter your initials (up to 3 characters):}
-			push    
-			calle    GetInput,  6
-			pushi    3
-			lea      @temp138
-			push    
-			pushi    3
-			pushi    0
-			callk    StrAt,  6
-code_0236:
-			lat      temp4
-			not     
-			bt       code_024f
-			pushi    3
-			lea      @temp48
-			push    
-			pushi    30
-			lofsa    {Enter configuration file name (or hit return to skip):}
-			push    
-			calle    GetInput,  6
-			bnt      code_027c
-code_024f:
-			pushi    65535
-			pushi    3
-			pushi    0
-			lea      @temp48
-			push    
-			pushi    1
-			callk    FileIO,  6
-			sal      logHandle
-			eq?     
-			bnt      code_027c
-			pushi    2
-			lea      @temp48
-			push    
-			pushi    0
-			callk    StrAt,  4
-			bnt      code_027c
-			pushi    3
-			lea      @temp48
-			push    
-			pushi    0
-			pushi    0
-			callk    StrAt,  6
-			jmp      code_0236
-code_027c:
-			pushi    65535
-			lal      logHandle
-			ne?     
-			bnt      code_042e
-code_0284:
-			pushi    4
-			pushi    5
-			lea      @temp8
-			push    
-			pushi    80
-			lsl      logHandle
-			callk    FileIO,  8
-			bnt      code_0427
-			ldi      0
-			sat      temp0
-code_029a:
-			pushi    2
-			lea      @temp8
-			push    
-			lst      temp0
-			callk    StrAt,  4
-			sat      temp3
-			bnt      code_02be
-			pushi    3
-			push    
-			pushi    9
-			pushi    32
-			calle    OneOf,  6
-			bnt      code_02be
-			+at      temp0
-			jmp      code_029a
-code_02be:
-			ldi      0
-			sat      temp1
-code_02c2:
-			pushi    2
-			lea      @temp8
-			push    
-			lst      temp0
-			callk    StrAt,  4
-			sat      temp3
-			bnt      code_02fa
-			pushi    5
-			push    
-			pushi    61
-			pushi    58
-			pushi    9
-			pushi    32
-			calle    OneOf,  10
-			not     
-			bnt      code_02fa
-			pushi    3
-			lea      @temp108
-			push    
-			lst      temp1
-			lst      temp3
-			callk    StrAt,  6
-			+at      temp0
-			+at      temp1
-			jmp      code_02c2
-code_02fa:
-			pushi    3
-			lea      @temp108
-			push    
-			lst      temp1
-			pushi    0
-			callk    StrAt,  6
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {kbdDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_031d
-			lea      @temp143
-			jmp      code_0393
-code_031d:
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {joyDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_0334
-			lea      @temp183
-			jmp      code_0393
-code_0334:
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {videoDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_034b
-			lea      @temp223
-			jmp      code_0393
-code_034b:
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {soundDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_0364
-			lea      @temp263
-			jmp      code_0393
-code_0364:
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {mouseDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_037d
-			lea      @temp303
-			jmp      code_0393
-code_037d:
-			pushi    0
-			pushi    2
-			lea      @temp108
-			push    
-			lofsa    {audioDrv}
-			push    
-			callk    StrCmp,  4
-			eq?     
-			bnt      code_0393
-			lea      @temp343
-code_0393:
-			sat      temp5
-			bnt      code_0284
-code_0398:
-			pushi    2
-			lea      @temp8
-			push    
-			lst      temp0
-			callk    StrAt,  4
-			sat      temp3
-			bnt      code_03c0
-			pushi    5
-			push    
-			pushi    61
-			pushi    58
-			pushi    9
-			pushi    32
-			calle    OneOf,  10
-			bnt      code_03c0
-			+at      temp0
-			jmp      code_0398
-code_03c0:
-			lat      temp0
-			sat      temp1
-			ldi      0
-			sat      temp2
-code_03c8:
-			pushi    2
-			lea      @temp8
-			push    
-			lst      temp1
-			callk    StrAt,  4
-			sat      temp3
-			bnt      code_0404
-			pushi    4
-			push    
-			pushi    58
-			pushi    92
-			pushi    47
-			calle    OneOf,  8
-			bnt      code_03f0
-			lst      temp1
-			ldi      1
-			add     
-			sat      temp0
-code_03f0:
-			lst      temp3
-			ldi      46
-			eq?     
-			bnt      code_03ff
-			lst      temp1
-			lat      temp0
-			sub     
-			sat      temp2
-code_03ff:
-			+at      temp1
-			jmp      code_03c8
-code_0404:
-			lst      temp2
-			ldi      0
-			eq?     
-			bnt      code_0413
-			lst      temp1
-			lat      temp0
-			sub     
-			sat      temp2
-code_0413:
-			pushi    3
-			lst      temp5
-			lea      @temp8
-			push    
-			lat      temp0
-			add     
-			push    
-			lst      temp2
-			callk    StrCpy,  6
-			jmp      code_0284
-code_0427:
-			pushi    2
-			pushi    1
-			lsl      logHandle
-			callk    FileIO,  4
-code_042e:
-			pushi    4
-			lea      @temp78
-			push    
-			pushi    952
-			pushi    7
-			lea      @sysLogPath
-			push    
-			callk    Format,  8
-			lat      temp4
-			bnt      code_04a4
-			pushi    65535
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    1
-			callk    FileIO,  6
-			sal      logHandle
-			eq?     
-			bt       code_048d
-			pushi    4
-			lea      @temp8
-			push    
-			pushi    952
-			pushi    8
-			lea      @temp78
-			push    
-			callk    Format,  8
-			bnt      code_0472
-			ldi      0
-			bt       code_048d
-code_0472:
-			pushi    7
-			lea      @temp8
-			push    
-			pushi    81
-			lofsa    {append to it}
-			push    
-			pushi    0
-			pushi    81
-			lofsa    {overwrite it}
-			push    
-			pushi    1
-			calle    Print,  14
-			bnt      code_04a4
-code_048d:
-			pushi    2
-			pushi    1
-			lsl      logHandle
-			callk    FileIO,  4
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    2
-			callk    FileIO,  6
-			sal      logHandle
-			jmp      code_04b1
-code_04a4:
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    0
-			callk    FileIO,  6
-			sal      logHandle
-code_04b1:
-			pushi    65535
-			lal      logHandle
-			eq?     
-			bnt      code_04cb
-			pushi    3
-			pushi    952
-			pushi    9
-			lea      @temp78
-			push    
-			calle    Printf,  6
-			jmp      code_0905
-code_04cb:
-			pushi    3
-			pushi    1
-			lofsa    {GAME}
-			push    
-			pushi    #name
-			pushi    0
-			lag      theGame
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {VERSION}
-			push    
-			lsg      version
-			call     localproc_000e,  6
-			pushi    2
-			pushi    7
-			lofsa    {QA-DATE}
-			push    
-			call     localproc_000e,  4
-			pushi    3
-			pushi    1
-			lofsa    {ANALYST}
-			push    
-			lea      @temp138
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {SEVERITY}
-			push    
-			pushi    11
-			pushi    952
-			pushi    10
-			pushi    81
-			lofsa    {FATAL}
-			push    
-			lofsa    {F}
-			push    
-			pushi    81
-			lofsa    {NON-FATAL}
-			push    
-			lofsa    {N}
-			push    
-			pushi    81
-			lofsa    {SUGGESTION}
-			push    
-			lofsa    {S}
-			push    
-			calle    Print,  22
-			push    
-			call     localproc_000e,  6
-			ldi      1
-			sat      temp0
-			ldi      1
-			sat      temp6
-code_0542:
-			lst      temp0
-			ldi      10
-			le?     
-			bnt      code_0597
-			pushi    4
-			lea      @temp108
-			push    
-			pushi    952
-			pushi    11
-			lst      temp0
-			callk    Format,  8
-			pushi    5
-			lea      @temp8
-			push    
-			pushi    952
-			pushi    12
-			lst      temp0
-			pushi    10
-			callk    Format,  10
-			lat      temp6
-			bnt      code_0586
-			pushi    3
-			pushi    5
-			lea      @temp108
-			push    
-			lea      @temp8
-			push    
-			call     localproc_000e,  6
-			sat      temp6
-			jmp      code_0592
-code_0586:
-			pushi    3
-			pushi    1
-			lea      @temp108
-			push    
-			pushi    0
-			call     localproc_000e,  6
-code_0592:
-			+at      temp0
-			jmp      code_0542
-code_0597:
-			pushi    3
-			pushi    1
-			lofsa    {DEPARTMENT}
-			push    
-			pushi    11
-			pushi    952
-			pushi    13
-			pushi    81
-			lofsa    {PROG}
-			push    
-			lofsa    {P}
-			push    
-			pushi    81
-			lofsa    {ART}
-			push    
-			lofsa    {A}
-			push    
-			pushi    81
-			lofsa    {DESIGN}
-			push    
-			lofsa    {D}
-			push    
-			calle    Print,  22
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {ROOM}
-			push    
-			lsg      curRoomNum
-			call     localproc_000e,  6
-			pushi    #script
-			pushi    0
-			lag      curRoom
-			send     4
-			sat      temp0
-			pushi    3
-			pushi    1
-			lofsa    {ROOM-SCRIPT}
-			push    
-			lat      temp0
-			bnt      code_05f4
-			pushi    #name
-			pushi    0
-			send     4
-code_05f4:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {ROOM-STATE}
-			push    
-			lat      temp0
-			bnt      code_060a
-			pushi    #state
-			pushi    0
-			send     4
-code_060a:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-X}
-			push    
-			pushi    #x
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-Y}
-			push    
-			pushi    #y
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-Z}
-			push    
-			pushi    #z
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    #script
-			pushi    0
-			lag      ego
-			send     4
-			sat      temp0
-			pushi    3
-			pushi    1
-			lofsa    {EGO-SCRIPT}
-			push    
-			lat      temp0
-			bnt      code_0663
-			pushi    #name
-			pushi    0
-			send     4
-code_0663:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-STATE}
-			push    
-			lat      temp0
-			bnt      code_0679
-			pushi    #state
-			pushi    0
-			send     4
-code_0679:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-VIEW}
-			push    
-			pushi    #view
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-LOOP}
-			push    
-			pushi    #loop
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-CEL}
-			push    
-			pushi    #cel
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-PRIORITY}
-			push    
-			pushi    #priority
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-HEADING}
-			push    
-			pushi    #heading
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {CYCLER}
-			push    
-			pushi    #cycler
-			pushi    0
-			lag      ego
-			send     4
-			bnt      code_06fc
-			pushi    #name
-			pushi    0
-			pushi    #cycler
-			pushi    0
-			lag      ego
-			send     4
-			send     4
-code_06fc:
-			push    
-			call     localproc_000e,  6
-			pushi    #mover
-			pushi    0
-			lag      ego
-			send     4
-			sat      temp0
-			pushi    3
-			pushi    1
-			lofsa    {EGO-MOVER}
-			push    
-			lat      temp0
-			bnt      code_071b
-			pushi    #name
-			pushi    0
-			send     4
-code_071b:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {MOVER-X}
-			push    
-			lat      temp0
-			not     
-			bnt      code_0732
-			ldi      0
-			jmp      code_0751
-code_0732:
-			pushi    #isMemberOf
-			pushi    1
-			class    PolyPath
-			push    
-			lat      temp0
-			send     6
-			bnt      code_074a
-			pushi    #finalX
-			pushi    0
-			lat      temp0
-			send     4
-			jmp      code_0751
-code_074a:
-			pushi    #x
-			pushi    0
-			lat      temp0
-			send     4
-code_0751:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {MOVER-Y}
-			push    
-			lat      temp0
-			not     
-			bnt      code_0768
-			ldi      0
-			jmp      code_0787
-code_0768:
-			pushi    #isMemberOf
-			pushi    1
-			class    PolyPath
-			push    
-			lat      temp0
-			send     6
-			bnt      code_0780
-			pushi    #finalY
-			pushi    0
-			lat      temp0
-			send     4
-			jmp      code_0787
-code_0780:
-			pushi    #y
-			pushi    0
-			lat      temp0
-			send     4
-code_0787:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {EGO-MOVESPD}
-			push    
-			pushi    #moveSpeed
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    4
-			lofsa    {SIGNAL-BITS}
-			push    
-			pushi    #signal
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    4
-			lofsa    {ILLEGAL-BITS}
-			push    
-			pushi    #illegalBits
-			pushi    0
-			lag      ego
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {HOWFAST}
-			push    
-			lsg      howFast
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {ICONBAR}
-			push    
-			lag      theIconBar
-			bnt      code_07e5
-			pushi    #name
-			pushi    0
-			send     4
-code_07e5:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {CUR-ICON}
-			push    
-			lag      theIconBar
-			bnt      code_080c
-			pushi    #curIcon
-			pushi    0
-			send     4
-			bnt      code_080c
-			pushi    #name
-			pushi    0
-			pushi    #curIcon
-			pushi    0
-			lag      theIconBar
-			send     4
-			send     4
-code_080c:
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {DETAIL-LEVEL}
-			push    
-			pushi    #detailLevel
-			pushi    0
-			lag      theGame
-			send     4
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    2
-			lofsa    {CD-AUDIO}
-			push    
-			lsg      cDAudio
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {VIDEO-DRV}
-			push    
-			lea      @temp223
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {SOUND-DRV}
-			push    
-			lea      @temp263
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {AUDIO-DRV}
-			push    
-			lea      @temp343
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {KEYBOARD-DRV}
-			push    
-			lea      @temp143
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {JOY-DRV}
-			push    
-			lea      @temp183
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    1
-			lofsa    {MOUSE}
-			push    
-			lea      @temp303
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			dup     
-			lofsa    {LARGEST-HEAP}
-			push    
-			pushi    1
-			pushi    0
-			callk    MemoryInfo,  2
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			dup     
-			lofsa    {FREE-HEAP}
-			push    
-			pushi    1
-			pushi    1
-			callk    MemoryInfo,  2
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			dup     
-			lofsa    {TOTAL-HUNK}
-			push    
-			pushi    1
-			pushi    4
-			callk    MemoryInfo,  2
-			push    
-			ldi      6
-			shr     
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			dup     
-			lofsa    {LARGEST-HUNK}
-			push    
-			pushi    1
-			pushi    2
-			callk    MemoryInfo,  2
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			dup     
-			lofsa    {FREE-HUNK}
-			push    
-			pushi    1
-			pushi    3
-			callk    MemoryInfo,  2
-			push    
-			ldi      6
-			shr     
-			push    
-			call     localproc_000e,  6
-			pushi    3
-			pushi    6
-			lsl      logHandle
-			lofsa    {**********************************\0D\n}
-			push    
-			callk    FileIO,  6
-			pushi    2
-			pushi    1
-			lsl      logHandle
-			callk    FileIO,  4
-code_0905:
-			pushi    4
-			lea      @temp78
-			push    
-			pushi    952
-			pushi    6
-			lea      @sysLogPath
-			push    
-			callk    Format,  8
-			pushi    65535
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    2
-			callk    FileIO,  6
-			sal      logHandle
-			eq?     
-			bnt      code_094f
-			pushi    65535
-			pushi    3
-			pushi    0
-			lea      @temp78
-			push    
-			pushi    0
-			callk    FileIO,  6
-			sal      logHandle
-			eq?     
-			bnt      code_094f
-			pushi    3
-			pushi    952
-			pushi    14
-			lea      @temp78
-			push    
-			calle    Printf,  6
-			jmp      code_098a
-code_094f:
-			pushi    3
-			pushi    6
-			lsl      logHandle
-			lea      @temp138
-			push    
-			callk    FileIO,  6
-			pushi    3
-			pushi    6
-			lsl      logHandle
-			lofsa    {\n}
-			push    
-			callk    FileIO,  6
-			pushi    3
-			pushi    6
-			lsl      logHandle
-			lea      @temp48
-			push    
-			callk    FileIO,  6
-			pushi    3
-			pushi    6
-			lsl      logHandle
-			lofsa    {\n}
-			push    
-			callk    FileIO,  6
-			pushi    2
-			pushi    1
-			lsl      logHandle
-			callk    FileIO,  4
-code_098a:
-			lat      temp7
-			sag      inputFont
-			pushi    1
-			pushi    952
-			callk    DisposeScript,  2
-			ret     
+(enum 1
+	Txt
+	Num
+	Uns
+	Hex
+	Inp
+	Tim
+	Dat
+)
+
+(define MAXCOMMENTS 10)
+
+(procedure (Log how aLabel anArg &tmp [buffer 40] tm retval)
+	(Format @buffer LOGGER 0 aLabel)
+	(FileIO fileFPuts logHandle @buffer)
+	(= buffer NULL)
+	(switch how
+		(Txt	(StrCpy @buffer (if anArg anArg else {})))
+		(Num	(Format @buffer LOGGER 1 anArg))
+		(Uns	(Format @buffer LOGGER 2 anArg))
+		(Hex	(Format @buffer LOGGER 3 anArg))
+		(Inp
+			(if anArg
+				(GetInput @buffer 66 anArg)
+			)
+			(= retval (StrLen @buffer))
+		)
+		(Tim
+			; get system time stamp (minutes after 12:00)
+			(= tm (GetTime SYSTIME2))
+			(Format 
+				@buffer 
+				LOGGER 4
+				(>> tm 11)
+				(& (>> tm 5) %111111)
+				(* (& tm %11111) 2)
+			)
+		)
+		(Dat
+			; get system date stamp (mm/dd/yy)
+			(= tm (GetTime SYSDATE))
+			(Format 
+				@buffer 
+				LOGGER 5
+				(& (>> tm 5) %1111)
+				(& tm %11111)
+				(+ 80 (>> tm 9))
+			)
 		)
 	)
+	
+	(StrCat @buffer {\r})
+	(FileIO fileFPuts logHandle @buffer)
+	retval
+);procedure Log
+
+(instance sysLogger of Code
+	
+	(method (doit 
+			&tmp	i j l c firstNote theDrv commented saveInfont
+			[str 40]
+			[cfgPath 30]
+			[thePath 30]
+			[theToken 30]
+			[QAinitials 5]
+			[kbdDrvEntry 40]
+			[joyDrvEntry 40]
+			[videoDrvEntry 40]
+			[soundDrvEntry 40]
+			[mouseDrvEntry 40]
+			[audioDrvEntry 40]
+		)
+		
+		;;	initialize some variables:
+		
+		(= saveInfont inputFont)
+		(= inputFont 999)
+		
+		(= str 
+			(= thePath 
+				(= theToken 
+					(= kbdDrvEntry 
+						(= joyDrvEntry 
+							(= videoDrvEntry
+								(= soundDrvEntry 
+									(= mouseDrvEntry
+										(= audioDrvEntry 0)))))))))
+		
+		(= firstNote (== 0 (StrLen @sysLogPath)))
+		
+		;; if path argument is NULL, we need some initial info 
+		(if firstNote
+			(while (not (< 0 (StrLen @thePath) 19))
+				(GetInput @thePath 40 
+					{Enter drive letter, path and your name\n
+					(no extension, max 40 characters)}
+				)
+			)
+			(StrCpy @sysLogPath @thePath 40)
+		)
+		
+		;;access "memory variable" file to seed data
+		(Format @thePath LOGGER 6 @sysLogPath)
+		
+		(if (!= -1 (= logHandle (FileIO fileOpen @thePath fRead)))
+			(FileIO fileFGets @QAinitials 80 logHandle)
+			(FileIO fileFGets @cfgPath 80 logHandle)
+			(FileIO fileClose logHandle)
+		else
+			(= QAinitials 0)
+			(StrCpy @cfgPath {resource.cfg})
+		)
+		
+		(if firstNote
+			(GetInput @QAinitials 5
+				{Enter your initials (up to 3 characters):})
+			(StrAt @QAinitials 3 NULL)
+		)
+		
+		;; read configuration file
+		(while
+			(and 
+				(or (not firstNote)
+					(GetInput @cfgPath 30 
+						{Enter configuration file name (or hit return to skip):})
+				)
+				(== -1 (= logHandle (FileIO fileOpen @cfgPath fRead)))
+				(StrAt @cfgPath 0)
+			)
+			(StrAt @cfgPath 0 0)
+		);while
+		
+		(if (!= -1 logHandle) ; opened config file
+			
+			(while (FileIO fileFGets @str 80 logHandle)
+				
+				; strip leading whitespace
+				(for 
+					((= i 0)) 
+					(and (= c (StrAt @str i)) (OneOf c TAB SPACEBAR)) 
+					((++ i))
+				);for
+				
+				(for ((= j 0))
+					(and
+						(= c (StrAt @str i))
+						(not (OneOf c `= `: TAB SPACEBAR))
+					) 
+					((++ i) (++ j))
+					(StrAt @theToken j c)
+				)
+				
+				(StrAt @theToken j NULL)
+				
+				(= theDrv
+					(cond
+						((== 0 (StrCmp @theToken {kbdDrv}))		@kbdDrvEntry)
+						((== 0 (StrCmp @theToken {joyDrv}))		@joyDrvEntry)
+						((== 0 (StrCmp @theToken {videoDrv}))	@videoDrvEntry)
+						((== 0 (StrCmp @theToken {soundDrv}))	@soundDrvEntry)
+						((== 0 (StrCmp @theToken {mouseDrv}))	@mouseDrvEntry)
+						((== 0 (StrCmp @theToken {audioDrv}))	@audioDrvEntry)
+					);cond
+				);=
+				
+				(if theDrv
+					
+					;;skip trailing white space
+					(while (and (= c (StrAt @str i)) (OneOf c `= `: TAB SPACEBAR))
+						(++ i)
+					)
+					
+					;;find last delimiter and period
+					(for ((= j i) (= l 0)) (= c (StrAt @str j)) ((++ j))
+						(if (OneOf c `: `/) ;`\\ `/)
+							(= i (+ j 1))
+						)
+						(if (== c `.)
+							(= l (- j i))
+						)
+					);for
+					
+					(if (== l 0)
+						(= l (- j i))
+					)
+					
+					(StrCpy theDrv (+ @str i) l)
+					
+				);if theDrv
+				
+			);while
+			
+			(FileIO fileClose logHandle)
+			
+		);if opened config file
+		
+		;;NOW, open log file!
+		(Format @thePath LOGGER 7 @sysLogPath)
+		(if (and
+				firstNote
+				(or
+					;; file doesn't exist so start new one
+					(== -1 (= logHandle (FileIO fileOpen @thePath fRead)))
+					;; file exists, ask whether to overwrite
+					(and (Format @str LOGGER 8 @thePath) FALSE)
+					(Print @str
+						#button: {append to it} FALSE
+						#button: {overwrite it} TRUE
+					)
+				);or
+			);and
+			
+			(FileIO fileClose logHandle)
+			(= logHandle (FileIO fileOpen @thePath fTrunc))
+		else
+			(= logHandle (FileIO fileOpen @thePath fAppend))
+		);if-else
+		
+		(if (== -1 logHandle)
+			
+			(Printf LOGGER 9 @thePath)
+			
+		else
+			
+			;;ษอออออออออออออออออออออออออออออออออออออป
+			;;บ    Match Fields With Import Items   บ
+			;;ฬอออออออออออออออออออออออออออออออออออออน
+			;;บ Number of Items in Import File: 63  บ
+			;;ฬออออออหออออออออออออออหออออออหออออออออน
+			;;บ Item บ Field Name   บ Type บ Length บ
+			;;ฬออออออฮออออออออออออออฮออออออฮออออออออน
+			;;บ   1  บ BUG-NUMBER   บ   N  บ     7  บ
+			;;บ   2  บ BACKWARD     บ   B  บ     7  บ
+			;;บ   3  บ FORWARD      บ   F  บ     7  บ
+			;;บ   4  บ GAME         บ   A  บ     6  บ
+			
+			(Log Txt {GAME} (theGame name?))
+			
+			;;บ   5  บ VERSION      บ   A  บ     7  บ
+			
+			(Log Txt {VERSION} version)
+			
+			;;บ   6  บ QA-DATE      บ   D  บ     6  บ
+			
+			(Log Dat {QA-DATE})
+			
+			;;บ   7  บ ANALYST      บ   A  บ     3  บ
+			
+			(Log Txt {ANALYST} @QAinitials)
+			
+			;;บ   8  บ QA-STATUS    บ   A  บ     1  บ
+			;;บ   9  บ RE-CHECK     บ   D  บ     6  บ
+			;;บ  10  บ SEVERITY     บ   A  บ     1  บ
+			
+			(Log Txt {SEVERITY}
+				(Print 
+					"Severity of bug..."
+					#button: {FATAL} {F}
+					#button: {NON-FATAL} {N}
+					#button: {SUGGESTION} {S}
+				)
+			)
+			
+			;;บ  11  บ QA-COMMENT1  บ   A  บ    76  บ
+			;;บ  12  บ QA-COMMENT2  บ   A  บ    76  บ
+			;;บ  13  บ QA-COMMENT3  บ   A  บ    76  บ
+			;;บ  14  บ QA-COMMENT4  บ   A  บ    76  บ
+			;;บ  15  บ QA-COMMENT5  บ   A  บ    76  บ
+			;;บ  16  บ QA-COMMENT6  บ   A  บ    76  บ
+			;;บ  17  บ QA-COMMENT7  บ   A  บ    76  บ
+			;;บ  18  บ QA-COMMENT8  บ   A  บ    76  บ
+			;;บ  19  บ QA-COMMENT9  บ   A  บ    76  บ
+			;;บ  20  บ QA-COMMENT10 บ   A  บ    76  บ
+			
+			(for 
+				((= i 1) (= commented TRUE)) 
+				(<= i MAXCOMMENTS)
+				((++ i)) 
+				
+				(Format @theToken LOGGER 10 i)
+				(Format @str LOGGER 12 i MAXCOMMENTS)
+				(if commented
+					(= commented (Log Inp @theToken @str))
+				else
+					(Log Txt @theToken NULL)
+				)
+			)
+			;;บ  21  บ DEPARTMENT   บ   A  บ     1  บ
+			
+			(Log Txt {DEPARTMENT}
+				(Print 
+					LOGGER 13
+					#button: {PROG}   {P}  
+					#button: {ART}    {A}  
+					#button: {DESIGN} {D}
+				)
+			)
+			
+			;;บ  22  บ RESPONSE-BY  บ   A  บ     3  บ
+			;;บ  23  บ RESP-DATE    บ   D  บ     6  บ
+			;;บ  24  บ ACTION       บ   A  บ     1  บ
+			;;บ  25  บ RESPONSE-1   บ   A  บ    76  บ
+			;;บ  26  บ RESPONSE-2   บ   A  บ    76  บ
+			;;บ  27  บ RESPONSE-3   บ   A  บ    76  บ
+			;;บ  28  บ RESPONSE-4   บ   A  บ    76  บ
+			;;บ  29  บ RESPONSE-5   บ   A  บ    76  บ
+			
+			;;บ  30  บ ROOM         บ   N  บ     4  บ
+			
+			(Log Num {ROOM} curRoomNum)
+			
+			;;บ  31  บ ROOM-SCRIPT  บ   A  บ    15  บ
+			;;บ  32  บ ROOM-STATE   บ   N  บ     5  บ
+			
+			(= i (curRoom script?))
+			(Log Txt {ROOM-SCRIPT} (if i (i name?)))
+			(Log Num {ROOM-STATE} (if i (i state?)))
+			
+			;;บ  33  บ EGO-X        บ   A  บ     3  บ
+			;;บ  34  บ EGO-Y        บ   A  บ     3  บ
+			;;บ  35  บ EGO-Z        บ   A  บ     3  บ
+			
+			(Log Num {EGO-X} (ego x?))
+			(Log Num {EGO-Y} (ego y?))
+			(Log Num {EGO-Z} (ego z?))
+			
+			;;บ  36  บ EGO-SCRIPT   บ   A  บ    15  บ
+			;;บ  37  บ EGO-STATE    บ   N  บ     5  บ
+			
+			(= i (ego script?))
+			(Log Txt {EGO-SCRIPT} (if i (i name?)))
+			(Log Num {EGO-STATE} (if i (i state?)))
+			
+			;;บ  38  บ EGO-VIEW     บ   A  บ     4  บ
+			;;บ  39  บ EGO-LOOP     บ   A  บ     2  บ
+			;;บ  40  บ EGO-CEL      บ   A  บ     2  บ
+			;;บ  41  บ EGO-PRIORITY บ   A  บ     3  บ
+			;;บ  42  บ EGO-HEADING  บ   A  บ     3  บ
+			
+			(Log Num {EGO-VIEW} (ego view?))
+			(Log Num {EGO-LOOP} (ego loop?))
+			(Log Num {EGO-CEL} (ego cel?))
+			(Log Num {EGO-PRIORITY} (ego priority?))
+			(Log Num {EGO-HEADING} (ego heading?))
+			
+			;;บ  43  บ EGO-CYCLER   บ   A  บ    15  บ
+			
+			(Log Txt {CYCLER} (if (ego cycler?) ((ego cycler?) name?)))
+			
+			;;บ  44  บ EGO-MOVER    บ   A  บ    15  บ
+			;;บ  45  บ MOVER-X      บ   A  บ     3  บ
+			;;บ  46  บ MOVER-Y      บ   A  บ     3  บ
+			;;บ  47  บ EGO-MOVESPD  บ   A  บ     4  บ
+			
+			(= i (ego mover?))
+			(Log Txt {EGO-MOVER} (if i (i name?)))
+			(Log Num {MOVER-X} 
+				(cond 
+					((not i) NULL)
+					((i isMemberOf: PolyPath) (i finalX?))
+					(else (i x?))
+				)
+			)
+			(Log Num {MOVER-Y} 
+				(cond 
+					((not i) NULL)
+					((i isMemberOf: PolyPath) (i finalY?))
+					(else (i y?))
+				)
+			)
+			
+			(Log Num {EGO-MOVESPD} (ego moveSpeed?))
+			
+			;;บ  48  บ SIGNAL-BITS  บ   A  บ     4  บ
+			
+			(Log Hex {SIGNAL-BITS} (ego signal?))
+			
+			;;บ  49  บ HOWFAST      บ   A  บ     1  บ
+			
+			(Log Num {HOWFAST} howFast)
+			
+			;;บ  50  บ ICONBAR      บ   A  บ    15  บ
+			
+			(Log Txt {ICONBAR} (if theIconBar (theIconBar name?)))
+			(Log Txt {CUR-ICON} 
+				(if (and theIconBar (theIconBar curIcon?))
+					((theIconBar curIcon?) name?)
+				)
+			)
+			;;บ  51  บ DETAIL-LEVEL บ   A  บ     2  บ
+			
+			(Log Num {DETAIL-LEVEL} (theGame detailLevel:))
+			
+			;;บ  52  บ CD-AUDIO     บ   A  บ     1  บ
+			
+			(Log Num {CD-AUDIO} cDAudio)
+			
+			;;บ  53  บ VIDEO-DRV    บ   A  บ     8  บ
+			;;บ  54  บ SOUND-DRV    บ   A  บ     8  บ
+			;;บ  55  บ AUDIO-DRV    บ   A  บ     8  บ
+			;;บ  56  บ KEYBOARD-DRV บ   A  บ     8  บ
+			;;บ  57  บ JOY-DRV      บ   A  บ     8  บ
+			;;บ  58  บ MOUSE        บ   A  บ     1  บ
+			
+			(Log Txt {VIDEO-DRV} @videoDrvEntry)
+			(Log Txt {SOUND-DRV} @soundDrvEntry)
+			(Log Txt {AUDIO-DRV} @audioDrvEntry)
+			(Log Txt {KEYBOARD-DRV} @kbdDrvEntry)
+			(Log Txt {JOY-DRV} @joyDrvEntry)
+			(Log Txt {MOUSE} @mouseDrvEntry)
+			
+			
+			;;บ  59  บ LARGEST-HEAP บ   A  บ     5  บ
+			;;บ  60  บ FREE-HEAP    บ   A  บ     5  บ
+			;;บ  61  บ TOTAL-HUNK   บ   A  บ     3  บ
+			;;บ  62  บ LARGEST-HUNK บ   A  บ     5  บ
+			;;บ  63  บ FREE-HUNK    บ   A  บ     3  บ
+			
+			(Log Uns {LARGEST-HEAP} (MemoryInfo LargestPtr))
+			(Log Uns {FREE-HEAP} (MemoryInfo FreeHeap))
+			(Log Uns {TOTAL-HUNK} (>> (MemoryInfo TotalHunk) 6))
+			(Log Uns {LARGEST-HUNK} (MemoryInfo LargestHandle))
+			(Log Uns {FREE-HUNK} (>> (MemoryInfo FreeHunk) 6))
+			
+			;;ศออออออสออออออออออออออสออออออสออออออออผ
+			
+			(FileIO fileFPuts logHandle {**********************************\r})
+			(FileIO fileClose logHandle)
+		);if opened log file
+		
+		(Format @thePath LOGGER 6 @sysLogPath)
+		(if (and
+				(== -1 (= logHandle (FileIO fileOpen @thePath fTrunc))) ;existing file
+				(== -1 (= logHandle (FileIO fileOpen @thePath fAppend))) ;new file
+			)
+			(Printf LOGGER 14 @thePath)
+		else
+			(FileIO fileFPuts logHandle @QAinitials)
+			(FileIO fileFPuts logHandle {\n})
+			(FileIO fileFPuts logHandle @cfgPath)
+			(FileIO fileFPuts logHandle {\n})
+			(FileIO fileClose logHandle)
+		)
+		
+		(= inputFont saveInfont)
+		
+		;; unload me
+		(DisposeScript LOGGER)
+	)
 )
+
+
+
+

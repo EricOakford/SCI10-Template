@@ -168,8 +168,7 @@
 		(if fastCast
 			(while fastCast
 				(fastCast eachElementDo: #doit)
-				(if
-				(and ((= newEvent (Event new:)) type?) fastCast)
+				(if (and ((= newEvent (Event new:)) type?) fastCast)
 					(fastCast firstTrue: #handleEvent newEvent)
 				)
 				(newEvent dispose:)

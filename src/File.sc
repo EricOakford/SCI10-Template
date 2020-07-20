@@ -37,7 +37,6 @@
 ;;;		seek						;set file position
 ;;;		close						;close file
 ;;;		delete					;delete the file
-;;;		rename					;rename the file
 ;;;	)
 
 	(method (open mode)
@@ -129,15 +128,6 @@
 
 		(return (if handle (FileIO fileFGets str len handle) else NULL))
 	)
-	
-	(method (rename newName &tmp rc)
-		; return 0 if successful
-		(= rc (FileIO fileRename name newName))
-		(if (not rc)
-			(= name newName)
-		)
-		(return rc)
-	)
 
 	(method (seek offset mode &tmp theMode)
 		; Change the position in the file where the next read or write will
@@ -184,6 +174,6 @@
 	)
 
 	(method (showStr where)
-		(Format where "File: %s" name)
+		(Format where {File: %s} name)
 	)
 )

@@ -68,7 +68,7 @@
 			(= fieldAngle 
 				(- 360 
 					(if (== theSeer ego)
-						(* 2 (theSeer sightAngle?))	;egoBlindSpot)
+						(* 2 egoBlindSpot)
 					)
 				)
 			)

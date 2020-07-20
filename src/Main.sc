@@ -170,6 +170,7 @@
 	myTopBordColor
 	myHighlightColor
 	debugging
+	egoTalker
 )
 (procedure (NormalEgo)
 	(ego
