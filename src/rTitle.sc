@@ -1,4 +1,11 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
+;
+;	TITLE.SC
+;
+;	Show the title screen, then the startup menu.
+;
+;
+
 (script# rTitle)
 (include game.sh)
 (use Main)
@@ -12,10 +19,10 @@
 	title 0
 )
 
-(enum 1
-	skipIt
-	watchIt
-	restoreGame
+(enum
+	buttonStart
+	buttonRestore
+	buttonQuit
 )
 
 (instance title of Room
@@ -34,38 +41,42 @@
 			p_color 15
 			p_back -1
 		)
+		(self setScript:	sTitle)
 	)
-	(method (handleEvent event)
-		(if
-			(and
-				(event type?)
-				(!= (event message?) `#2)
-				(== curRoomNum newRoomNum)
+)
+
+(instance sTitle of Script
+	(method (changeState ns &tmp str nextRoom)
+		(switchto (= state ns)
+			(
+				(= cycles 2)
 			)
-			(event claimed: TRUE)
-			(Sound pause: TRUE)
-			(theGame setCursor: normalCursor TRUE 160 100)
-			(switch
-				(PrintD
-					{Would you like to skip\nthe introduction or\nwatch the whole thing?} 67 100 60
-					#new #button {Skip it} skipIt
-					#new #button {Watch it} watchIt
-					#new #button {Restore a Game} restoreGame
-				)
-				(skipIt
-					(curRoom newRoom: rTestRoom)
-					(theMusic dispose:)
-				)
-				(watchIt
-					(Sound pause: FALSE)
-				)
-				(restoreGame
-					(Sound pause: FALSE)
-					(theGame restore:)
+			(			
+				(= seconds 3)
+				(SetCursor normalCursor TRUE)
+				(repeat
+					(switch
+						(Print ""
+							#at 20 165
+							#font SYSFONT
+							#button {Start Game} buttonStart
+							#button {Restore Game} buttonRestore
+							#button {Quit Game} buttonQuit
+						)
+						(buttonStart
+							(curRoom newRoom: rTestRoom)
+							(break)
+						)
+						(buttonRestore
+							(theGame restore:)
+						)
+						(buttonQuit
+							(= quit TRUE)
+							(break)
+						)
+					)
 				)
 			)
-			(Sound pause: FALSE)
-			(theGame setCursor: waitCursor FALSE)
 		)
 	)
 )

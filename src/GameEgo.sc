@@ -150,6 +150,11 @@
 			((= head (Head new:)) init: self)
 		)
 	)
+
+	(method (dispose)
+		(= head 0)
+		(super dispose:)
+	)	
 	
 	(method (cue)
 		(if head

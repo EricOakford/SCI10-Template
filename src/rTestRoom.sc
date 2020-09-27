@@ -23,7 +23,6 @@
 	(method (init)
 		(HandsOn)
 		(ego posn: 146 153 loop: 0 init:)
-		(NormalEgo)
 		(super init:)
 	)
 	

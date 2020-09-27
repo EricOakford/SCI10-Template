@@ -160,6 +160,8 @@
 	pMouseY
 	theEgoHead
 	egoLooper
+	egoStopWalk
+	egoAvoider
 	[gameFlags 10]
 	myTextColor
 	myInsideColor
@@ -174,13 +176,14 @@
 )
 (procedure (NormalEgo)
 	(ego
+		normal: TRUE
 		setLoop: -1
 		looper: egoLooper
 		setPri: -1
 		setMotion: 0
-		setCycle: StopWalk
+		setCycle: egoStopWalk
 		setStep: 3 2
-		setAvoider: PAvoider
+		setAvoider: egoAvoider
 		ignoreActors: FALSE
 		moveSpeed: (theGame egoMoveSpeed?)
 		cycleSpeed: (theGame egoMoveSpeed?)
@@ -505,6 +508,10 @@
 	)
 )
 
+(instance egoSW of StopWalk)
+
+(instance egoAvoid of PAvoider)
+
 (instance babbleIcon of DCIcon
 	
 	(method (init)
@@ -527,29 +534,19 @@
 	
 	(method (init)
 		;load some important modules
-		BorderWindow
-		DText
-		DButton
-		StopWalk
-		Polygon
-		PolyPath
-		(ScriptID GAME_EGO)
-		IconBar
-		Inventory
-		(ScriptID SIGHT)
-		RandCycle
-		Oscillate
+		(= systemWindow BorderWindow)
 		(super init: &rest)
 		
 		(StrCpy @sysLogPath {})
 		(= egoLooper stopGroop)
+		(= egoStopWalk egoSW)
+		(= egoAvoider egoAvoid)
 		(= doVerbCode DoVerbCode)
 		(= ftrInitializer FtrInit)
 		((= keyDownHandler keyH) add:)
 		((= mouseDownHandler mouseH) add:)
 		((= directionHandler dirH) add:)
 		(= pMouse PseudoMouse)
-		(= ego (ScriptID GAME_EGO 0))
 		(self
 			egoMoveSpeed: 5
 			setSpeed: 0
@@ -565,18 +562,35 @@
 			flags: mNOPAUSE
 			init:
 		)
+		;Moved the icon bar, inventory, and control panel into their own scripts.
+		(= ego (ScriptID GAME_EGO 0))
+		(User alterEgo: ego canControl: FALSE canInput: FALSE)		
+		((ScriptID GAME_ICONBAR 0) init:)
+		((ScriptID GAME_INV 0) init:)
+		((ScriptID GAME_CONTROLS 0) init:)	
+		((theIconBar at: ICON_INVENTORY)
+			message: (if (HaveMouse) SHIFTTAB else TAB)
+		)
 		((ScriptID GAME_INIT 0) init:)
 	)
 	
 	(method (startRoom roomNum)
+		((ScriptID DISPOSE_CODE) doit: roomNum)
+		(if
+			(and
+				(u> (MemoryInfo FreeHeap) (+ 20 (MemoryInfo LargestPtr)))
+				(Print "Memory fragmented." #button {Debug} 1)
+			)
+			(theGame showMem:)
+		)		
 		(if debugging
 			((ScriptID DEBUG 0) init:)
 		)
 		(if pMouse
 			(pMouse stop:)
 		)
+		(NormalEgo)
 		(statusCode doit: roomNum)
-		((ScriptID DISPOSE_CODE) doit: roomNum)
 		(super startRoom: roomNum)
 	)
 
