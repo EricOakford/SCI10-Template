@@ -90,10 +90,10 @@
 	(= theGamePrintLang (theGame printLang?))
 	(= theGameSubtitleLang (theGame subtitleLang?))
 	(theGame printLang: 1 subtitleLang: 0)
-	(kernel_123 param1 @temp3 0)
+	(StrSplit param1 @temp3 0)
 	(if (= temp2 0)
 		(theGame printLang: temp2)
-		(kernel_123 param2 @temp3 0)
+		(StrSplit param2 @temp3 0)
 	else
 		(StrCpy param2 {})
 	)

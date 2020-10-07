@@ -53,7 +53,7 @@
 				(== (StrAt @buffer (+ 1 temp1022)) 74)
 			)
 			(theGame printLang: ENGLISH subtitleLang: JAPANESE)
-			(kernel_123 @buffer @buffer {#J})	;EO: this should be StrSplit, but it is not in VOCAB.999
+			(StrSplit @buffer @buffer {#J})
 			(theGame
 				printLang: theGamePrintLang
 				subtitleLang: theGameSubtitleLang
