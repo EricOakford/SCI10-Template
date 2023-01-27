@@ -4,8 +4,7 @@
 ;
 ;	This is a custom window that Print points to.
 ;	Customize it any way you like.
-;
-;	If you decide not to use it, it consumes no heap.
+;	If you decide not to use it, it will consume no heap.
 ;
 
 (script#	GAME_WINDOW)
@@ -14,23 +13,8 @@
 (use BordWind)
 (use Window)
 
-(public
-	GameWindow 0
-)
 
-(class GameWindow kindof BorderWindow
-	
-	(method (init)
-		(self
-			color: myTextColor
-			back: (EGAOrVGA myBackColor myBotBordColor)
-			topBordColor: myTopBordColor
-			lftBordColor: (EGAOrVGA myLftBordColor myTopBordColor)
-			rgtBordColor: (EGAOrVGA myRgtBordColor myInsideColor)
-			botBordColor: (EGAOrVGA myBotBordColor myInsideColor)
-		)
-	)
-	
+(class GameWindow kindof BorderWindow	
 	(method (open)
 		;Customize the window here
 		(super open:	&rest)

@@ -1,5 +1,5 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-
+;
 ;	GAMEICONBAR.SC
 ;
 ;	The game's icon bar is initialized here. It could have been in the game's Main script, but
@@ -10,8 +10,9 @@
 (script# GAME_ICONBAR)
 (include game.sh)
 (use Main)
+(use Intrface)
+(use Procs)
 (use IconBar)
-(use Invent)
 (use System)
 
 (public
@@ -19,174 +20,162 @@
 )
 
 (instance iconCode of Code
-	(properties)
-	
-	(method (init)
+	(method (doit)
 		((= theIconBar IconBar)
 			add:
-				iconWalk
-				iconLook
-				iconDo
-				iconTalk
-				iconSmell
-				iconTaste
-				iconUse
-				iconInv
-				iconControl
-				iconHelp
+			;These correspond to ICON_*** in game.sh
+			iconWalk iconLook iconDo iconTalk
+			iconUseIt iconInventory iconControlPanel iconHelp iconScore
 			eachElementDo: #init
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myBackColor myBotBordColor)
+			eachElementDo: #lowlightColor (FindColor colGray4 colGray1)
 			curIcon: iconWalk
-			useIconItem: iconUse
+			useIconItem: iconUseIt
 			helpIconItem: iconHelp
-			disable:
 			state: (| OPENIFONME NOCLICKHELP)
 		)
+		(iconInventory message: (if (HaveMouse) TAB else SHIFTTAB))
 	)
 )
 
 (instance iconWalk of IconItem
 	(properties
-		view 900
-		loop 0
+		view vIcons
+		loop lIconWalk
 		cel 0
-		cursor 6
+		cursor WALK_CURSOR
 		message verbWalk
 		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for walking.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
+		helpStr "Use this icon to move your character."
+		maskView vIcons
+		maskLoop lIconDisabled
 	)
 )
 
 (instance iconLook of IconItem
 	(properties
-		view 900
-		loop 1
+		view vIcons
+		loop lIconLook
 		cel 0
-		cursor 19
+		cursor LOOK_CURSOR
 		message verbLook
 		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for looking.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
+		helpStr "Use this icon to look at things."
+		maskView vIcons
+		maskLoop lIconDisabled
 	)
 )
 
 (instance iconDo of IconItem
 	(properties
-		view 900
-		loop 2
+		view vIcons
+		loop lIconHand
 		cel 0
-		cursor 20
+		cursor DO_CURSOR
 		message verbDo
 		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for doing.}
-		maskView 900
-		maskLoop 14
+		helpStr "Use this icon to do things."
+		maskView vIcons
+		maskLoop lIconDisabled
+		maskCel 1
 	)
 )
 
 (instance iconTalk of IconItem
 	(properties
-		view 900
-		loop 3
+		view vIcons
+		loop lIconTalk
 		cel 0
-		cursor 7
+		cursor TALK_CURSOR
 		message verbTalk
 		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for talking.}
-		maskView 900
-		maskLoop 14
-		maskCel 3
+		helpStr "Use this icon to talk to other characters."
+		maskView vIcons
+		maskLoop lIconDisabled
+		maskCel 2
 	)
 )
 
-(instance iconUse of IconItem
+(instance iconUseIt of IconItem
 	(properties
-		view 900
-		loop 4
+		view vIcons
+		loop lIconInvItem
 		cel 0
-		cursor 999
+		cursor ARROW_CURSOR
 		message verbUse
 		signal (| HIDEBAR RELVERIFY)
-		helpStr {This window displays the current inventory item.}
-		maskView 900
-		maskLoop 14
+		helpStr "Select this icon to use your current inventory object."
+		maskView vIcons
+		maskLoop lIconDisabled
 		maskCel 4
 	)
 )
 
-(instance iconInv of IconItem
+(instance iconInventory of IconItem
 	(properties
-		view 900
-		loop 5
+		view vIcons
+		loop lIconInventory
 		cel 0
 		cursor ARROW_CURSOR
-		type $0000
-		message 0
+		type NULL
+		message NULL
 		signal (| HIDEBAR RELVERIFY IMMEDIATE)
-		helpStr {This icon brings up the inventory window.}
-		maskView 900
-		maskLoop 14
-		maskCel 2
+		helpStr "Use this icon to bring up your inventory window."
+		maskView vIcons
+		maskLoop lIconDisabled
+		maskCel 3
 	)
 	
 	(method (select)
-		(if (super select:)
-			(inventory showSelf: ego)
+		(if (super select: &rest)
+			(ego showInv:)
 		)
 	)
 )
 
-(instance iconSmell of IconItem
+(instance iconScore of IconItem
 	(properties
-		view 900
-		loop 10
+		view vIcons
+		loop lIconScore
 		cel 0
-		cursor 30
-		message verbSmell
-		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for smelling.}
-		maskView 900
-		maskLoop 14
-	)
-)
-
-(instance iconTaste of IconItem
-	(properties
-		view 900
-		loop 11
-		cel 0
-		cursor 31
-		message verbTaste
-		signal (| HIDEBAR RELVERIFY)
-		helpStr {This icon is for tasting.}
-		maskView 900
-		maskLoop 14
-		maskCel 1
-	)
-)
-
-(instance iconControl of IconItem
-	(properties
-		view 900
-		loop 7
-		cel 0
-		cursor 999
-		message 8
+		cursor ARROW_CURSOR
 		signal (| HIDEBAR RELVERIFY IMMEDIATE)
-		helpStr {This icon brings up the control panel.}
-		maskView 900
-		maskLoop 14
+		helpStr "This icon displays your current score."
+		maskView vIcons
+		maskLoop lIconScore
 		maskCel 1
 	)
 	
+	(method (show &tmp [str 7] [rectPt 4] theFont)
+		(super show: &rest)
+		(= theFont 30)
+		(Format @str "%d" score)
+		(TextSize @rectPt @str theFont 0)
+		(Display @str
+			p_color colLRed
+			p_font theFont
+			p_at
+				(+ nsLeft 5 (/ (- 25 [rectPt 3]) 2))
+				(+ nsTop 14)
+		)
+	)
+)
+
+(instance iconControlPanel of IconItem
+	(properties
+		view vIcons
+		loop lIconControls
+		cel 0
+		cursor ARROW_CURSOR
+		message verbNone
+		signal (| HIDEBAR RELVERIFY IMMEDIATE)
+		helpStr "This icon brings up the control panel."
+		maskView vIcons
+		maskLoop lIconDisabled
+	)
+	
 	(method (select)
-		(if (super select:)
+		(if (super select: &rest)
 			(theIconBar hide:)
 			(gameControls show:)
 		)
@@ -195,14 +184,16 @@
 
 (instance iconHelp of IconItem
 	(properties
-		view 900
-		loop 9
+		view vIcons
+		loop lIconHelp
 		cel 0
-		cursor 29
+		cursor HELP_CURSOR
 		message verbHelp
 		signal (| RELVERIFY IMMEDIATE)
-		helpStr {This icon tells you about other icons.}
-		maskView 900
-		maskLoop 14
+		helpStr "To learn about the other icons, first click here,
+				then pass the question mark over the other icons."
+		maskView vIcons
+		maskLoop lIconDisabled
+		maskCel 1
 	)
 )

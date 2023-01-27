@@ -1,7 +1,12 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
+;
+;	GAMEABOUT.SC
+;
+;	Displays a message in response to a call to "theGame showAbout:".
+;
+;
 (script# GAME_ABOUT)
 (include game.sh)
-(use Main)
 (use Intrface)
 (use System)
 
@@ -10,8 +15,9 @@
 )
 
 (instance aboutCode of Code
-	
 	(method (doit)
-		(Printf "SCI10 Template Game\nBy Eric Oakford\nVersion %s" version)
+		(Print "SCI1.0 Template Game\n
+			by Eric Oakford"
+		)
 	)
 )

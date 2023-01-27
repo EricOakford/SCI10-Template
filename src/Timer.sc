@@ -6,7 +6,7 @@
 
 (define	ticksPerSec		60)
 (define	ticksPerMin		3600)
-(define	minPerHr			60)
+(define	minPerHr			60)	
 
 (class Timer kindof Object
 	;;; The Timer class implements the concept of an alarm clock,
@@ -42,20 +42,20 @@
 	;;; twice as long as one with a fast machine.
 	
 	(properties
-		cycleCnt 	-1			;number of animation cycles left before done
-		seconds 		-1			;number of seconds left before done
-		ticksToDo			-1			;ticks before done
-		lastTime 	-1			;private
-		client 		0 			;who to cue: when done
+		cycleCnt -1			;number of animation cycles left before done
+		seconds -1			;number of seconds left before done
+		ticksToDo		-1			; ticks before done
+		lastTime -1			;private
+		client 0				;who to cue: when done
 	)
 	
 ;;;	(methods
 ;;;		set					;set number of game-time seconds
-;;;		setCycle				;set number of animation cycles
+;;;		setCycle			;set number of animation cycles
 ;;;		setReal				;set number of real-time seconds
 ;;;		delete				;do actual disposal of the Time
-;;;		setTicks				;set time based on 60ths of a second
-;;;		cue					; left to the application to define if needed
+;;;		set60ths			;set time based on 60ths of a second
+;;;		cue				; left to the application to define if needed
 ;;;	)
 	
 	
@@ -103,6 +103,7 @@
 		;Add ourselves to the timer list.
 		(timers add:self)
 		
+		
 		;Tell the caller who we are.
 		(if (caller respondsTo:#timer:)		;Pablo 12/5/88
 			;If the caller has a timer already attached, dispose that timer.
@@ -130,15 +131,18 @@
 					(if (not (-- seconds)) (CueClient))
 				)
 			)
-			(
-				(or
-					(u< (+ ticksToDo lastTime) (GetTime))
-					(and
-						(u> lastTime (GetTime))
-						(u> (+ ticksToDo lastTime) lastTime)
+			(else
+				;This is a 60ths second real-time counter.
+				; account for wrap
+				(if (or
+						(u< (+ ticksToDo lastTime) (GetTime))
+						(and
+							(u> lastTime (GetTime))
+							(u> (+ ticksToDo lastTime) lastTime)
+						)
 					)
+					(CueClient)
 				)
-				(CueClient)
 			)
 		)
 	)
@@ -176,8 +180,7 @@
 		(return aTimer)
 	)
 	
-	
-	(method (set caller sec min hr &tmp aTimer theTicks theSpeed [str 50])
+	(method (set caller sec min hr &tmp aTimer ticks theSpeed [str 50])
 		;; Set the timer to go off after a certain number of seconds of
 		;; game time (real time on fast machines, slower on slow
 		;; machines).
@@ -187,20 +190,17 @@
 ;;;		(define	minPerHr			60)
 		
 		(= theSpeed speed)
-		(if (== theSpeed speed) (= theSpeed 1))
-		(= theTicks (/ (* sec ticksPerSec) theSpeed))
+		(if (== theSpeed 0) (= theSpeed 1))
+		(= ticks (/ (* sec ticksPerSec) theSpeed))
 		(if (> argc 2)
-			(+= theTicks (/ (* min ticksPerMin) theSpeed))
+			(+= ticks (/ (* min ticksPerMin) theSpeed))
 		)
 		(if (> argc 3)
 			;This is a bit funny in order to avoid overflow.
-			(+= theTicks (* (/ (* hr ticksPerMin) theSpeed) minPerHr))
+			(+= ticks (* (/ (* hr ticksPerMin) theSpeed) minPerHr))
 		)
 		(= aTimer (if (& -info- CLASS) (self new:) else self))
-		(aTimer
-			init: 		caller,
-			cycleCnt:	theTicks
-		)
+		(aTimer init:caller, cycleCnt:ticks)
 		(return aTimer)
 	)
 	
@@ -220,20 +220,18 @@
 		(return aTimer)
 	)
 
-	(method (set60ths caller theTicks &tmp aTimer)
+	(method (set60ths caller ticks &tmp aTimer)
 		;; Set the timer to go off after a certain period of real time.
 		
-		(= aTimer
-			(if (& -info- CLASS)
-				(self new:)
-			else
-				self
-			)
-		)
+		; init last time with current ticks
+		(= lastTime (GetTime))
+
+		
+		(= aTimer (if (& -info- CLASS) (self new:) else self))
 		(aTimer 
-			init:			caller			
-			ticksToDo: 		theTicks
-			lastTime:		(GetTime)
+			init:caller, 
+			ticksToDo: ticks,
+			lastTime: (GetTime)
 		)
 		(return aTimer)
 	)

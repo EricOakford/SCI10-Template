@@ -1,11 +1,18 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# SPEED)
+;
+;	SPEEDTEST.SC
+;
+;	This is the script that checks the machine speed, then starts the game proper.
+;
+;
+
+(script# SPEED_TEST)
 (include game.sh)
 (use Main)
+(use Procs)
 (use Motion)
 (use Game)
 (use Actor)
-(use Intrface)
 (use System)
 
 (public
@@ -16,19 +23,19 @@
 	doneTime
 	machineSpeed
 	versionFile
-	fastSpeed
+	fastThreshold
+	mediumThreshold
 )
-
 (instance fred of Actor)
 
 (instance speedTest of Room
 	(properties
-		picture pSpeedTest
+		picture vSpeedTest
 		style PLAIN
 	)
 	
 	(method (init)
-		(= versionFile (FileIO fileOpen {version} 1))
+		(= versionFile (FileIO fileOpen {version} fRead))
 		(FileIO fileFGets version 6 versionFile)
 		(FileIO fileClose versionFile)
 		(super init:)
@@ -36,7 +43,7 @@
 		(while (u> (GetTime) $fc00)
 		)
 		(fred
-			view: 99
+			view: vSpeedTest
 			setLoop: 0
 			illegalBits: 0
 			posn: 20 99
@@ -47,7 +54,8 @@
 		)
 		(= speed 0)
 		(= machineSpeed 0)
-		(= fastSpeed 90)
+		(= fastThreshold   (if (Btst fIsVGA) 90 else 60))
+		(= mediumThreshold (if (Btst fIsVGA) 59 else 30))
 	)
 	
 	(method (doit)
@@ -56,11 +64,19 @@
 			(= doneTime (+ 60 (GetTime)))
 		)
 		(if (and (u< doneTime (GetTime)) (not (self script?)))
-			(if (< machineSpeed fastSpeed)
-				(= howFast 0)
-				(theGame detailLevel: 1)
-			else
-				(= howFast 2)
+			(cond
+				((>= machineSpeed fastThreshold)
+					(= howFast fast)
+					(theGame detailLevel: 3)
+				)
+				((and (>= machineSpeed mediumThreshold) (< machineSpeed fastThreshold))
+					(= howFast medium)
+					(theGame detailLevel: 2)
+				)
+				(else
+					(= howFast slow)
+					(theGame detailLevel: 1)
+				)
 			)
 			(self setScript: speedScript)
 		)
@@ -72,8 +88,7 @@
 )
 
 (instance speedScript of Script
-	
-	(method (changeState newState &tmp [inputRoom 10] nextRoom)
+	(method (changeState newState &tmp nextRoom)
 		(switch (= state newState)
 			(0
 				(Palette PALIntensity 0 255 100)
@@ -85,23 +100,10 @@
 				(= cycles 1)
 			)
 			(2
+				;If debugging is enabled, go to the "Where to?" dialog.
+				;Otherwise, go to the title screen...
 				(if debugging
-					(repeat
-						(= inputRoom 0)
-						(= nextRoom
-							(Print "Where to, boss?"
-								#edit @inputRoom 5
-							)
-						)
-						(if inputRoom
-							(= nextRoom (ReadNumber @inputRoom))
-						)
-						(if (> nextRoom 0)
-							(break)
-						)
-					)
-					(theIconBar enable:)
-					(HandsOn)
+					(= nextRoom WHERE_TO)
 				else
 					(= nextRoom rTitle)
 				)

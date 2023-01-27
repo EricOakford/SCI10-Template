@@ -27,7 +27,7 @@
 
 (instance title of Room
 	(properties
-		picture pSpeedTest
+		picture vSpeedTest
 		style FADEOUT
 	)
 	

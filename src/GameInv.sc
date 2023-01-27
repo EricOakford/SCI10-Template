@@ -2,210 +2,165 @@
 ;
 ;	GAMEINV.SC
 ;
-;	Here, you can add inventory item instances, and can create custom properties.
-;	
-;	 An example might be::
-;	
-;	 	(instance Hammer of InvItem
-;	 		(properties
-;	 			view 900
-;	 			loop 1
-;	 			cursor 900			; Required cursor resource when using this item.
-;	 			signal IMMEDIATE
-;	 			description			; the item's displayed name
-;	 		)
-;	 	)
-;	
-;	 Then in the invCode init, add the inventory item to the add: call.
+;	Here, you can add inventory item instances.
 ;
 ;
-
 (script# GAME_INV)
 (include game.sh)
 (use Main)
-(use BordWind)
-(use Intrface)
+(use Procs)
 (use IconBar)
+(use BordWind)
 (use Invent)
 (use System)
 
 (public
 	invCode 0
-	invWin 1
 )
+
+(define INVENTORY_CURSOR_START 200)
 
 (instance invCode of Code
-	
 	(method (init)
-		(inventory
+		((= inventory Inventory)
 			init:
 			add:
-				Coin
-				Bomb
-				invLook
-				invHand
-				invSelect
-				invHelp
-				ok
+				;Add your inventory items here.
+				;Make sure they are in the same order as the item list in GAME.SH.
+				Money
+			;add the interface buttons afterwards
+			add: invLook invHand invSelect invHelp ok
 			eachElementDo: #highlightColor 0
-			eachElementDo: #lowlightColor (EGAOrVGA myInsideColor myBotBordColor)
+			eachElementDo: #lowlightColor (FindColor colGray1 colGray4)
 			eachElementDo: #init
-			window: invWin
-			helpIconItem: invHelp
-			selectIcon: invSelect
-			okButton: ok
 			state: NOCLICKHELP
+			window:	invWin
+			helpIconItem:	invHelp
+			selectIcon:	invSelect
+			okButton:	ok
 		)
-		(Coin owner: ego)
-	)
-)
-
-(instance invWin of InsetWindow
-	
-	(method (init)
+		;set up the inventory window
 		(invWin
-			color: myTextColor
-			back: (EGAOrVGA myBotBordColor myInsideColor)
-			topBordColor: (EGAOrVGA myBackColor myTopBordColor)
-			lftBordColor: (EGAOrVGA myRgtBordColor myTopBordColor)
-			rgtBordColor: (EGAOrVGA myInsideColor myBotBordColor)
-			botBordColor: (EGAOrVGA myTextColor myBotBordColor)
-			insideColor: (EGAOrVGA myInsideColor myBotBordColor)
-			topBordColor2: myTextColor
-			lftBordColor2: myTextColor
-			botBordColor2: (EGAOrVGA myBackColor myTopBordColor)
-			rgtBordColor2: (EGAOrVGA myLftBordColor myTopBordColor)
-			botBordHgt: 25
+			color: 0
+			back: (FindColor colGray2 colGray1)
+			topBordColor: (FindColor colGray4 colWhite)
+			lftBordColor: (FindColor colGray3 colWhite)
+			rgtBordColor: (FindColor colGray1 colGray2)
+			botBordColor: (FindColor colBlack colGray2)
+			insideColor: (FindColor colGray1 colGray2)
+			topBordColor2: colBlack
+			lftBordColor2: colBlack
+			botBordColor2: (FindColor colGray4 colWhite)
+			rgtBordColor2: (FindColor colGray5 colWhite)
 		)
 	)
 )
 
-(instance ok of IconItem
-	(properties
-		view 901
-		loop 3
-		cel 0
-		nsLeft 40
-		cursor ARROW_CURSOR
-		signal (| forceUpdOn updOn)
-		helpStr {Select this Icon to close this window.}
-	)
-	
-	(method (init)
-		(self
-			highlightColor: 0
-			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
-		)
-		(super init:)
+(class GameIconItem of IconItem
+	;this is to ensure that showInv: doesn't mistake the icons
+	;for inventory items
+	(method (ownedBy)
+		(return FALSE)
 	)
 )
 
-(instance invLook of IconItem
+(instance Money of InvItem
 	(properties
-		view 901
-		loop 2
+		view vInvItems
+		loop iMoney
+		cursor 200
+		description {Money! Cash! Assets!}
+	)
+)
+
+(instance invLook of GameIconItem
+	(properties
+		view vInvIcons
+		loop lInvLook
 		cel 0
-		cursor 19
+		cursor LOOK_CURSOR
 		message verbLook
 		helpStr {Select this Icon then select an inventory item you'd like a description of.}
 	)
-	
+	;these need different colors than the inventory items
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
+			lowlightColor: (FindColor colGray4 colGray1)
 		)
 		(super init:)
 	)
 )
 
-(instance invHand of IconItem
+(instance invHand of GameIconItem
 	(properties
-		view 901
-		loop 0
+		view vInvIcons
+		loop lInvHand
 		cel 0
-		cursor 20
+		cursor DO_CURSOR
 		message verbDo
 		helpStr {This allows you to do something to an item.}
 	)
-	
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
+			lowlightColor: (FindColor colGray4 colGray1)
 		)
 		(super init:)
 	)
 )
 
-(instance invHelp of IconItem
+(instance invHelp of GameIconItem
 	(properties
-		view 901
-		loop 1
+		view vInvIcons
+		loop lInvHelp
 		cel 0
-		cursor 29
+		cursor HELP_CURSOR
 		message verbHelp
 	)
-	
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
+			lowlightColor: (FindColor colGray4 colGray1)
 		)
 		(super init:)
 	)
 )
 
-(instance invSelect of IconItem
+(instance invSelect of GameIconItem
 	(properties
-		view 901
-		loop 4
+		view vInvIcons
+		loop lInvSelect
 		cel 0
 		cursor ARROW_CURSOR
 		helpStr {This allows you to select an item.}
 	)
-	
 	(method (init)
 		(self
 			highlightColor: 0
-			lowlightColor: (EGAOrVGA myBackColor myBotBordColor)
+			lowlightColor: (FindColor colGray4 colGray1)
 		)
 		(super init:)
 	)
 )
 
-(instance Coin of InvItem
+(instance ok of GameIconItem
 	(properties
-		view 700
+		view vInvIcons
+		loop lInvOK
 		cel 0
-		cursor 1
-		signal IMMEDIATE
-		description {the buckazoid coin}
-		owner 40
+		nsLeft 40
+		cursor ARROW_CURSOR
+		signal (| HIDEBAR RELVERIFY IMMEDIATE)
+		helpStr {Select this Icon to close this window.}
 	)
-	(method (doVerb theVerb param2)
-		(switch theVerb
-			(verbLook
-				(Print "It's a buckazoid coin.")
-			)
+	(method (init)
+		(self
+			highlightColor: 0
+			lowlightColor: (FindColor colGray4 colGray1)
 		)
+		(super init:)
 	)
 )
 
-(instance Bomb of InvItem
-	(properties
-		view 700
-		cel 1
-		cursor 22
-		signal IMMEDIATE
-		description {the unstable ordinance}
-		owner 40
-	)
-	(method (doVerb theVerb param2)
-		(switch theVerb
-			(verbLook
-				(Print "It's a piece of unstable ordinance.")
-			)
-		)
-	)
-)
+(instance invWin of InsetWindow)

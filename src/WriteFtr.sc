@@ -1,427 +1,516 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# 948)
+(script# WRITEFTR)
 (include game.sh)
 (use Main)
 (use Intrface)
 (use Feature)
-(use Window)
 (use File)
 (use Actor)
 (use System)
-
-
+;;;;
+;;;;	WRITEFTR.SC
+;;;;	(c) Sierra On-Line, Inc, 1990
+;;;;
+;;;;	Author: J.Mark Hood
+;;;;
+;;;;	Simple C.A.S.E. Tools for positioning and adding response to
+;;;;	Features, PicViews, Views, Props, Actors and their subclasses.
+;;;;
+;;;;	Classes:
+;;;;		WriteCode
+;;;;		CreateObject
+;;;;
+;;;; also several internal procedures
 (local
-	[nameString 200]
-	[local200 100]
-	[verbString 8] = [{ verbWalk___} { verbLook___} { verbDo_____} { verbUse____} { verbTalk___} { verbHelp___} { gameVerbs__} {}]
-	toScreen =  1
-	drawNSRect =  1
-	inited
-	theType
-	sightAngle =  90
-)
-(procedure (localproc_051e param1 &tmp newEvent temp1 temp2 newEventY newEventX newEventY_2 newEventX_2)
-	(Print 948 11)
-	(while (!= ((= newEvent (Event new:)) type?) 1)
-		(newEvent dispose:)
-	)
-	(GlobalToLocal newEvent)
-	(= newEventY (newEvent y?))
-	(= newEventX (newEvent x?))
-	(newEvent dispose:)
-	(Print 948 12)
-	(while (!= ((= newEvent (Event new:)) type?) 1)
-		(newEvent dispose:)
-	)
-	(GlobalToLocal newEvent)
-	(= newEventY_2 (newEvent y?))
-	(= temp1
-		(+
-			(/ (- (= newEventX_2 (newEvent x?)) newEventX) 2)
-			newEventX
-		)
-	)
-	(= temp2 (+ (/ (- newEventY_2 newEventY) 2) newEventY))
-	(param1
-		x: temp1
-		y: temp2
-		nsLeft: newEventX
-		nsTop: newEventY
-		nsBottom: newEventY_2
-		nsRight: newEventX_2
-	)
-	(if drawNSRect
-		(Graph
-			GDrawLine
-			newEventY
-			newEventX
-			newEventY
-			newEventX_2
-			1
-			15
-		)
-		(Graph
-			GDrawLine
-			newEventY_2
-			newEventX
-			newEventY_2
-			newEventX_2
-			1
-			15
-		)
-		(Graph
-			GDrawLine
-			newEventY
-			newEventX
-			newEventY_2
-			newEventX
-			1
-			15
-		)
-		(Graph
-			GDrawLine
-			newEventY
-			newEventX_2
-			newEventY_2
-			newEventX_2
-			1
-			15
-		)
-		(Graph
-			GShowBits
-			newEventY
-			newEventX
-			(+ newEventY_2 1)
-			(+ newEventX_2 1)
-			1
-		)
-	)
-	(newEvent dispose:)
+	[nameString	100]
+	[nounString 100]	
+	[sCStr 		100] 
+	[cCStr 		100] 
+	[descString 100]
+	[sightStr  	30]
+	[getDistStr	30]
+	[seeDistStr	30]
+	toScreen	=	TRUE
+	drawNSRect	= TRUE
+	inited	=	FALSE
+	theType 	=	FALSE
 )
 
-(procedure (localproc_0655 param1 &tmp newEvent)
-	(param1
-		view: (GetNumber {View?} 0)
-		loop: (GetNumber {Loop?} 0)
-		cel: (GetNumber {Cel?} 0)
-		signal: 16400
-		priority: 15
-		init:
-	)
-	(if (param1 respondsTo: #illegalBits)
-		(param1 illegalBits: 0)
-	)
-	(while (!= ((= newEvent (Event new:)) type?) 1)
-		(GlobalToLocal newEvent)
-		(param1 posn: (newEvent x?) (newEvent y?))
-		(Animate (cast elements?) 0)
-		(newEvent dispose:)
-	)
-	(newEvent dispose:)
+;;;(procedure
+;;;	DoFeature
+;;;	DoView
+;;;	DoProperties
+;;;	Logit
+;;;	GetVerb
+;;;)
+(enum
+	exitPrint
+	makeFeature
+	makePicView
+	makeView
+	makeProp
+	makeActor
 )
+(class WriteCode ;of RootObj  ; get check
 
-(procedure (localproc_06f9 param1)
-	(File name: @sysLogPath writeString: param1 close:)
-	(DisposeScript 993)
-)
+;;;	(methods
+;;;		doit
+;;;		writeList
+;;;	)
 
-(procedure (localproc_0716 param1)
-	(param1
-		description: (GetInput @local200 40 {description?})
-		sightAngle: (= sightAngle (GetNumber {sight angle?} sightAngle))
-		_approachVerbs: (aprchD init: verbString)
-	)
-)
-
-(procedure (localproc_0754 param1 &tmp newEvent)
-	(Print 948 13)
-	(while (!= ((= newEvent (Event new:)) type?) 1)
-		(newEvent dispose:)
-	)
-	(GlobalToLocal newEvent)
-	(param1
-		approachX: (newEvent x?)
-		approachY: (newEvent y?)
-	)
-	(newEvent dispose:)
-)
-
-(instance aprchD of Dialog
-	(properties
-		text {Approach Verbs}
-	)
-	
-	(method (init param1 &tmp temp0 temp1)
-		(= window systemWindow)
-		(= nsBottom 0)
-		(selectorI
-			text: param1
-			font: smallFont
-			setSize:
-			moveTo: 4 4
-			state: 1
-		)
-		(self add: selectorI setSize:)
-		(textI
-			text: {Space to select, enter when done.}
-			setSize: (- (- nsRight nsLeft) 8)
-			moveTo: 4 4
-		)
-		(= temp0 (+ (textI nsBottom?) 4))
-		(self eachElementDo: #move 0 temp0)
-		(= temp1
-			(self add: textI setSize: center: open: 4 -1 doit:)
-		)
-		(self dispose:)
-		(if temp1
-			(= temp0 0)
-			(= temp1 0)
-			(while (< temp0 7)
-				(if (== (StrAt param1 (* temp0 13)) 62)
-					(= temp1 (| temp1 (<< $0001 temp0)))
-				)
-				(++ temp0)
-			)
-		)
-		(return temp1)
-	)
-)
-
-(class WriteCode
-	(properties)
-	
-	(method (doit param1 &tmp [temp0 400] [temp400 40] [temp440 20] [temp460 40])
-		(if (param1 isMemberOf: Feature)
-			(Format
-				@temp400
-				948
-				0
-				(param1 nsTop?)
-				(param1 nsLeft?)
-				(param1 nsBottom?)
-				(param1 nsRight?)
+	(method (doit theObj &tmp [buffer 400] [vlcOrNsStr 40])
+		(if (theObj isMemberOf: Feature)
+			(Format @vlcOrNsStr 
+				"______nsLeft %d\r
+				 ______nsTop  %d\r
+				 ______nsBottom %d\r
+				 ______nsRight %d\r" 
+				(theObj nsLeft?)
+				(theObj nsTop?)
+				(theObj nsBottom?)
+				(theObj nsRight?)
 			)
 		else
-			(Format
-				@temp400
-				948
-				1
-				(param1 view?)
-				(param1 loop?)
-				(param1 cel?)
+			(Format @vlcOrNsStr
+				"______view	%d\r
+				 ______loop %d\r
+				 ______cel  %d\r"
+				 (theObj view?)
+				 (theObj loop?)
+				 (theObj cel?)
 			)
 		)
-		(if (param1 z?)
-			(Format @temp440 948 2 (param1 z?))
-		else
-			(= temp440 0)
-		)
-		(if (param1 _approachVerbs?)
-			(Format
-				@temp460
-				948
-				3
-				(param1 approachX?)
-				(param1 approachY?)
-				(param1 _approachVerbs?)
-			)
-		else
-			(= temp460 0)
-		)
-		(Format
-			@temp0
-			948
-			4
+		(Format @buffer 
+			"(instance %s of %s\r
+				___(properties\r
+				______x					%d		\r
+				______y					%d		\r
+				______z					%d		\r
+				______heading			%d		\r
+				______noun			 \'%s\'	\r
+				%s
+				 _____description	 \"%s\"	\r
+				______sightAngle		%d		\r
+				______closeRangeDist	%d		\r
+				______longRangeDist 	%d		\r
+				______shiftClick		%s		\r
+				______contClick		%s		\r
+				___)\r
+				)\r 
+			"
 			@nameString
-			(if (== theType 2)
+			(if (== theType makePicView)
 				(PicView name?)
 			else
-				((param1 superClass?) name?)
+				((theObj superClass?) name?)
 			)
-			(param1 x?)
-			(param1 y?)
-			@temp440
-			@temp400
-			@local200
-			(param1 sightAngle?)
-			@temp460
+			(theObj x?)
+			(theObj y?)							
+			(theObj z?)							
+			(theObj heading?)
+			@nounString
+			@vlcOrNsStr
+			@descString
+			(theObj sightAngle?)				
+			(theObj closeRangeDist?)			
+			(theObj longRangeDist?)			
+			@sCStr 	
+			@cCStr 	
 		)
 		(if toScreen
-			(Print @temp0 #font 999 #title {Feature Writer V1.0})
+			(Print @buffer #font:999 #title:{Feature Writer V1.0})
 		)
-		(localproc_06f9 @temp0)
-		(if (param1 isMemberOf: Feature)
-			(param1 dispose:)
+		(Logit @buffer)
+		(if (theObj isMemberOf: Feature)
+			(theObj dispose:)
 		else
-			(param1 addToPic:)
+			(theObj addToPic:)
 		)
 	)
-	
-	(method (writeList param1)
-		(param1 eachElementDo: #perform self)
+
+;; although currently not used
+;; this is a useful method for writing out the cast, features list etc.
+	(method (writeList theList)
+		(theList eachElementDo: #perform: self)
 		(CreateObject doit:)
-	)
+;		(DisposeScript 800)
+	); writeObjects
 )
 
-(class CreateObject
-	(properties)
-	
-	(method (doit &tmp [temp0 15] temp15 newEvent theSystemWindow)
-		(= theSystemWindow systemWindow)
-		(= systemWindow SysWindow)
+
+
+;(class stringHolder	of Object
+;	(properties
+;		who			0
+;		noun			0
+;		shiftClick	0
+;		contClick	0
+;	)
+;)
+
+(class CreateObject	;of RootObj
+;;;	(methods 
+;;;		doit
+;;;	)
+	(method (doit &tmp [thePath 15] theObj event)
 		(if (not inited)
-			(= temp0 0)
-			(Format @temp0 948 5 (curRoom curPic?))
-			(if
-			(not (GetInput @temp0 30 {Enter path and filename}))
-				(return)
-			)
-			(Format @sysLogPath @temp0)
-			(switch
-				(Print
-					948
-					6
-					#title
-					{Feature Writer V1.0}
-					#button
-					{YES}
-					1
-					#button
-					{NO}
-					2
+			(= thePath 0)
+			(GetInput @thePath 30 {Enter path and filename})
+			(Format @sysLogPath @thePath)
+			(Format @sCStr	"verbLook")
+			(Format @cCStr	"verbGet")
+			(switch (Print "Outline Features?"
+					#title:{Feature Writer V1.0}
+					#button: {YES}	1
+					#button: {NO}	2
 				)
-				(0 (return))
-				(1 (= drawNSRect 1))
-				(2 (= drawNSRect 0))
+				(1 (= drawNSRect TRUE))
+				(2 (= drawNSRect FALSE))
 			)
-			(switch
-				(Print
-					948
-					7
-					#title
-					{Feature Writer V1.0}
-					#button
-					{YES}
-					1
-					#button
-					{NO}
-					2
+			(switch (Print "Display code to screen?"
+					#title:{Feature Writer V1.0}
+					#button: {YES}	1
+					#button: {NO}	2
 				)
-				(0 (return))
-				(1 (= toScreen 1))
-				(2 (= toScreen 0))
+				(1 (= toScreen TRUE))
+				(2 (= toScreen FALSE))
 			)
-			(= inited 1)
+			(= inited TRUE)
+		)					 	
+		(= theType
+			(Print  "Class?"
+				#title:	{Feature Writer V1.0}
+				#button:	{Feature}	makeFeature
+				#button:	{PicView}	makePicView
+				#button:	{View}		makeView
+				#button:	{Prop}		makeProp
+				#button:	{Actor}		makeActor
+			)
 		)
-		(if
-			(not
-				(= theType
-					(Print
-						948
-						8
-						#title
-						{Feature Writer V1.0}
-						#button
-						{Feature}
-						1
-						#button
-						{PicView}
-						2
-						#button
-						{View}
-						3
-						#button
-						{Prop}
-						4
-						#button
-						{Actor}
-						5
+		(if (not theType) (return))
+		(= theObj
+			(
+				(switch theType
+					(makeFeature
+						Feature 
+					)	
+					(makePicView
+						View 
+					)
+					(makeView
+						View	
+					)
+					(makeProp
+						Prop	
+					)
+					(makeActor
+						Actor		
 					)
 				)
-			)
-			(return)
-		)
-		(= temp15
-			(
-			(switch theType
-				(1 Feature)
-				(2 View)
-				(3 View)
-				(4 Prop)
-				(5 Actor)
-			)
 				new:
 			)
 		)
 		(GetInput @nameString 30 {Name?})
-		(StrCpy @local200 @nameString)
-		(localproc_0716 temp15)
-		(if (== theType 1)
-			(localproc_051e temp15)
-		else
-			(localproc_0655 temp15)
+		(StrCpy @descString @nameString)
+		(DoProperties theObj)
+		(if (== theType makeFeature)
+			(DoFeature theObj)
+		else	; something with a view, loop and cel
+			(DoView theObj)
 		)
-		(if (temp15 _approachVerbs?) (localproc_0754 temp15))
-		(if
-			(Print
-				948
-				9
-				#title
-				{Feature Writer V1.0}
-				#button
-				{NO}
-				0
-				#button
-				{YES}
-				1
+		(if (Print  "Z property"
+		 	#title:	{Feature Writer V1.0}
+		 	#button:	{YES}	TRUE	
+		 	#button:	{NO}	FALSE			
 			)
-			(Print 948 10)
-			(while (!= ((= newEvent (Event new:)) type?) 1)
-				(newEvent dispose:)
+			(Print "Please	click the mouse on the objects projection onto the ground")
+			(while (!= ((= event (Event new:)) type?) mouseDown) 
+				(event dispose:)
 			)
-			(GlobalToLocal newEvent)
-			(temp15 z: (- (newEvent y?) (temp15 y?)))
-			(temp15 y: (newEvent y?))
-			(newEvent dispose:)
+			(GlobalToLocal event)
+			(theObj z:(- (event y?)	(theObj y?)))
+			(theObj y:(event y?))
+			(event dispose:)
 		)
-		(WriteCode doit: temp15)
-		(= systemWindow theSystemWindow)
+		(WriteCode doit: theObj)
 	)
 )
 
-(instance selectorI of DSelector
-	(properties
-		x 13
-		y 7
+(procedure (DoFeature obj &tmp event theX theY theTop theLeft theBottom theRight)
+	(Print "Click left mouse button on top left corner")
+	(while (!= ((= event (Event new:)) type?) mouseDown) (event dispose:))
+	(GlobalToLocal event)
+	(= theTop (event y?))
+	(= theLeft (event x?))
+	(Print "Click left mouse button on bottom right corner")
+	(while (!= ((= event (Event new:)) type?)	mouseDown) (event dispose:))
+	(GlobalToLocal event)
+	(= theBottom 	(event y?))
+	(= theRight 	(event x?))
+	(= theX	(+ (/ (- theRight theLeft) 2) theLeft))
+	(= theY	(+ (/ (- theBottom theTop) 2) theTop))
+	(obj
+		x:				theX,
+		y:				theY,
+		nsLeft:		theLeft,
+		nsTop:		theTop,
+		nsBottom:	theBottom,
+		nsRight:		theRight
 	)
+	(if drawNSRect
+		(Graph GDrawLine theTop    theLeft 	 	theTop 		theRight 	VMAP vWHITE)
+		(Graph GDrawLine theBottom theLeft 		theBottom	theRight 	VMAP vWHITE)
+		(Graph GDrawLine theTop		theLeft 	  	theBottom 	theLeft 		VMAP vWHITE)
+		(Graph GDrawLine theTop		theRight   	theBottom 	theRight 	VMAP vWHITE)
+		(Graph GShowBits theTop 	theLeft 		theBottom 	theRight 	VMAP)
+	)
+ 	(event dispose:)
+)
+
+
+
+(procedure (DoView obj &tmp event)
+	(obj
+		view:			(GetNumber {View?} 0),
+		loop:			(GetNumber {Loop?} 0),
+		cel:			(GetNumber {Cel?} 0),
+		signal:		(| fixPriOn ignrAct),
+		priority:	15,
+		init:
+	)
+	(if (obj respondsTo:#illegalBits) (obj illegalBits:0))
+	(while (!= ((= event (Event new:)) type?) mouseDown) 
+		(GlobalToLocal event)
+		(obj posn:(event x?) (event y?))
+		(Animate (cast elements?) FALSE)
+		(event dispose:)
+	)
+ 	(event dispose:)
 	
-	(method (handleEvent event)
-		(super handleEvent: event &rest)
-		(if
-			(or
-				(and
-					(== (event type?) mouseDown)
-					(event claimed?)
-				)
-				(and
-					(== (event type?) keyDown)
-					(== (event message?) SPACEBAR)
-				)
-			)
-			(if (== (StrAt cursor 0) 62)
-				(StrAt cursor 0 32)
-			else
-				(StrAt cursor 0 62)
-			)
-			(self draw:)
-			(event claimed: 1)
-		)
-		(event claimed?)
-	)
 )
 
-(instance textI of DText
-	(properties
-		font 0
+(procedure (Logit what)
+	(File	
+		name:	 @sysLogPath,
+		writeString: what,
+		close:
+	)
+	(DisposeScript FILE)
+)
+
+;(procedure (DoProperties obj 
+;					&tmp 
+;					theDialog 
+;					nounT 
+;					nounE 
+;					scT
+;					scE
+;					ccT
+;					ccE
+;					lookT
+;					lookE
+;					descT
+;					descE
+;					sightAngT
+;					sightAngE
+;					getDistT
+;					getDistE
+;					seeDistT
+;					seeDistE
+;					[titleString 40]
+;				)
+;	(Format @titleString "instance %s of %s" @nameString ((obj superClass?) name?))
+;	((= theDialog (Dialog new:))
+;		window: systemWindow,
+;		text:	  @titleString	
+;	)
+;	(StrCpy @nounString {/})
+;	((= nounT (DText new:))
+;		text:		{/noun?},
+;		moveTo: 	MARGIN MARGIN, 
+;		font:		999,
+;		setSize:
+;	)
+;	((= nounE (DEdit new:))
+;		text:		@nounString,
+;		font: 	999, 
+;		moveTo: 	MARGIN (+ (nounT nsBottom?) 4),
+;		max:		40,
+;		setSize:
+;	)
+;	(StrCpy @sCStr {#doLook})
+;	((= scT (DText new:))
+;		text:		{shiftClick selector?},
+;		moveTo: 	MARGIN (+ (nounE nsBottom?) 4), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= scE (DEdit new:))
+;		text:		@sCStr,
+;		font: 	999, 
+;		moveTo: 	MARGIN (+ (scT nsBottom?) 4),
+;		max:20,
+;		setSize:
+;	)
+;	(StrCpy @cCStr {#doGet})
+;	((= ccT (DText new:))
+;		text:		{cntrlClick selector?},
+;		moveTo: 	(+ (scT nsRight?) 8) (scT nsTop?), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= ccE (DEdit new:))
+;		text:		@cCStr,
+;		font: 	999, 
+;		moveTo: 	(ccT nsLeft?) (+ (ccT nsBottom?) 4),
+;		max:		20,
+;		setSize:
+;	)
+;	(= lookString 0)
+;	((= lookT (DText new:))
+;		text:		{look response?},
+;		moveTo: 	MARGIN (+ (scE nsBottom?) 4), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= lookE (DEdit new:))
+;		text:		@lookString,
+;		font: 	999, 
+;		moveTo: 	MARGIN (+ (lookT nsBottom?) 4),
+;		max:40,
+;		setSize:
+;	)
+;	(= descString 0)
+;	((= descT (DText new:))
+;		text:		{description?},
+;		moveTo: 	MARGIN (+ (lookE nsBottom?) 4), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= descE (DEdit new:))
+;		text:		@descString,
+;		font: 	999, 
+;		moveTo: 	MARGIN (+ (descT nsBottom?) 4),
+;		max:		40,
+;		setSize:
+;	)
+;	(StrCpy @sightStr {90})
+;	((= sightAngT (DText new:))
+;		text:		{sight angle?},
+;		moveTo: 	MARGIN (+ (descE nsBottom?) 4), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= sightAngE (DEdit new:))
+;		text:		@sightStr,
+;		font: 	999, 
+;		moveTo: 	MARGIN (+ (sightAngT nsBottom?) 4),
+;		max:		4,
+;		setSize:
+;	)
+;
+;	(StrCpy @getDistStr {50})
+;	((= getDistT (DText new:))
+;		text:		{get distance?},
+;		moveTo: 	(+ (sightAngT nsRight?) 10)  (sightAngT nsTop?), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= getDistE (DEdit new:))
+;		text:		@getDistStr,
+;		font: 	999, 
+;		moveTo: 	(getDistT nsLeft?)	(+ (sightAngT nsBottom?) 4),
+;		max:		4,
+;		setSize:
+;	)
+;
+;	(StrCpy @seeDistStr {100})
+;	((= seeDistT (DText new:))
+;		text:		{see distance?},
+;		moveTo: 	(+ (getDistT nsRight?) 10)  (sightAngT nsTop?), 
+;		font:		999,
+;		setSize:
+;	)
+;	((= seeDistE (DEdit new:))
+;		text:		@seeDistStr,
+;		font: 	999, 
+;		moveTo: 	(seeDistT nsLeft?)	(+ (sightAngT nsBottom?) 4),
+;		max:		4,
+;		setSize:
+;	)
+;	(theDialog 
+;		add: 			
+;			nounT 		nounE 
+;			scT 			scE 
+;			ccT 			ccE 
+;			lookT 		lookE 
+;			descT 		descE
+;			sightAngT	sightAngE
+;			getDistT		getDistE
+;			seeDistT		seeDistE,
+;		setSize:		, 
+;		center:		,
+;		open:			,
+;		doit:
+;	)
+;	(obj
+;		noun:				@nounString,
+;		shiftClick:		@sCStr,
+;		contClick:		@cCStr,
+;		lookStr:			@lookString,
+;		sightAngle:		(ReadNumber @sightStr),
+;		getableDist:	(ReadNumber	@getDistStr),
+;		seeableDist:	(ReadNumber	@seeDistStr),
+;		description:	@descString
+;	)
+;	(theDialog dispose:)
+;)
+
+
+
+; less filling DoProperties light.
+
+(procedure (DoProperties obj)
+;	(featuresStrings add:
+;		((stringHolder new:)
+		(obj
+;			who:obj,
+			noun:(GetInput	@nounString 30 {/noun?}),
+			shiftClick:(GetVerb	@sCStr 20 {shftClick verb?}),
+			contClick:(GetVerb	@cCStr 20 {cntrlClick verb?}),
+			sightAngle:(GetNumber {sight angle?} 90),	
+			closeRangeDist:(GetNumber {getable dist?} 50),
+			longRangeDist:(GetNumber {seeable dist?} 100),
+			description:(GetInput @descString 50 {description?})
+		)
+;	)
+)
+
+(procedure (GetVerb theString theSize theTitle)
+	(GetInput theString theSize theTitle)
+	(return
+		(cond
+			((StrCmp theString {verbLook})
+				verbLook
+			)
+;			((StrCmp theString {verbOpen})
+;				verbOpen	
+;			)
+;			((StrCmp theString {verbClose})
+;				verbClose
+;			)
+;			((StrCmp theString {verbSmell})
+;				verbSmell
+;			)
+;			((StrCmp theString {verbMove})
+;				verbMove	
+;			)
+;			((StrCmp theString {verbEat})
+;				verbEat 	
+;			)
+;			((StrCmp theString {verbGet})
+;				verbGet 	
+;			)
+		)
 	)
 )

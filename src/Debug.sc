@@ -2,190 +2,328 @@
 (script# DEBUG)
 (include game.sh)
 (use Main)
+(use Procs)
 (use Intrface)
-(use PolyEdit)
-(use WriteFtr)
-(use Window)
-(use User)
-(use Invent)
 (use Feature)
+(use Invent)
+(use User)
 (use Actor)
 (use System)
 
 (public
-	debugHandler 0
+	dbg 0
 )
 
 (local
-	singleStepOn
-	invDButton
+	yesI
 )
-(procedure (SingleStepMode &tmp evt)
-	(while
-	(!= ((= evt (Event new:)) message?) $1800)
-		(if (== (evt message?) $2200)
-			(theGame doit:)
+(procedure (GetNum n default &tmp [str 40])
+	(= str 0)
+	(if (> argc 1)
+		(Format @str 899 0 default)
+	)
+	(return
+		(if (GetInput @str 10 n)
+			(ReadNumber @str)
 		else
-			(evt dispose:)
+			-1
 		)
 	)
 )
 
-(instance debugHandler of Feature
-	
+(procedure (CheckScroll)
+	(if (OneOf (curRoom style?) SCROLLRIGHT SCROLLLEFT SCROLLUP SCROLLDOWN)
+		(curRoom drawPic: (curRoom picture?) PLAIN style: PLAIN)
+	)
+)
+
+(instance dbg of Feature
+
 	(method (init)
 		(super init:)
 		(mouseDownHandler addToFront: self)
 		(keyDownHandler addToFront: self)
 	)
-	
 	(method (dispose)
 		(mouseDownHandler delete: self)
 		(keyDownHandler delete: self)
 		(super dispose:)
 		(DisposeScript DEBUG)
 	)
-	
-	
-	(method (handleEvent event &tmp obj i [str 80] nextRoom)
+
+	(method (handleEvent event &tmp
+			[str 75] obj evt i node saveBits theColor t l r b numCols numRows)
 		(switch (event type?)
 			(keyDown
 				(event claimed: TRUE)
 				(switch (event message?)
-					(`@t
-						(= nextRoom (GetNumber {Which room number?}))
-						(curRoom newRoom: nextRoom)
-					)
-					(`?
-						(Print
-							"Debug Key commands:\n
-							ALT-A Cursor Position\n
-							ALT-B Polygon Editor\n
-							ALT-C Control\n
-							ALT-E Show ego\n
-							ALT-F Set/Clr Flag\n
-							ALT-G Go one cycle\n
-							_____(in single-step mode only)\n
-							ALT-I Get InvItem\n
-							ALT-L Open Log File\n
-							ALT-M Show memory"
+					(`@k
+						(= obj (GetPort))
+						(SetPort 0)
+						(= numCols 5)
+						(= numRows 16)
+						(= t 15)
+						(= l 80)
+						(= b (+ t (* 34 numCols)))
+						(= r (+ l (* 10 numRows)))
+						(= saveBits
+							(Graph GSaveBits t l b r VMAP)
 						)
-						(Print
-							"ALT-O Single-Step\n
-							ALT-P Priority\n
-							ALT-S Show cast\n
-							ALT-T Teleport\n
-							ALT-V Visual\n
-							ALT-W Feature Writer\n
-							ALT-X eXit game quickly"
-						)
-					)
-					(`@a
-						(Printf "Cursor X: %d Y: %d" (event x?) (event y?))
-					)
-					(`@b
-						(PolygonEditor doit:)
-					)
-					(`@s
-						(= i (cast first:))
-						(while i
-							(= obj (NodeValue i))
-							(Print
-								(Format
-									@str "view: %d
-										(x,y):%d,%d
-										STOPUPD=%d
-										IGNRACT=%d
-										ILLBITS=$%x"
-									(obj view?)
-									(obj x?)
-									(obj y?)
-									(/ (& (obj signal?) notUpd) notUpd)
-									(/ (& (obj signal?) ignrAct) ignrAct)
-									(if
-										(or
-											(== (obj superClass?) Actor)
-											(== (obj superClass?) Ego)
-										)
-										(obj illegalBits?)
-									else
-										-1
-									)
-								)
-								#window SysWindow
-								#title (obj name?)
-								#icon (obj view?) (obj loop?) (obj cel?)
+						(Graph GFillRect t l b r 1 255)
+						(for ((= theColor 0)) (< theColor 256) ((++ theColor))
+							(Graph
+								GFillRect
+								(+ t numCols (* numCols (/ theColor 8)))
+								(+ l numRows (* 16 (mod theColor 8)))
+								(+ t numCols numCols (* numCols (/ theColor 8)))
+								(+ l numRows numRows (* numRows (mod theColor 8)))
+								VMAP
+								theColor
 							)
-							(= i (cast next: i))
 						)
+						(Graph GShowBits t l b r VMAP)
+						(repeat
+							(if
+								(or
+									(== ((= evt (Event new:)) type?) mouseDown)
+									(== (evt type?) keyDown)
+								)
+								(break)
+							)
+							(evt dispose:)
+						)
+						(evt dispose:)
+						(Graph GRestoreBits saveBits)
+						(Graph GShowBits t l b r VMAP)
+						(SetPort obj)
 					)
-					(`@m
+					(`@f
 						(theGame showMem:)
 					)
-					(`@e
-						(Format
-							@str "ego\nx:%d y:%d\nloop:%d\ncel:%d"
-							(ego x?)
-							(ego y?)
-							(ego loop?)
-							(ego cel?)
+					(`@g
+						(= str 0)
+						(GetInput @str 4 {Variable No.})
+						(= i (ReadNumber @str))
+						(= str 0)
+						(GetInput @str 4 {Value})
+						(= [ego i] (ReadNumber @str))
+						(= str 0)
+					)
+					(`@h
+						(= str 0)
+						(GetInput @str 4 {Variable No.})
+						(= i (ReadNumber @str))
+						(if (IsObject [ego i])
+							(Printf 899 1 i ([ego i] name?))
+						else
+							(Printf 899 2 i [ego i])
 						)
-						(Print @str #icon (ego view?) 0 0)
+						(= str 0)
 					)
 					(`@v
 						(Show VMAP)
 					)
 					(`@p
+						(CheckScroll)
 						(Show PMAP)
 					)
 					(`@c
+						(CheckScroll)
 						(Show CMAP)
-					)
-					(`@k
-						(if singleStepOn
-							(theGame doit:)
+						(Animate (cast elements?))
+						(while (== 0 ((= event (Event new: (- allEvents mouseUp))) type?))
+							(event dispose:)
 						)
+						(event dispose:)
+						(Show VMAP)
+					)
+					(`@e
+						(if (cast contains: ego)
+							(Print
+								(Format @str 899 3
+									(ego view?)
+									(ego loop?)
+									(ego cel?)
+									(ego x?)
+									(ego y?)
+									(ego z?)
+									(ego heading?)
+									(ego priority?)
+									(ego signal?)
+									(ego illegalBits?)
+									(ego normal?)
+									(ego onControl:)
+									(ego onControl: origin)
+								)
+								#title (ego name?)
+								#icon (ego view?) (ego loop?) (ego cel?)
+							)
+						else
+							(Print 899 4)
+						)
+					)
+					(`@a
+						(= i (cast first:))
+						(while i
+							(= node (NodeValue i))
+							(Print
+								(Format @str 899 5
+									(node name?)
+									((node superClass?) name?)
+									(node view?)
+									(node loop?)
+									(node cel?)
+									(node x?)
+									(node y?)
+									(node z?)
+									(node heading?)
+									(node priority?)
+									(node signal?)
+									(if
+										(or
+											(== (node superClass?) Actor)
+											(== (node superClass?) Ego)
+										)
+										(node illegalBits?)
+									else
+										-1
+									)
+								)
+								#icon
+								(node view?)
+								(node loop?)
+								(node cel?)
+							)
+							(= i (cast next: i))
+						)
+					)
+					(`@t
+						(if modelessDialog
+							(modelessDialog dispose:)
+						)
+						(if (> (= i (GetNumber {Teleport to:})) 0)
+							(theMusic stop:)
+							(curRoom newRoom: i)
+						)
+					)
+					(`@d
+						(if (= debugOn (not debugOn))
+							(Print 899 6)
+						else
+							(Print 899 7)
+						)
+					)
+					(`@r
+						(Printf 899 8
+							curRoomNum
+							(curRoom name?)
+							(if (IsObject (curRoom script?))
+								((curRoom script?) name?)
+							else
+								{..none..}
+							)
+							(curRoom horizon?)
+							(curRoom vanishingX?)
+							(curRoom vanishingY?)
+							(curRoom picAngle?)
+							(curRoom north?)
+							(curRoom south?)
+							(curRoom east?)
+							(curRoom west?)
+							(curRoom style?)
+							(curRoom curPic?)
+						)
+					)
+					(`@y
+						(Printf 899 9
+							(curRoom vanishingX?)
+							(curRoom vanishingY?)
+						)
+						(= i (GetNum {vanishingX:}))
+						(if (OneOf i -1 0)
+						else
+							(curRoom vanishingX: i)
+						)
+						(= i (GetNum {vanishingY:}))
+						(if (OneOf i -1 0)
+						else
+							(curRoom vanishingY: i)
+						)
+						(Printf 899 9
+							(curRoom vanishingX?)
+							(curRoom vanishingY?)
+						)
+					)
+					(`@u
+						(User canInput: TRUE canControl: TRUE)
+						(theIconBar enable:
+							ICON_WALK
+							ICON_LOOK
+							ICON_DO
+							ICON_TALK
+							ICON_HELP
+							ICON_ITEM
+							ICON_INVENTORY
+						)
+					)
+					(`@z
+						(= quit TRUE)
 					)
 					(`@i
 						(dInvD doit:)
 					)
-					(`@l
-						(if (> (MemoryInfo LargestPtr) 1536)
-							((ScriptID LOGGER) doit: @sysLogPath)
-						else
-							(Print "Not Enough Memory!!")
-						)
-						(event claimed: TRUE)
+					(3
+						(while (not (!= (= i (GetNumber {Clear Flag#:_})) -1)))
+						(Bclr i)
 					)
-					(`@o
-						(if singleStepOn
-							(= singleStepOn FALSE)
-							(Print "Single-step mode is off")
-						else
-							(= singleStepOn TRUE)
-							(Print "Single-step mode is on")
-							(SingleStepMode)
-						)
-					)
-					(`@f
-						(= i 0)
-						(= i (GetNumber {Flag Number:}))
-						(if (Btst i)
-							(Print "clearing flag")
-							(Bclr i)
-						else
-							(Print "setting flag")
-							(Bset i)
-						)
-					)
-					(`@w
-						(CreateObject doit:)
-					)
-					(`@x
-						(= quit TRUE)
+					($0013
+						(while (not (!= (= i (GetNumber {Set Flag#:_})) -1)))
+						(Bset i)
 					)
 					(else
 						(event claimed: FALSE)
+					)
+				)
+			)
+			(mouseDown
+				(cond 
+					((== (event modifiers?) altDown)
+						(event claimed: TRUE)
+						(= obj
+							(Print
+								(Format @str 899 10 (event x?) (event y?))
+								#at
+								(cond 
+									((< (event x?) 23) 3)
+									((> (event x?) 292) 273)
+									(else (- (event x?) 20))
+								)
+								(cond 
+									((< (event y?) 9) 3)
+									((> (event y?) 175) 170)
+									(else (- (event y?) 6))
+								)
+								#font 999
+								#dispose
+							)
+						)
+						(while (!= mouseUp ((= evt (Event new:)) type?))
+							(evt dispose:)
+						)
+						(evt dispose:)
+						(obj dispose:)
+					)
+					((== (event modifiers?) (| ctrlDown altDown))
+						(event claimed: TRUE)
+						(while (!= mouseUp ((= evt (Event new:)) type?))
+							((User alterEgo?)
+								posn: (evt x?) (- (evt y?) 10)
+								setMotion: 0
+							)
+							(Animate (cast elements?) FALSE)
+							(evt dispose:)
+						)
+						(evt dispose:)
 					)
 				)
 			)
@@ -194,23 +332,20 @@
 )
 
 (instance dInvD of Dialog
-	(properties)
-	
-	(method (init &tmp temp0 temp1 temp2 i newDText inventoryFirst temp6)
-		(= temp2 (= temp0 (= temp1 4)))
-		(= i 0)
-		(= inventoryFirst (inventory first:))
-		(while inventoryFirst
-			(= temp6 (NodeValue inventoryFirst))
-			(++ i)
-			(if (temp6 isKindOf: InvItem)
+	(method (init &tmp lastX lastY widest num el node obj)
+		(= widest (= lastX (= lastY 4)))
+		(= num 0)
+		(for ((= node (inventory first?))) node ((= node (inventory next: node)))
+			(= obj (NodeValue node))
+			(++ num)
+			(if (obj isKindOf: InvItem)
 				(self
 					add:
-						((= newDText (DText new:))
-							value: temp6
-							text: (temp6 name?)
-							nsLeft: temp0
-							nsTop: temp1
+						((= el (DText new:))
+							value: obj
+							text: (obj name?)
+							nsLeft: lastX
+							nsTop: lastY
 							state: 3
 							font: smallFont
 							setSize:
@@ -218,80 +353,85 @@
 						)
 				)
 			)
-			(if
-			(< temp2 (- (newDText nsRight?) (newDText nsLeft?)))
-				(= temp2 (- (newDText nsRight?) (newDText nsLeft?)))
+			(if (< widest (- (el nsRight?) (el nsLeft?)))
+				(= widest (- (el nsRight?) (el nsLeft?)))
 			)
 			(if
 				(>
-					(= temp1
-						(+ temp1 (- (newDText nsBottom?) (newDText nsTop?)) 1)
+					(= lastY
+						(+ lastY (- (el nsBottom?) (el nsTop?)) 1)
 					)
 					140
 				)
-				(= temp1 4)
-				(= temp0 (+ temp0 temp2 10))
-				(= temp2 0)
+				(= lastY 4)
+				(= lastX (+ lastX widest 10))
+				(= widest 0)
 			)
-			(= inventoryFirst (inventory next: inventoryFirst))
 		)
 		(= window systemWindow)
 		(self setSize:)
-		(= invDButton (DButton new:))
-		(invDButton
+		(= yesI (DButton new:))
+		(yesI
 			text: {Outta here!}
 			setSize:
-			moveTo: (- nsRight (+ 4 (invDButton nsRight?))) nsBottom
+			moveTo: (- nsRight (+ 4 (yesI nsRight?))) nsBottom
 		)
-		(self add: invDButton setSize: center:)
-		(return i)
+		(yesI
+			move: (- (yesI nsLeft?) (yesI nsRight?)) 0
+		)
+		(self add: yesI setSize: center:)
+		(return num)
 	)
 	
-	(method (doit &tmp theNewDButton)
+	(method (doit &tmp el)
 		(self init:)
-		(self open: MARGIN 15)
-		(= theNewDButton invDButton)
+		(self open: 4 15)
+		(= el yesI)
 		(repeat
 			(if
 				(or
-					(not (= theNewDButton (super doit: theNewDButton)))
-					(== theNewDButton -1)
-					(== theNewDButton invDButton)
+					(not
+						(= el (super doit: el))
+					)
+					(== el -1)
+					(== el yesI)
 				)
 				(break)
 			)
-			((theNewDButton value?) owner: ego)
+			((el value?) owner: ego)
 		)
 		(self dispose:)
 	)
 	
-	(method (handleEvent event &tmp eMsg eType)
-		(= eMsg (event message?))
-		(switch (= eType (event type?))
+	(method (handleEvent event &tmp evMsg evType)
+		(= evMsg (event message?))
+		(switch (= evType (event type?))
 			(keyDown
-				(switch eMsg
+				(switch evMsg
 					(UPARROW
-						(= eMsg SHIFTTAB)
+						(= evMsg SHIFTTAB)
 					)
 					(DOWNARROW
-						(= eMsg TAB)
+						(= evMsg TAB)
 					)
 				)
 			)
 			(direction
-				(switch eMsg
+				(switch evMsg
 					(dirN
-						(= eMsg SHIFTTAB)
-						(= eType keyDown)
+						(= evMsg SHIFTTAB)
+						(= evType keyDown)
 					)
 					(dirS
-						(= eMsg TAB)
-						(= eType keyDown)
+						(= evMsg TAB)
+						(= evType keyDown)
 					)
 				)
 			)
 		)
-		(event type: eType message: eMsg)
+		(event type: evType message: evMsg)
 		(super handleEvent: event)
 	)
 )
+
+
