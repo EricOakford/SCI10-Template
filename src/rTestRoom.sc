@@ -1,12 +1,12 @@
 ;;; Sierra Script 1.0 - (do not remove this comment)
-(script# rTestroom)
+(script# rTestRoom)
 (include game.sh)
 (use Main)
+(use Procs)
+(use Intrface)
+(use Polygon)
 (use Game)
 (use Sound)
-(use Intrface)
-(use Procs)
-(use Talker)
 (use Actor)
 (use System)
 
@@ -16,30 +16,45 @@
 
 (instance testRoom of Room
 	(properties
-		lookStr {This is an empty room.}
+		lookStr {You are in an empty room.}
 		picture scriptNumber
-		style PIXELDISSOLVE
+		style FADEOUT
+		horizon 50
+		vanishingX 130
+		vanishingY 50
 	)
 	
 	(method (init)
-		(HandsOn)
-		(ego
-			posn: 146 153
-			loop: 0
-			init:
-			normalize:
-		)
 		(super init:)
-	)
-	
-	(method (doit)
-		(super doit:)
+		(switch prevRoomNum
+			; Add room numbers here to set up the ego when coming from different directions.
+			(else 
+				(ego posn: 150 130)
+			)
+		)
+		;set up polygons
+		;room poly
+		(curRoom addObstacle:
+			((Polygon new:)
+				type: PContainedAccess
+				init:
+					319 189
+					319 50
+					0 50
+					0 189
+				yourself:
+			)
+		)
+		(ego init: normalize:)
+		; We just came from the title screen, so we need to call this to give control
+		; to the player.
+		(HandsOn)
 	)
 	
 	(method (doVerb theVerb)
 		(switch theVerb
 			(else
-				(super doVerb: theVerb &rest)
+				(super doVerb: theVerb)
 			)
 		)
 	)

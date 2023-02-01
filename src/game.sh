@@ -29,6 +29,7 @@
 (define WHERE_TO		13)
 (define DISPOSE			14)
 (define PROCS			15)
+(define COLOR_INIT		16)
 
 ;
 ; Actual rooms

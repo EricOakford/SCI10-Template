@@ -76,6 +76,7 @@
 				iconControlHelp
 			helpIconItem: iconControlHelp
 			curIcon: iconRestore
+			okButton: iconOk
 			eachElementDo: #highlightColor 0
 			eachElementDo: #lowlightColor (FindColor colGray4 colGray1)
 			state: NOCLICKHELP

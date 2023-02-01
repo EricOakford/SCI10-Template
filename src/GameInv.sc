@@ -9,6 +9,7 @@
 (include game.sh)
 (use Main)
 (use Procs)
+(use Intrface)
 (use IconBar)
 (use BordWind)
 (use Invent)
@@ -71,6 +72,17 @@
 		cursor 200
 		description {Money! Cash! Assets!}
 	)
+	
+	(method (doVerb theVerb)
+		(switch theVerb
+			(verbDo
+				(Print "There isn't much you can do to it what inflation hasn't already.")
+			)
+			(else
+				(super doVerb: theVerb)
+			)
+		)
+	)
 )
 
 (instance invLook of GameIconItem
@@ -117,6 +129,7 @@
 		cel 0
 		cursor HELP_CURSOR
 		message verbHelp
+		helpStr {This icon tells you about the other icons.}
 	)
 	(method (init)
 		(self

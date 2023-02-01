@@ -13,8 +13,6 @@
 
 (public
 	RedrawCast 0
-	HandsOn 1
-	HandsOff 2
 	cls 3
 	Btst 4
 	Bset 5
@@ -30,59 +28,6 @@
 (procedure (RedrawCast)
 	;Used to re-animate the cast without cycling
 	(Animate (cast elements?) FALSE)
-)
-
-(procedure (HandsOn)
-	;Enable ego control
-	(= isHandsOff FALSE)
-	(User canControl: TRUE canInput: TRUE)
-	(theIconBar enable:
-		ICON_WALK
-		ICON_LOOK
-		ICON_DO
-		ICON_TALK
-		ICON_ITEM
-		ICON_INVENTORY
-		ICON_CONTROL
-		ICON_HELP
-	)
-	(if (not (theIconBar curInvIcon?))
-		(theIconBar disable: ICON_ITEM)
-	)
-	(if (not (HaveMouse))
-		(theGame setCursor:
-			((theIconBar curIcon?) cursor?) TRUE saveCursorX saveCursorY
-		)
-	else
-		(theGame setCursor: ((theIconBar curIcon?) cursor?))
-	)
-)
-
-(procedure (HandsOff &tmp saveIcon)
-	;Disable ego control
-	(= isHandsOff TRUE)
-	(User canControl: FALSE canInput: FALSE)
-	(ego setMotion: 0)
-	(= saveIcon (theIconBar curIcon?))
-	(theIconBar disable:
-		ICON_WALK
-		ICON_LOOK
-		ICON_DO
-		ICON_TALK
-		ICON_ITEM
-		ICON_INVENTORY
-	)
-	(theIconBar curIcon: saveIcon)
-	(if (not (HaveMouse))
-		(= saveCursorX ((User curEvent?) x?))
-		(= saveCursorY ((User curEvent?) y?))
-		(theGame setCursor: waitCursor TRUE 310 180)
-	else
-		(theGame setCursor: waitCursor TRUE)
-	)
-	(if pMouse
-		(pMouse stop:)
-	)
 )
 
 (procedure (cls)

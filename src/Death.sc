@@ -43,6 +43,7 @@
 	
 	(method (init)
 		(theMusic fade:)
+		(theMusic2 fade:)
 		(theIconBar disable:)
 		(theGame setCursor: normalCursor TRUE)
 		(super init:)

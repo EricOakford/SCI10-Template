@@ -6,7 +6,6 @@
 ;	 you should probably add your script number here.
 ;
 ;
-
 (script# DISPOSE)
 (include game.sh)
 (use Main)

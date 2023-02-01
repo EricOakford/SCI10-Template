@@ -9,36 +9,23 @@
 (script# MAIN)
 (include game.sh) (include language.sh)
 (use GameEgo)
-(use Intrface)
-(use Window)
 (use Procs)
-(use PrintD)
+(use Intrface)
 (use PMouse)
-(use GameEgo)
-(use SlideIcon)
-(use BordWind)
-(use Feature)
-(use LoadMany)
-(use IconBar)
-(use BordWind)
-(use RandCyc)
-(use PAvoid)
-(use StopWalk)
-(use PolyPath)
 (use Polygon)
-(use Osc)
-(use DCIcon)
-(use Motion)
-(use Grooper)
+(use PolyPath)
+(use IconBar)
+(use Feature)
+(use Window)
 (use Sound)
 (use Game)
-(use Invent)
 (use User)
-(use Actor)
 (use System)
 
 (public
-	SCI10 0 ;Replace "SCI10" with the game's internal name here (up to 6 characters)
+	SCI10 0 ;Replace "SCI10" with the game's internal name (up to 6 characters)
+	HandsOn 1
+	HandsOff 2
 )
 
 (local
@@ -135,7 +122,7 @@
 	;globals 100 and above are for game use	
 	theMusic	;music object, current playing music
 	gameCode = 1234	;EO: Don't mess with this, or you'll get Error 11 shortly after startup!
-	
+	theMusic2	;second sound object, can be used for sound effects
 	;standard globals for colors
 	colBlack
 	colGray1
@@ -163,34 +150,58 @@
 	colCyan
 	colLCyan
 	;end standard color globals
+	myTextColor				;color of text in message boxes
+	myBackColor				;color of message boxes
 	
-	[gameFlags FLAG_ARRAY]	; array of all event flags. It can be increased in GAME.SH.
+	[gameFlags FLAG_ARRAY]	;array of all event flags. It can be increased in GAME.SH.
 	saveCursorX				; position of cursor when HandsOff is used
 	saveCursorY				;
-	numColors				; Number of colors supported by graphics driver
-	numVoices				; Number of voices supported by sound driver
-	debugging				; debug mode enabled
-	isHandsOff				; ego can't be controlled
-	egoLooper				; pointer for ego's stopGroop
+	numColors				;Number of colors supported by graphics driver
+	numVoices				;Number of voices supported by sound driver
+	debugging				;debug mode enabled
+	isHandsOff				;ego can't be controlled
+	egoLooper				;pointer for ego's stopGroop
 	deathReason
+	theCurIcon
+	iconSettings
 )
 
 ;
-; Global sound object
-(instance longSong of Sound)
+; Global sound objects
+(instance longSong of Sound
+	(properties
+		flags mNOPAUSE
+	)
+)
 
+(instance longSong2 of Sound
+	(properties
+		flags mNOPAUSE
+	)
+)
+
+;
+;  Sound used only by theGame:solvePuzzle
+(instance pointsSound of Sound
+	(properties
+		number sScore
+		flags mNOPAUSE
+	)
+)
 ;
 ; Event handlers
 (instance keyH of EventHandler)
 (instance mouseH of EventHandler)
 (instance dirH of EventHandler)
 
+;
+; The main game instance. It adds game-specific functionality.	
+; Replace "SCI10" with the game's internal name (up to 6 characters)
 (instance SCI10 of Game
-	; The main game instance. It adds game-specific functionality.	
 	(properties
 		printLang ENGLISH	;set your game's language here. Supported languages can be found in LANGUAGE.SH.
 	)
-	
+
 	(method (init)
 		;load up the standard game system
 		(= systemWindow SysWindow)
@@ -198,13 +209,23 @@
 		(super init: &rest)
 		
 		;initialize the colors first
-		((ScriptID GAME_INIT 1) doit:)
+		((ScriptID COLOR_INIT 0) doit:)
 		
-		;set up the global sound
+		;set up the global sounds
 		((= theMusic longSong)
-			init:
 			owner: self
-			flags: mNOPAUSE
+			init:
+		)
+		((= theMusic2 longSong2)
+			owner: self
+			init:
+		)
+		
+		(pointsSound
+			owner: self
+			init:
+			setPri: 15
+			setLoop: 1
 		)
 		
 		;set up doVerb and feature initializer code
@@ -235,20 +256,20 @@
 		;now go to the speed tester
 		(self newRoom: SPEED_TEST)
 	)
-	
+
 	(method (startRoom n)
 		(cls)
-		((ScriptID DISPOSE 0) doit:)
+		((ScriptID DISPOSE 0) doit: n)
 		; Check for frags
 		(if (and	(!= (- (MemoryInfo FreeHeap) 2)
 					(MemoryInfo LargestPtr))
-					(Print {Memory fragmented.})
-					(theGame showMem:)
-				)
+				(Print {Memory fragmented.})
+				(theGame showMem:)
+			)
 		)
 		(if debugging
 			((ScriptID DEBUG 0) init:)
-		)			
+		)
 		(super startRoom: n)
 	)
 
@@ -274,14 +295,14 @@
 							(Print "Your money's no good there.")
 						)
 						(else
-							(Print "Try finding some place else to place that.")
+							(Print "It doesn't work.")
 						)
 					)
 				)
 			)
 		)
 	)
-	
+
 	(method (handleEvent event)
 		(super handleEvent: event)
 		(if (event claimed?) (return TRUE))
@@ -353,11 +374,17 @@
 	)
 
 	(method (solvePuzzle pFlag pValue)
-		;Adds an amount to the player's current score. A flag (one used with
-		;Bset, Bclr, and Btst) is used so that a score is only added once.
-			(if (not (Btst pFlag))
+		;Adds an amount to the player's current score.
+		;It checks if a certain flag is set so that the points are awarded only once.
+		(if (and (> argc 1) (Btst pFlag))
+			(return)
+		)
+		(if pValue
 			(theGame changeScore: pValue)
-			(Bset pFlag)
+			(if (and (> argc 1) pFlag)
+				(Bset pFlag)
+				(pointsSound play:)
+			)
 		)
 	)
 
@@ -377,7 +404,7 @@
 			)
 		)
 	)
-	
+
 	(method (quitGame)
 		(super quitGame:
 			(YesNoDialog "Do you really want to quit?")
@@ -444,5 +471,99 @@
 (instance theDefaultFeature of Feature
 	(properties
 		description "that thing (whatever it is)"
+	)
+)
+
+(procedure (HandsOff)
+	;Disable ego control
+	(if (not theCurIcon)	; don't want to save it twice!
+		(= theCurIcon (theIconBar curIcon?))
+	)
+	
+	(= isHandsOff TRUE)
+	(User
+		canControl: FALSE
+		canInput: FALSE
+	)
+	(ego setMotion: 0)
+	
+	; save the state of each icon so we can put the icon bar back the way it was
+	(= iconSettings 0)
+	(theIconBar eachElementDo: #perform checkIcon)
+
+	; disable some icons so user doesn't screw us up
+	(theIconBar disable:
+		ICON_WALK
+		ICON_LOOK
+		ICON_DO
+		ICON_TALK
+		ICON_ITEM
+		ICON_INVENTORY
+	)
+	
+	; if no mouse, move the cursor out of the way, but save the initial
+	; posn so HandsOn can restore it	
+	(if (not (HaveMouse))
+		(= saveCursorX ((User curEvent?) x?))
+		(= saveCursorY ((User curEvent?) y?))
+		(theGame setCursor: waitCursor TRUE 310 185)
+	else
+		(theGame setCursor: waitCursor TRUE)
+	)
+)
+
+(procedure (HandsOn)
+	;Enable ego control
+	(= isHandsOff FALSE)
+	(User
+		canControl: TRUE
+		canInput: TRUE
+	)
+	
+	; re-enable iconbar
+	(theIconBar enable:
+		ICON_WALK
+		ICON_LOOK
+		ICON_DO
+		ICON_TALK
+		ICON_ITEM
+		ICON_INVENTORY
+		ICON_CONTROL
+		ICON_HELP
+	)
+	(if (not (theIconBar curInvIcon?))
+		(theIconBar disable: ICON_ITEM)
+	)
+
+	(if theCurIcon
+		(theIconBar curIcon: theCurIcon)
+		(theGame setCursor: ((theIconBar curIcon?) cursor?))
+		(= theCurIcon 0)
+		(if (and	(== (theIconBar curIcon?) (theIconBar at: ICON_ITEM))
+					(not (theIconBar curInvIcon?))
+				)
+			(theIconBar advanceCurIcon:)
+		)
+	)	
+	
+	; restore cursor xy posn if no mouse
+	(if (not (HaveMouse))
+		(theGame setCursor:
+			((theIconBar curIcon?) cursor?) TRUE saveCursorX saveCursorY
+		)
+	else
+		(theGame setCursor:
+			((theIconBar curIcon?) cursor?) TRUE
+		)
+	)
+)
+
+(instance checkIcon of Code
+	(method (doit theIcon)
+		(if (theIcon isKindOf: IconItem)		; It's an icon
+			(if (& (theIcon signal?) DISABLED)
+				(|= iconSettings (>> $8000 (theIconBar indexOf: theIcon)))
+			)
+		)
 	)
 )
