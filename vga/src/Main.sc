@@ -9,6 +9,8 @@
 (script# MAIN)
 (include game.sh) (include language.sh)
 (use GameEgo)
+(use GameWindow)
+(use BordWind)
 (use Procs)
 (use Intrface)
 (use PMouse)
@@ -207,7 +209,9 @@
 		(= systemWindow SysWindow)
 		(= version {x.yyy})
 		(super init: &rest)
-		
+
+		;set the custom window here, not in GameInit!
+		(= systemWindow BorderWindow)		
 		;initialize the colors first
 		((ScriptID COLOR_INIT 0) doit:)
 		

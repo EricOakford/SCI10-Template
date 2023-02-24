@@ -23,7 +23,6 @@
 		(= numVoices (DoSound NumVoices))
 		(= numColors (Graph GDetect))
 		(= useSortedFeatures TRUE)
-		(= systemWindow BorderWindow)
 		(theGame
 			egoMoveSpeed: 4
 			setCursor: theCursor TRUE 304 172
