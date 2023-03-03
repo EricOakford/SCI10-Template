@@ -5,7 +5,7 @@
 ;
 
 (script# PROCS)
-(include game.sh)
+(include game.sh) (include language.sh)
 (use Main)
 (use Intrface)
 (use StopWalk)
@@ -23,6 +23,8 @@
 	InRoom 10
 	PutInRoom 11
 	YesNoDialog 12
+	FindLanguage 13
+	FindGameControls 14
 )
 
 (procedure (RedrawCast)
@@ -138,3 +140,24 @@
 	)
 	(theGame setCursor: oldCur)
 )
+
+(procedure (FindLanguage german spanish french italian english)
+	(switch (theGame printLang?)
+		(GERMAN german)
+		(SPANISH spanish)
+		(FRENCH french)
+		(ITALIAN italian)
+		(else  english)
+	)
+)
+
+(procedure (FindGameControls)
+	(FindLanguage
+		vGameControlsGerman
+		vGameControlsSpanish
+		vGameControlsFrench
+		vGameControlsItalian
+		vGameControls
+	)
+)
+	

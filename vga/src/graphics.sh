@@ -48,7 +48,13 @@
 		lInvOK
 		lInvSelect
 	)	
-(define vGameControls 947)
+(define vGameControls			947)
+(define vGameControlsFrench		948)
+(define vGameControlsSpanish	949)
+(define vGameControlsItalian	950)
+(define vGameControlsGerman		951)
+(define vGameControlsJapanese	952)
+(define vGameControlsPortuguese	953)	
 	(enum
 		lSliderText
 		lControlFixtures

@@ -6,7 +6,7 @@
 ;
 ;
 (script# GAME_CONTROLS)
-(include game.sh)
+(include game.sh) (include language.sh)
 (use Main)
 (use BordWind)
 (use Window)
@@ -97,72 +97,131 @@
 	(method (open &tmp
 			savePort theBevelWid t l r b theColor theMaps
 			bottomColor topColor leftColor rightColor thePri i
-			[str 15] [rectPt 4]
+			[str 40] [rectPt 4] theView
 		)
-		(= thePri -1)
 		(self
-			top: (/ (- SCRNHIGH (+ (CelHigh vGameControls lControlFixtures 1) 6)) 2)
-			left: (/ (- SCRNWIDE (+ 151 (CelWide vGameControls lSliderText 1))) 2)
+			top: (/ (- SCRNHIGH (+ (CelHigh (FindGameControls) lControlFixtures 1) 6)) 2)
+			left:
+				(/
+					(-
+						SCRNWIDE
+						(+
+							151
+							(CelWide (FindGameControls) lSliderText 1)
+							(FindLanguage 10 10 10 10 0)
+						)
+					)
+					2
+				)
 			bottom:
 				(+
-					(CelHigh vGameControls lControlFixtures 1)
+					(CelHigh (FindGameControls) lControlFixtures 1)
 					6
-					(/ (- SCRNHIGH (+ (CelHigh vGameControls lControlFixtures 1) 6)) 2)
+					(/ (- SCRNHIGH (+ (CelHigh (FindGameControls) lControlFixtures 1) 6)) 2)
 				)
 			right:
 				(+
 					151
-					(CelWide vGameControls lSliderText 1)
-					(/ (- SCRNWIDE (+ 151 (CelWide vGameControls lSliderText 1))) 2)
+					(CelWide (FindGameControls) lSliderText 1)
+					(FindLanguage 10 10 10 10 0)
+					(/
+						(-
+							SCRNWIDE
+							(+
+								151
+								(CelWide (FindGameControls) lSliderText 1)
+								(FindLanguage 10 10 10 10 0)
+							)
+						)
+						2
+					)
 				)
-			priority: thePri
+			priority: -1
 		)
 		(super open:)
+		(= thePri -1)
 		
 		; Game Paused text
-		(DrawCel vGameControls lSliderText 5
+		(DrawCel
+			(FindGameControls) 0 5
 			(+
 				(/
 					(-
-						(- (+ 151 (CelWide vGameControls lSliderText 1)) (+ 4 (CelWide vGameControls lControlFixtures 1)))
-						(CelWide vGameControls lSliderText 5)
+						(-
+							(+
+								151
+								(CelWide (FindGameControls) lSliderText 1)
+								(FindLanguage 10 10 10 10 0)
+							)
+							(+ 4 (CelWide (FindGameControls) lControlFixtures 1))
+						)
+						(CelWide (FindGameControls) lSliderText 5)
 					)
 					2
 				)
 				4
-				(CelWide vGameControls lControlFixtures 1)
+				(CelWide (FindGameControls) lControlFixtures 1)
 			)
-			3
+			(FindLanguage 2 6 6 6 6)
 			thePri
 		)
 		; Box for buttons
-		(DrawCel vGameControls lControlFixtures 1 4 3 thePri)
+		(DrawCel (FindGameControls) lControlFixtures 1 4 3 thePri)
 		; 1st arrow between sliders
-		(DrawCel vGameControls lControlFixtures 0 94 38 thePri)
+		(DrawCel (FindGameControls) lControlFixtures 0 94 38 thePri)
 		; 2nd arrow between sliders
-		(DrawCel vGameControls lControlFixtures 0 135 38 thePri)
+		(DrawCel (FindGameControls) lControlFixtures 0 135 38 thePri)
 		; Detail text
-		(DrawCel vGameControls lSliderText 4 63 (- SLIDER_TOP (+ (CelHigh vGameControls lSliderText 4) 3)) thePri)
+		(DrawCel (FindGameControls) lSliderText 4
+			(- SLIDER_LEFT (FindLanguage 0 0 2 4 4))
+			(-
+				(- SLIDER_TOP (+ (CelHigh (FindGameControls) lSliderText 4) 3))
+				(FindLanguage -4 0 4 0 0)
+			)
+			thePri
+		)
 		; Volume text
-		(DrawCel vGameControls lSliderText 3 101 (- SLIDER_TOP (+ (CelHigh vGameControls lSliderText 4) 3)) thePri)
+		(DrawCel (FindGameControls) lSliderText 3
+			(- (+ SLIDER_LEFT 40) (FindLanguage 3 6 6 6 6))
+			(-
+				(- SLIDER_TOP (+ (CelHigh (FindGameControls) lSliderText 4) 3))
+				(FindLanguage -4 0 4 0 0)
+			)
+			thePri
+		)
 		; Speed text
-		(DrawCel vGameControls lSliderText 2 146 (- SLIDER_TOP (+ (CelHigh vGameControls lSliderText 4) 3)) thePri)
+		(DrawCel (FindGameControls) lSliderText 2
+			(- (+ SLIDER_LEFT 80) (FindLanguage 14 5 5 1 1))
+			(-
+				(- SLIDER_TOP (+ (CelHigh (FindGameControls) lSliderText 4) 3))
+				(FindLanguage -4 0 4 0 0)
+			)
+			thePri
+		)
 		
 		;Now draw the window below the sliders for score
-		(Graph GShowBits 12 1 15 (+ 151 (CelWide vGameControls lSliderText 1)) 1)
-		(= b (+ (= t (+ 46 (CelHigh vGameControls lSliderText 1))) SCORE_TOP))
+		(= b
+			(+
+				(= t (+ 46 (CelHigh (FindGameControls) lSliderText 1)))
+				SCORE_TOP
+			)
+		)
 		(= r
 			(+
-				(= l (+ 10 (CelWide vGameControls lControlFixtures 1)))
+				(= l (+ 10 (CelWide (FindGameControls) lControlFixtures 1)))
 				(-
-					(+ 151 (CelWide vGameControls lSliderText 1))
-					(+ 10 (CelWide vGameControls lControlFixtures 1) 6)
+					(+
+						151
+						(CelWide (FindGameControls) lSliderText 1)
+						(FindLanguage 10 10 10 10 0)
+					)
+					(+ 10 (CelWide (FindGameControls) lControlFixtures 1) 6)
 				)
 			)
 		)
 		(= theColor 0)
-		(= bottomColor (FindColor colGray2 colGray1))
-		(= rightColor (FindColor colGray3 colGray1))
+		(= bottomColor colGray2)
+		(= rightColor (FindColor colGray3 colGray2))
 		(= leftColor (FindColor colGray5 colWhite))
 		(= topColor colWhite)
 		(= theBevelWid 3)
@@ -178,30 +237,43 @@
 		(Graph GFillRect (- b theBevelWid) l b r theMaps topColor thePri)
 		(for ((= i 0)) (< i theBevelWid) ((++ i))
 			(Graph GDrawLine (+ t i) (+ l i) (- b (+ i 1)) (+ l i) rightColor thePri -1)
-			(Graph GDrawLine (+ t i)(- r (+ i 1)) (- b (+ i 1)) (- r (+ i 1)) leftColor thePri -1)
+			(Graph GDrawLine (+ t i) (- r (+ i 1)) (- b (+ i 1)) (- r (+ i 1)) leftColor thePri -1)
 		)
-		(Graph GShowBits t l (+ b 1) (+ r 1) 1)
+		(Graph GShowBits t l (+ b 1) (+ r 1) VMAP)
 		
-		;print the score centered in its window
-		(Format @str "Score: %d of %d" score possibleScore)
+		;print the score centered in its window.
+		;Here is also an example of strings split by language
+		; done in the kernel.
+		(Format @str
+			"Score: %d of %d"			;English
+			;#GPunkte: %d von %d"		;German
+			;#SPuntuaci¢n: %d de %d"		;Spanish
+			;#FScore: %d de %d"			;French
+			score possibleScore score possibleScore)
 		(TextSize @rectPt @str 999 0)
 		(Display @str
 			p_font 999
 			p_color (FindColor colGray4 colWhite)
 			p_at
-			(+ 10 (CelWide vGameControls lControlFixtures 1)
+			(+
+				10
+				(CelWide (FindGameControls) lControlFixtures 1)
 				(/
 					(-
 						(-
-							(+ 151 (CelWide vGameControls lSliderText 1))
-							(+ 10 (CelWide vGameControls lControlFixtures 1) 6)
+							(+
+								151
+								(CelWide (FindGameControls) lSliderText 1)
+								(FindLanguage 10 10 10 10 0)
+							)
+							(+ 10 (CelWide (FindGameControls) lControlFixtures 1) 6)
 						)
 						[rectPt 3]
 					)
 					2
 				)
 			)
-			(+ 46 (CelHigh vGameControls lSliderText 1) 3)
+			(+ 46 (CelHigh (FindGameControls) lSliderText 1) 3)
 		)
 	)
 )
@@ -279,6 +351,12 @@
 		helpStr "Use this to save the current state of your game.
 				When you later select Restore, everything will be exactly as it is now."
 	)
+	
+	(method (show)
+		(= view (FindGameControls))
+		(super show: &rest)
+	)
+
 )
 
 (instance iconRestore of ControlIcon
@@ -291,6 +369,11 @@
 		message verbNone
 		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr "This restores a game you saved earlier."
+	)
+	
+	(method (show)
+		(= view (FindGameControls))
+		(super show: &rest)
 	)
 )
 
@@ -305,6 +388,11 @@
 		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr "Use this to restart the game from the very beginning."
 	)
+	
+	(method (show)
+		(= view (FindGameControls))
+		(super show: &rest)
+	)
 )
 
 (instance iconQuit of ControlIcon
@@ -317,6 +405,11 @@
 		message verbNone
 		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr "Use this to leave the game."
+	)
+	
+	(method (show)
+		(= view (FindGameControls))
+		(super show: &rest)
 	)
 )
 
@@ -359,5 +452,10 @@
 		message gameVerbs
 		signal (| VICON FIXED_POSN HIDEBAR RELVERIFY IMMEDIATE)
 		helpStr "Use this to exit this menu and resume game play."
+	)
+	
+	(method (show)
+		(= view (FindGameControls))
+		(super show: &rest)
 	)
 )

@@ -148,7 +148,7 @@
 	
 	(method (show &tmp [str 7] [rectPt 4] theFont)
 		(super show: &rest)
-		(= theFont 30)
+		(= theFont 999)
 		(Format @str "%d" score)
 		(TextSize @rectPt @str theFont 0)
 		(Display @str
