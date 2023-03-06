@@ -30,17 +30,16 @@
 ;;;				)
 ;;;			)
 ;;;			(2
-;;;				;foreign language can be either SPANISH, FRENCH, or GERMAN
-;;;				; (Italian on the way)
-;;;				(if (== (theGame printLang?) SPANISH)
+;;;				;foreign language can be either SPANISH, FRENCH, GERMAN, or ITALIAN
+;;;				(if (== (theGame printLang?) GERMAN)
 ;;;					(theGame
 ;;;						parseLang: ENGLISH
 ;;;						printLang: ENGLISH
 ;;;					)
 ;;;				else
 ;;;					(theGame
-;;;						parseLang: SPANISH
-;;;						printLang: SPANISH
+;;;						parseLang: GERMAN
+;;;						printLang: GERMAN
 ;;;					)
 ;;;				)
 ;;;			)

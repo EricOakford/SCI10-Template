@@ -191,7 +191,7 @@
 		)
 		; Speed text
 		(DrawCel (FindGameControls) lSliderText 2
-			(- (+ SLIDER_LEFT 80) (FindLanguage 14 5 5 1 1))
+			(- (+ SLIDER_LEFT 80) (FindLanguage 15 5 5 1 1))
 			(-
 				(- SLIDER_TOP (+ (CelHigh (FindGameControls) lSliderText 4) 3))
 				(FindLanguage -4 0 4 0 0)
