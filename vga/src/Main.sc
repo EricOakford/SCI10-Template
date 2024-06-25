@@ -23,6 +23,7 @@
 (use Game)
 (use User)
 (use System)
+(use StopWalk)
 
 (public
 	SCI10 0 ;Replace "SCI10" with the game's internal name (up to 6 characters)
@@ -206,7 +207,14 @@
 
 	(method (init)
 		;load up the standard game system
+		
+		;pre-load commonly-used scripts to keep them in hunk.
 		(= systemWindow SysWindow)
+		(ScriptID SIGHT)
+		StopWalk
+		Polygon
+		PolyPath
+		
 		(= version {x.yyy})
 		(super init: &rest)
 
