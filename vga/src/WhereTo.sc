@@ -29,6 +29,7 @@
 		(= nextRoom
 			(Print "Where to, boss?"
 				#edit @str 5 115 0
+				#button {Continue normally} rTitle
 			)
 		)
 		(= nextRoom rTitle)
